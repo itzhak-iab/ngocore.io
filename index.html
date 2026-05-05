@@ -383,7 +383,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
       <button type="button" id="i18n-en-btn" onclick="setAppLang('en')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;font-size:0.82rem">🇬🇧 English</button>
     </div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.05-r26</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.05-r27</div>
   </aside>
 
   <!-- Main Content -->
@@ -8903,13 +8903,17 @@ const EMAILJS_PUBLIC_KEY = window.EMAILJS_PUBLIC_KEY || '';
 const EMAILJS_SERVICE_ID = window.EMAILJS_SERVICE_ID || '';
 const EMAILJS_TEMPLATE_ID = window.EMAILJS_TEMPLATE_ID || '';
 
-// ----- PWA Service Worker registration -----
+// ----- Service Worker: unregister + clear caches (was causing stale content) -----
+// Was: PWA SW with offline cache. Disabled because cached HTML was overriding new deploys.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').then(reg => {
-      console.log('[SW] registered', reg.scope);
-    }).catch(err => console.warn('[SW] registration failed', err));
-  });
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => {
+      reg.unregister().then(ok => { if (ok) console.log('[SW] unregistered', reg.scope); });
+    });
+  }).catch(()=>{});
+  if (window.caches && caches.keys) {
+    caches.keys().then(names => names.forEach(n => caches.delete(n).then(() => console.log('[cache] cleared', n))));
+  }
 }
 
 // ----- EmailJS init (safe no-op if keys missing) -----
