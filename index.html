@@ -353,33 +353,37 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <div class="role" id="userRole"></div>
       </div>
     </div>
-    <div class="nav-group-label">סקירה</div>
-    <div class="nav-item active" onclick="switchSection('dashboard',this)"><span class="icon">📊</span> <span data-i18n="nav.dashboard">דשבורד מנהלים</span></div>
+    <div class="nav-item active" onclick="switchSection('dashboard',this)"><span class="icon">📊</span> <span data-i18n="nav.dashboard">דשבורד</span></div>
     <div class="nav-item" onclick="switchSection('me',this)"><span class="icon">👤</span> <span data-i18n="nav.me">האזור האישי שלי</span></div>
 
-    <div class="nav-group-label">פיננסים וגיוס</div>
-    <div class="nav-item" onclick="switchSection('finance',this)"><span class="icon">💰</span> <span data-i18n="nav.finance">שקיפות פיננסית</span></div>
-    <div class="nav-item" onclick="switchSection('donors',this)"><span class="icon">❤️</span> <span data-i18n="nav.donors">ניהול תורמים</span></div>
+    <!-- Programs nav (filled dynamically by renderProgramNav) -->
+    <div class="nav-group-label">תוכניות העמותה</div>
+    <div id="programsNav"></div>
 
-    <div class="nav-group-label">תפעול יומי</div>
-    <div class="nav-item" onclick="switchSection('tasks',this)"><span class="icon">✅</span> <span data-i18n="nav.tasks">יומן ומשימות</span></div>
-    <div class="nav-item" onclick="switchSection('reports',this)"><span class="icon">📋</span> <span data-i18n="nav.reports">דיווחי עובדים</span></div>
-    <div class="nav-item" onclick="switchSection('expenses',this)"><span class="icon">🧾</span> <span data-i18n="nav.expenses">החזרי הוצאות</span></div>
+    <div class="nav-group-label">פעולות מהירות</div>
+    <div class="nav-item" onclick="switchSection('tasks',this)"><span class="icon">✅</span> יומן משימות</div>
+    <div class="nav-item" onclick="quickGoSubmitExpense()"><span class="icon">🧾</span> הגשת החזר הוצאות</div>
+    <div class="nav-item" onclick="quickGoSubmitWeekly()"><span class="icon">📋</span> מילוי דוח שבועי</div>
 
-    <!-- Hidden but still accessible via program detail -->
-    <div class="nav-item" onclick="switchSection('workplan',this)" id="navWorkplan" style="display:none"><span class="icon">🗺️</span> <span data-i18n="nav.workplan">תוכנית עבודה</span></div>
-    <div class="nav-item" onclick="switchSection('projects',this)" id="navProjects" style="display:none"><span class="icon">🎯</span> <span data-i18n="nav.projects">פרויקטים</span></div>
-    <div class="nav-item" onclick="switchSection('vehicles',this)" id="navVehicles" style="display:none"><span class="icon">🚗</span> <span data-i18n="nav.vehicles">רכבים</span></div>
-
+    <!-- Admin-only management items -->
     <div class="nav-group-label admin-only" id="navGroupAdmin" style="display:none">ניהול</div>
-    <div class="nav-item" onclick="switchSection('team',this)" id="navTeam" style="display:none"><span class="icon">👥</span> <span data-i18n="nav.team">ניהול צוות</span></div>
-    <div class="nav-item" onclick="switchSection('settings',this)" id="navSettings" style="display:none"><span class="icon">⚙️</span> <span data-i18n="nav.settings">הגדרות ארגון</span></div>
+    <div class="nav-item admin-only" onclick="switchSection('finance',this)" id="navFinance" style="display:none"><span class="icon">💰</span> <span data-i18n="nav.finance">שקיפות פיננסית</span></div>
+    <div class="nav-item admin-only" onclick="switchSection('donors',this)" id="navDonors" style="display:none"><span class="icon">❤️</span> תורמים</div>
+    <div class="nav-item admin-only" onclick="switchSection('reports',this)" id="navReports" style="display:none"><span class="icon">📊</span> כל הדיווחים</div>
+    <div class="nav-item" onclick="switchSection('team',this)" id="navTeam" style="display:none"><span class="icon">👥</span> ניהול צוות</div>
+    <div class="nav-item" onclick="switchSection('settings',this)" id="navSettings" style="display:none"><span class="icon">⚙️</span> הגדרות ארגון</div>
+
+    <!-- Legacy (not in nav, accessible via program detail) -->
+    <div class="nav-item" onclick="switchSection('workplan',this)" id="navWorkplan" style="display:none"></div>
+    <div class="nav-item" onclick="switchSection('projects',this)" id="navProjects" style="display:none"></div>
+    <div class="nav-item" onclick="switchSection('vehicles',this)" id="navVehicles" style="display:none"></div>
+    <div class="nav-item" onclick="switchSection('expenses',this)" id="navExpenses" style="display:none"></div>
     <div style="border-top:1px solid rgba(255,255,255,0.15);margin:10px 0;padding:10px 0;display:flex;gap:4px;justify-content:center">
       <button type="button" id="i18n-he-btn" onclick="setAppLang('he')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:0.82rem">🇮🇱 עברית</button>
       <button type="button" id="i18n-en-btn" onclick="setAppLang('en')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;font-size:0.82rem">🇬🇧 English</button>
     </div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.05-r24</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.05-r25</div>
   </aside>
 
   <!-- Main Content -->
@@ -2073,14 +2077,14 @@ function showApp(user) {
   // Admin-only features
   if (userRole === 'admin') {
     document.getElementById('navTeam').style.display = '';
-    const navSet = document.getElementById('navSettings');
-    if (navSet) navSet.style.display = '';
-    const navGrp = document.getElementById('navGroupAdmin');
-    if (navGrp) navGrp.style.display = '';
+    const adminEls = ['navSettings','navGroupAdmin','navFinance','navDonors','navReports'];
+    adminEls.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = ''; });
     document.getElementById('tkTemplatesCard').style.display = '';
     document.getElementById('dash-diagnostics-card').style.display = '';
     runDiagnostics();
   }
+  // Render the programs nav (everyone can see programs)
+  try { if (typeof renderProgramNav === 'function') renderProgramNav(); } catch(e) {}
   // Super-admin panel
   if (isSuperAdmin()) {
     const sa = document.getElementById('superAdminCard');
@@ -2193,14 +2197,64 @@ let _currentProgramKey = null;
 function openProgram(key) {
   _currentProgramKey = key;
   switchSectionByName('program');
+  // Mark active program in sidebar
+  document.querySelectorAll('.program-nav-item').forEach(el => el.classList.remove('active'));
+  const el = document.querySelector(`.program-nav-item[data-prog="${key}"]`);
+  if (el) el.classList.add('active');
   setTimeout(() => renderProgramDetail(), 100);
 }
 
+// Render program shortcut nav items in the sidebar
+function renderProgramNav() {
+  const wrap = document.getElementById('programsNav');
+  if (!wrap) return;
+  const keys = getOrgAreaKeys();
+  wrap.innerHTML = keys.map(k => {
+    const label = getOrgAreaLabel(k);
+    return `<div class="nav-item program-nav-item" data-prog="${k}" onclick="openProgram('${k}')" style="font-size:0.85rem;padding:9px 18px"><span class="icon">🏛️</span> ${label}</div>`;
+  }).join('');
+}
+
+// Quick action: jump to expense reimbursement form
+function quickGoSubmitExpense() {
+  switchSectionByName('expenses');
+  setTimeout(() => {
+    const card = document.getElementById('expAddCard');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('expDescription')?.focus();
+  }, 200);
+}
+
+// Quick action: jump to weekly report form
+function quickGoSubmitWeekly() {
+  switchSectionByName('reports');
+  setTimeout(() => {
+    const card = document.getElementById('weeklyReportCard');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+}
+
 function renderProgramDetail() {
-  if (!_currentProgramKey) return;
+  try {
+    _renderProgramDetailInner();
+  } catch(e) {
+    console.error('[renderProgramDetail]', e);
+    const t = document.getElementById('progDetailTitle');
+    if (t) t.textContent = 'שגיאה';
+    const l = document.getElementById('progDetailLeader');
+    if (l) l.innerHTML = `<span style="color:var(--danger)">שגיאה בטעינת התוכנית: ${e.message}</span>`;
+  }
+}
+
+function _renderProgramDetailInner() {
+  if (!_currentProgramKey) {
+    document.getElementById('progDetailTitle').textContent = 'בחרי תוכנית';
+    document.getElementById('progDetailLeader').textContent = 'חזרי לדשבורד ולחצי על אחת התוכניות';
+    return;
+  }
   const k = _currentProgramKey;
-  const info = getProgramInfo(k);
-  const label = getOrgAreaLabel(k);
+  const info = getProgramInfo(k) || {};
+  const label = getOrgAreaLabel(k) || k;
 
   document.getElementById('progDetailTitle').textContent = label;
   const leaderEl = document.getElementById('progDetailLeader');
@@ -2446,6 +2500,7 @@ async function saveProgramEdit(key) {
     closeProgramEdit();
     renderProgramDetail();
     renderProgramCards();
+    renderProgramNav();
     repopulateAllAreaDropdowns();
   } catch(e) {
     console.error('[saveProgramEdit]', e);
