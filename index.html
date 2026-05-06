@@ -382,11 +382,11 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     <div class="nav-item" onclick="switchSection('vehicles',this)" id="navVehicles" style="display:none"></div>
     <div class="nav-item" onclick="switchSection('expenses',this)" id="navExpenses" style="display:none"></div>
     <div style="border-top:1px solid rgba(255,255,255,0.15);margin:10px 0;padding:10px 0;display:flex;gap:4px;justify-content:center">
-      <button type="button" id="i18n-he-btn" onclick="setAppLang('he')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:0.82rem">🇮🇱 עברית</button>
+      <button type="button" id="i18n-he-btn" onclick="setAppLang('he')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:0.82rem">🇮🇱 עבורת</button>
       <button type="button" id="i18n-en-btn" onclick="setAppLang('en')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;font-size:0.82rem">🇬🇧 English</button>
     </div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.05-r37</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.05-r38</div>
   </aside>
 
   <!-- Main Content -->
@@ -421,14 +421,14 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
       <!-- AGGREGATE KPIs — moved to bottom; drill-down to filtered views -->
       <div class="card" style="background:var(--primary-soft);border-right:4px solid var(--primary)">
         <h3 style="margin:0 0 12px">📊 סקירה כללית של העמותה</h3>
-        <p style="margin:0 0 14px;color:var(--muted);font-size:0.88rem">סיכום מצרפי על כלל התוכניות. לחצו על כל אריח לצלילה.</p>
+        <p style="margin:0 0 14px;color:var(--muted);font-size:0.88rem">סיכום מצרף על כלל התוכניות. לחצו על כל אריח לצלילה.</p>
         <div class="kpi-grid" style="margin-bottom:0">
-          <div class="kpi clickable" onclick="drillDown('finance','income')" title="לחצי לפירוט הכנסות"><div class="icon">💰</div><div class="label">סך הכנסות</div><div class="value" id="dash-income">₪0</div></div>
-          <div class="kpi clickable" onclick="drillDown('finance','expense')" title="לחצי לפירוט הוצאות"><div class="icon">📤</div><div class="label">סך הוצאות</div><div class="value" id="dash-expense">₪0</div></div>
-          <div class="kpi clickable" onclick="drillDown('finance')" title="לחצי לפירוט פיננסי"><div class="icon">📊</div><div class="label">יתרה</div><div class="value" id="dash-balance">₪0</div></div>
-          <div class="kpi clickable" onclick="drillDown('donors')" title="לחצי לרשימת תורמים"><div class="icon">❤️</div><div class="label">תורמים</div><div class="value" id="dash-donors">0</div></div>
-          <div class="kpi clickable" onclick="drillDown('reports','this-month')" title="לחצי לדיווחי החודש"><div class="icon">📋</div><div class="label">דיווחים החודש</div><div class="value" id="dash-reports">0</div></div>
-          <div class="kpi clickable" onclick="drillDown('tasks','overdue')" title="לחצי למשימות באיחור"><div class="icon">⚠️</div><div class="label">משימות באיחור</div><div class="value" id="dash-tasks-overdue" style="color:var(--danger)">0</div></div>
+          <div class="kpi clickable" onclick="drillDown('finance','income')" title="לחץ לפירוט הכנסות"><div class="icon">💰</div><div class="label">סך הכנסות</div><div class="value" id="dash-income">₪0</div></div>
+          <div class="kpi clickable" onclick="drillDown('finance','expense')" title="לחץ לפירוט הוצאות"><div class="icon">📤</div><div class="label">סך הוצאות</div><div class="value" id="dash-expense">₪0</div></div>
+          <div class="kpi clickable" onclick="drillDown('finance')" title="לחץ לפירוט פיננסי"><div class="icon">📊</div><div class="label">יתרה</div><div class="value" id="dash-balance">₪0</div></div>
+          <div class="kpi clickable" onclick="drillDown('donors')" title="לחץ לרשימת תורמים"><div class="icon">❤️</div><div class="label">תורמים</div><div class="value" id="dash-donors">0</div></div>
+          <div class="kpi clickable" onclick="drillDown('reports','this-month')" title="לחץ לדיווחי החודש"><div class="icon">📋</div><div class="label">דיווחים החודש</div><div class="value" id="dash-reports">0</div></div>
+          <div class="kpi clickable" onclick="drillDown('tasks','overdue')" title="לחץ למשימות באיחור"><div class="icon">⚠️</div><div class="label">משימות באיחור</div><div class="value" id="dash-tasks-overdue" style="color:var(--danger)">0</div></div>
           <div class="kpi" id="dash-projects" style="display:none">0</div>
         </div>
       </div>
@@ -473,10 +473,10 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
 
       <!-- Personal KPIs -->
       <div class="kpi-grid">
-        <div class="kpi clickable" onclick="drillDown('tasks','my-open')" title="לחצי לרשימה"><div class="icon">📌</div><div class="label">המשימות הפתוחות שלי</div><div class="value" id="me-open-tasks">0</div></div>
-        <div class="kpi clickable" onclick="drillDown('tasks','my-overdue')" title="לחצי למשימות באיחור"><div class="icon">⚠️</div><div class="label">באיחור</div><div class="value" id="me-overdue" style="color:var(--danger)">0</div></div>
-        <div class="kpi clickable" onclick="drillDown('expenses','pending-my-approval')" title="לחצי להחזרים ממתינים"><div class="icon">⏳</div><div class="label">ממתין לאישור שלי</div><div class="value" id="me-approvals" style="color:var(--warning)">0</div></div>
-        <div class="kpi clickable" onclick="drillDown('reports','my-month')" title="לחצי לדיווחים שלי החודש"><div class="icon">📅</div><div class="label">שעות החודש</div><div class="value" id="me-hours-month">0</div></div>
+        <div class="kpi clickable" onclick="drillDown('tasks','my-open')" title="לחץ לרשימה"><div class="icon">📌</div><div class="label">המשימות הפתוחות שלי</div><div class="value" id="me-open-tasks">0</div></div>
+        <div class="kpi clickable" onclick="drillDown('tasks','my-overdue')" title="לחץ למשימות באיחור"><div class="icon">⚠️</div><div class="label">באיחור</div><div class="value" id="me-overdue" style="color:var(--danger)">0</div></div>
+        <div class="kpi clickable" onclick="drillDown('expenses','pending-my-approval')" title="לחץ להחזרים ממתינים"><div class="icon">⏳</div><div class="label">ממתין לאישור שלי</div><div class="value" id="me-approvals" style="color:var(--warning)">0</div></div>
+        <div class="kpi clickable" onclick="drillDown('reports','my-month')" title="לחץ לדיווחים שלי החודש"><div class="icon">📅</div><div class="label">שעות החודש</div><div class="value" id="me-hours-month">0</div></div>
       </div>
 
       <!-- Quick actions -->
@@ -537,13 +537,13 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <p>ניהול הכנסות והוצאות העמותה</p>
       </div>
       <div class="kpi-grid">
-        <div class="kpi clickable" onclick="filterFinance('income')" title="לחצי לפירוט הכנסות"><div class="icon">📥</div><div class="label">סך הכנסות</div><div class="value" id="fin-income">₪0</div></div>
-        <div class="kpi clickable" onclick="filterFinance('expense')" title="לחצי לפירוט הוצאות"><div class="icon">📤</div><div class="label">סך הוצאות</div><div class="value" id="fin-expense">₪0</div></div>
-        <div class="kpi clickable" onclick="filterFinance('all')" title="לחצי לכל הרשומות"><div class="icon">💵</div><div class="label">יתרה</div><div class="value" id="fin-balance">₪0</div></div>
-        <div class="kpi clickable" onclick="filterFinance('salary');scrollToCard('finSalaryCard')" title="לחצי לפירוט שכר"><div class="icon">💼</div><div class="label">סך תשלומי שכר</div><div class="value" id="fin-salary">₪0</div></div>
+        <div class="kpi clickable" onclick="filterFinance('income')" title="לחץ לפירוט הכנסות"><div class="icon">📥</div><div class="label">סך הכנסות</div><div class="value" id="fin-income">₪0</div></div>
+        <div class="kpi clickable" onclick="filterFinance('expense')" title="לחץ לפירוט הוצאות"><div class="icon">📤</div><div class="label">סך הוצאות</div><div class="value" id="fin-expense">₪0</div></div>
+        <div class="kpi clickable" onclick="filterFinance('all')" title="לחץ לכל הרשומות"><div class="icon">💵</div><div class="label">יתרה</div><div class="value" id="fin-balance">₪0</div></div>
+        <div class="kpi clickable" onclick="filterFinance('salary');scrollToCard('finSalaryCard')" title="לחץ לפירוט שכר"><div class="icon">💼</div><div class="label">סך תשלומי שכר</div><div class="value" id="fin-salary">₪0</div></div>
       </div>
       <p style="color:var(--muted);font-size:0.85rem;margin:-8px 0 16px;background:var(--primary-soft);padding:10px 14px;border-radius:var(--radius-sm);border-right:3px solid var(--primary)">
-        💡 לפירוט תקציב לפי תוכנית — לחצי על תוכנית בדשבורד או בסרגל הימני. כל תוכנית מציגה את התקציב, הגיוס, ההוצאה והפער שלה.
+        💡 לפירוט תקציב לפי תוכנית — לחץ על תוכנית בדשבורד או בסרגל הימני. כל תוכנית מציגה את התקציב, הגיוס, ההוצאה והפער שלה.
       </p>
 
       <!-- Salary breakdown -->
@@ -672,8 +672,8 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
       <div id="progDetailRoot">
         <div class="page-header">
           <button class="btn btn-secondary btn-sm" onclick="switchSectionByName('dashboard')" style="margin-bottom:8px">← חזרה לדשבורד</button>
-          <h1>בחרי תוכנית מהדשבורד</h1>
-          <p style="color:var(--muted)">לחצי על אחד מ-7 כרטיסי התוכנית בדף הראשי, או על שם תוכנית בסרגל הימני.</p>
+          <h1>בחר תוכנית מהדשבורד</h1>
+          <p style="color:var(--muted)">לחץ על אחד מ-7 כרטיסי התוכנית בדף הראשי, או על שם תוכנית בסרגל הימני.</p>
         </div>
       </div>
     </div>
@@ -789,7 +789,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
           <div id="mgrSumBody" style="padding:20px;overflow-y:auto;flex:1">
             <div class="empty-state" style="padding:40px 20px;text-align:center">
               <div style="font-size:3rem;margin-bottom:8px">📋</div>
-              <p style="margin:0">בחרי תקופה ולחצי על <strong>"🔄 הפק דוח"</strong> כדי ליצור את הסיכום.</p>
+              <p style="margin:0">בחר תקופה ולחץ על <strong>"🔄 הפק דוח"</strong> כדי ליצור את הסיכום.</p>
             </div>
           </div>
         </div>
@@ -1180,13 +1180,13 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     <div class="section" id="sec-vehicles">
       <div class="page-header">
         <h1 data-i18n="page.vehicles.title">🚗 ניהול רכבים</h1>
-        <p>מעקב, נסיעות, טיפולים ובירוקרטיה של רכבי העמותה</p>
+        <p>מעקב, נסהעות, טיפולים ובירוקרטיה של רכבי העמותה</p>
       </div>
 
       <!-- KPI Cards -->
       <div class="kpi-grid">
         <div class="kpi"><div class="icon">🚗</div><div class="label">רכבים</div><div class="value" id="veh-count">0</div></div>
-        <div class="kpi"><div class="icon">📅</div><div class="label">נסיעות החודש</div><div class="value" id="veh-trips-month">0</div></div>
+        <div class="kpi"><div class="icon">📅</div><div class="label">נסהעות החודש</div><div class="value" id="veh-trips-month">0</div></div>
         <div class="kpi"><div class="icon">⚠️</div><div class="label">חידושים קרובים</div><div class="value" id="veh-alerts-count" style="color:var(--accent)">0</div></div>
         <div class="kpi"><div class="icon">💰</div><div class="label">עלות החודש (₪)</div><div class="value" id="veh-cost-month">0</div></div>
       </div>
@@ -1247,7 +1247,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
 
       <!-- Add Trip -->
       <div class="card" id="tripAddCard">
-        <h3>📋 רישום נסיעה חדשה</h3>
+        <h3>📋 רישום נסהעה חדשה</h3>
         <div class="form-row">
           <div class="form-field"><label>רכב</label><select id="tripVehicle"></select></div>
           <div class="form-field"><label>נהג</label><input type="text" id="tripDriver" placeholder="שם הנהג"></div>
@@ -1255,7 +1255,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
           <div class="form-field"><label>חזרה (בפועל)</label><input type="datetime-local" id="tripEnd"></div>
         </div>
         <div class="form-row">
-          <div class="form-field" style="flex:2"><label>יעד / מטרת הנסיעה</label><input type="text" id="tripDestination" placeholder="למשל: ביקור חיילים בבסיס באר שבע"></div>
+          <div class="form-field" style="flex:2"><label>יעד / מטרת הנסהעה</label><input type="text" id="tripDestination" placeholder="למשל: ביקור חיילים בבסיס באר שבע"></div>
           <div class="form-field" style="flex:2"><label>נוסעים נוספים</label><input type="text" id="tripPassengers" placeholder="שמות מופרדים בפסיק"></div>
         </div>
         <div class="form-row">
@@ -1265,15 +1265,15 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
           <div class="form-field"><label>הוצאות נוספות (₪)</label><input type="number" id="tripExtraCost" placeholder="חניון, כבישי אגרה"></div>
         </div>
         <div class="form-row">
-          <div class="form-field" style="flex:1"><label>הערות</label><input type="text" id="tripNotes" placeholder="הערות לנסיעה..."></div>
+          <div class="form-field" style="flex:1"><label>הערות</label><input type="text" id="tripNotes" placeholder="הערות לנסהעה..."></div>
           <div class="form-field" style="flex:1"><label>🧾 צרף קבלות</label><input type="file" id="tripReceipts" multiple accept="image/*,application/pdf"></div>
         </div>
-        <button class="btn btn-primary" onclick="addTrip()" id="tripAddBtn">+ הוסף נסיעה</button>
+        <button class="btn btn-primary" onclick="addTrip()" id="tripAddBtn">+ הוסף נסהעה</button>
       </div>
 
       <!-- Trips Table -->
       <div class="card">
-        <h3>📊 יומן נסיעות</h3>
+        <h3>📊 יומן נסהעות</h3>
         <table class="data-table">
           <thead><tr><th>יציאה</th><th>רכב</th><th>נהג</th><th>יעד</th><th>נוסעים</th><th>ק"מ</th><th>עלויות</th><th>מסמכים</th><th>פעולות</th></tr></thead>
           <tbody id="tripsTableBody"><tr><td colspan="9" class="empty-state">טוען...</td></tr></tbody>
@@ -1537,7 +1537,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.05-r37 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.05-r38 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -1579,7 +1579,7 @@ const DEFAULT_PROGRAM_INFO = {
       { name:'מוביל תוכנית (50%)', type:'salary', monthlyAmount:12000, annualAmount:144000, notes:'ניהול המערך, שיבוץ ר"מים ובקרה' },
       { name:'שכר ר"מים/מרצים', type:'salary', monthlyAmount:160000, annualAmount:1920000, notes:'1,600 ש"ש/חודש @ 100₪/שעה' },
       { name:'רכבים וליסינג (3)', type:'lease', monthlyAmount:13500, annualAmount:162000, notes:'4,500 ₪ לרכב כולל ביטוח/אחזקה' },
-      { name:'דלק והוצאות נסיעה', type:'operations', monthlyAmount:7500, annualAmount:90000, notes:'~2,500 ₪ לרכב לחודש' }
+      { name:'דלק והוצאות נסהעה', type:'operations', monthlyAmount:7500, annualAmount:90000, notes:'~2,500 ₪ לרכב לחודש' }
     ],
     inputs: 'מוביל תוכנית, 8 ר"מים פלוגתיים, 2 מוסרי שיעורים (150 שיעורים), מרצים ע"פ דרישה (עד 20 שעות בחודש), ליווי נפשי, 3 רכבים לניידות',
     activities: 'ליווי רוחני-חינוכי אישי בבא"ח, גדוד וסיירת. נוכחות בשעות הלימוד, בשטח, בשעות ת"ש; שיעורים באמונה ובעבודת השם; ליווי חינוכי מסגרתי ושיקוף תמונת מצב למערכת',
@@ -1620,14 +1620,14 @@ const DEFAULT_PROGRAM_INFO = {
     costItems: [
       { name:'מוביל תוכנית (50%)', type:'salary', monthlyAmount:12000, annualAmount:144000, notes:'ריכוז פיתוח תכנים ואסטרטגיית מדיה' },
       { name:'מערך מדיה ושיווק', type:'service', monthlyAmount:20000, annualAmount:240000, notes:'רשתות, קמפיינים, צילום וקידום' },
-      { name:'כתיבה ועריכה', type:'service', monthlyAmount:10000, annualAmount:120000, notes:'מערכי שיעור ותכנים' },
+      { name:'כתיבה ועריכה', type:'service', monthlyAmount:10000, annualAmount:120000, notes:'מערוך שיעור ותכנים' },
       { name:'דפוס והפקה', type:'operations', monthlyAmount:10000, annualAmount:120000, notes:'חוברות, דפי זהות, חומרי לימוד' }
     ],
     inputs: 'רכז מדיה והנגשת תוכן, מענקים ותמריצים, אירועי שיא, דפוס ע"פ צורך, מימון כולל סופ"ש; מנוי ל-60 עותקי דבר מלכות',
     activities: 'מבצעי לימוד חטיבתיים; ערבי "סיום מסכת"; הפעלת כולל יום שישי ומוצאי שבת; הפצת דבר מלכות; כתיבת תכני "רוח חשמונאית"',
     outputs: 'קיום שיטתי של מבצעי לימוד והנגשת חומרי לימוד; יעד 1,000 משתתפים פעילים בתוכניות הלימוד; כולל ללוחמים בסופי שבוע',
-    outcomes: 'כתיבה והפקה של 90% ממערכי השיעור והתכנים התורניים; הגעה ל-70% מהלוחמים המדווחים על קביעת עתים לתורה; 50% מהלוחמים בכולל סופ"ש; רישום 1,500 משתתפים פעילים',
-    impact: 'לימוד התורה כאבן היסוד בעשיית החטיבה ובחיים הפרטיים או הציבוריים של בוגרי החטיבה — "למען שמו באהבה"'
+    outcomes: 'כתיבה והפקה של 90% ממערוך השיעור והתכנים התורניים; הגעה ל-70% מהלוחמים המדווחים על קביעת עתים לתורה; 50% מהלוחמים בכולל סופ"ש; רישום 1,500 משתתפים פעילים',
+    impact: 'לימוד התורה כאבן היסוד בעשיית החטיבה ובחרם הפרטיים או הציבוריים של בוגרי החטיבה — "למען שמו באהבה"'
   },
   'beit-neeman': {
     leader: 'מלכה אייזנמן',
@@ -1637,11 +1637,11 @@ const DEFAULT_PROGRAM_INFO = {
     statusLabel: 'פעיל / בהתהוות',
     costItems: [
       { name:'מוביל תוכנית (50%)', type:'salary', monthlyAmount:12000, annualAmount:144000, notes:'ריכוז קהילת הנשים והדרכות חתנים' },
-      { name:'אירועי קהילה', type:'operations', monthlyAmount:25000, annualAmount:300000, notes:'מפגשי נשים, כנסי הורים וזוגות' },
+      { name:'אירועי קהילה', type:'operations', monthlyAmount:25000, annualAmount:300000, notes:'מפגשי נשים, כנסה הורים וזוגות' },
       { name:'הדרכה וייעוץ', type:'service', monthlyAmount:5000, annualAmount:60000, notes:'סדנאות וסבסוד ייעוץ זוגי דחוף' }
     ],
     inputs: 'יועצי זוגיות, מדריכי חתנים, מדריכות כלות, רכזת קהילת נשים; תקציב לאירועי הורים ולאירועים ייעודיים לנשות החטיבה',
-    activities: 'ליווי חתנים וכלות (למציאות של נישואין בשירות אינטנסיבי); מפגשי קהילת נשות החטיבה; מערך תמיכה ליולדות',
+    activities: 'ליווי חתנים וכלות (למציאות של נישואין בשירות אינטנסהבי); מפגשי קהילת נשות החטיבה; מערך תמיכה ליולדות',
     outputs: 'סדנאות זוגיות; קהילת נשים פעילה ותומכת; זוגות מלווים',
     outcomes: 'ליווי והדרכה ל-100% מהחתנים והכלות בחטיבה; צמצום של 15% בפניות למערך הת"ש על רקע מצוקה זוגית; דיווח חיובי מ-80% מנשות הלוחמים על חוסן משפחתי',
     impact: 'יצירת חוסן משפחתי: הורים-ילדים וזוגות. בניית תרבות של "משפחה לוחמת" המאפשרת שירות סדיר, קבע ומילואים משמעותיים'
@@ -1654,7 +1654,7 @@ const DEFAULT_PROGRAM_INFO = {
     statusLabel: 'בהתהוות',
     costItems: [
       { name:'מוביל תוכנית (50%)', type:'salary', monthlyAmount:12000, annualAmount:144000, notes:'ניהול רשת בוגרים וקשרי מעסיקים' },
-      { name:'מערך השמה ונטוורקינג', type:'service', monthlyAmount:15000, annualAmount:180000, notes:'ליווי תעסוקתי וכנסי בוגרים' },
+      { name:'מערך השמה ונטוורקינג', type:'service', monthlyAmount:15000, annualAmount:180000, notes:'ליווי תעסוקתי וכנסה בוגרים' },
       { name:'CRM ומערכות מידע', type:'service', monthlyAmount:3000, annualAmount:36000, notes:'בסיס נתוני בוגרים וניוזלטר' }
     ],
     inputs: 'מנהל קהילה; מנטורים; מאגר מעסיקים בשוק האזרחי',
@@ -1752,7 +1752,7 @@ let _superAdminViewAllOrgs = false; // toggle: show all orgs (super-admin debugg
 function toggleSuperAdminViewAll() {
   _superAdminViewAllOrgs = !_superAdminViewAllOrgs;
   const btn = document.getElementById('saViewAllBtn');
-  if (btn) btn.textContent = _superAdminViewAllOrgs ? '👁️ רואה הכול (לחצי לחזור לארגון שלך)' : '🔍 הצגת כל הארגונים';
+  if (btn) btn.textContent = _superAdminViewAllOrgs ? '👁️ רואה הכול (לחץ לחזור לארגון שלך)' : '🔍 הצגת כל הארגונים';
   toast(_superAdminViewAllOrgs ? 'מציג נתונים מכל הארגונים' : 'חזרתי לתצוגת ארגון שלך');
   // Reload all data
   if (typeof loadFinance === 'function') loadFinance();
@@ -1840,7 +1840,7 @@ async function createNewOrg() {
   if (!orgIdRaw) return;
   // Validate orgId — Firestore doc IDs must not contain slash/period etc
   if (!/^[a-zA-Z0-9_-]+$/.test(orgIdRaw)) {
-    alert('מזהה לא תקין. השתמש באותיות באנגלית, מספרים, מקפים וקווים תחתונים בלבד (ללא רווחים, ללא נקודות).');
+    alert('מזהה לא תקין. השתמש באותיות באנגלית, מספרם, מקפים וקווים תחתונים בלבד (ללא רווחים, ללא נקודות).');
     return;
   }
   const orgId = orgIdRaw;
@@ -1974,12 +1974,12 @@ function signIn() {
       const code = e?.code || '';
       _dbg('❌ Popup נכשל: ' + code + ' — ' + (e.message||'').slice(0,80), '#dc2626');
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-        showLoginError('הכניסה בוטלה', 'לחצי שוב כדי להתחבר.');
+        showLoginError('הכניסה בוטלה', 'לחץ שוב כדי להתחבר.');
       } else if (code === 'auth/popup-blocked') {
         showLoginError('הדפדפן חוסם חלון קופץ', 'מנסה redirect...');
         auth.signInWithRedirect(provider).catch(e2 => showLoginError('שגיאה', e2.message||e2.code));
       } else if (code === 'auth/unauthorized-domain' || /requested action is invalid/i.test(e?.message||'')) {
-        showLoginError('הדומיין לא מאושר ב-Firebase', 'הוסיפי את הדומיין ל-Authorized domains ב-Firebase Console.');
+        showLoginError('הדומיין לא מאושר ב-Firebase', 'הוסף את הדומיין ל-Authorized domains ב-Firebase Console.');
       } else {
         showLoginError('שגיאת התחברות', e.message || code);
       }
@@ -2266,8 +2266,8 @@ function _renderProgramDetailInner() {
   if (!_currentProgramKey) {
     root.innerHTML = `<div class="page-header">
       <button class="btn btn-secondary btn-sm" onclick="switchSectionByName('dashboard')" style="margin-bottom:8px">← חזרה לדשבורד</button>
-      <h1>בחרי תוכנית מהדשבורד</h1>
-      <p style="color:var(--muted)">לחצי על אחד מ-7 כרטיסי התוכנית בדף הראשי, או על שם תוכנית בסרגל הימני.</p>
+      <h1>בחר תוכנית מהדשבורד</h1>
+      <p style="color:var(--muted)">לחץ על אחד מ-7 כרטיסי התוכנית בדף הראשי, או על שם תוכנית בסרגל הימני.</p>
     </div>`;
     return;
   }
@@ -2330,7 +2330,7 @@ function _renderProgramDetailInner() {
   const TYPE_LABELS = {salary:'שכר',lease:'ליסינג',rent:'שכירות',operations:'תפעול',service:'שירותים',equipment:'ציוד',grants:'מענקים',other:'אחר'};
   let costItemsHtml;
   if (costItems.length === 0) {
-    costItemsHtml = `<div class="empty-state" style="padding:14px">פירוט תקציב לא הוגדר עדיין. ${userRole==='admin'?'<br>לחצי על "ערוך" כדי להוסיף רכיבי תשומה.':''}</div>`;
+    costItemsHtml = `<div class="empty-state" style="padding:14px">פירוט תקציב לא הוגדר עדיין. ${userRole==='admin'?'<br>לחץ על "ערוך" כדי להוסיף רכיבי תשומה.':''}</div>`;
   } else {
     // Compute totals split: cash vs in-kind
     const cashSum = costItems.filter(it => (it.paymentMode||'cash') === 'cash').reduce((s,it) => s + (Number(it.annualAmount)||0), 0);
@@ -2409,7 +2409,7 @@ function _renderProgramDetailInner() {
   const recent = finanRecords.slice().sort((a,b) => (b.purchaseDate||b.date||'').localeCompare(a.purchaseDate||a.date||'')).slice(0,15);
   const canEdit = (userRole === 'admin' || userRole === 'team');
   const financeHtml = recent.length === 0
-    ? '<div class="empty-state" style="padding:14px">אין רשומות פיננסיות לתוכנית עדיין. הזיני הכנסה/הוצאה דרך הכפתורים למעלה.</div>'
+    ? '<div class="empty-state" style="padding:14px">אין רשומות פיננסיות לתוכנית עדיין. הזן הכנסה/הוצאה דרך הכפתורים למעלה.</div>'
     : '<table class="data-table" style="font-size:0.88rem">' +
       '<thead><tr><th>סוג</th><th>תאריך</th><th>סכום</th><th>מקור / ספק</th><th>מטרה / פירוט</th><th>מסמכים</th>' + (canEdit ? '<th style="width:100px">פעולות</th>' : '') + '</tr></thead>' +
       '<tbody>' + recent.map(r => {
@@ -2464,12 +2464,12 @@ function _renderProgramDetailInner() {
     </div>
 
     <div class="kpi-grid">
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','budget')" title="לחצי לפירוט רכיבי התקציב"><div class="icon">💰</div><div class="label">תקציב שנתי</div><div class="value">₪${effectiveBudget.toLocaleString()}</div></div>
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','committed')" title="לחצי לפירוט מקורות גיוס"><div class="icon">🤝</div><div class="label">גויס (מתחייב)</div><div class="value">₪${totalCommitted.toLocaleString()}</div></div>
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','received')" title="לחצי לפירוט תקבולים"><div class="icon">📥</div><div class="label">התקבל בפועל</div><div class="value">₪${totalRaised.toLocaleString()}</div></div>
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','spent')" title="לחצי לפירוט הוצאות"><div class="icon">📤</div><div class="label">הוצא בפועל</div><div class="value">₪${totalSpent.toLocaleString()}</div></div>
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','gap')" title="לחצי לפירוט פער"><div class="icon">📊</div><div class="label">פער למימון</div><div class="value" style="color:${gap>0?'var(--danger)':'var(--success)'}">₪${gap.toLocaleString()}</div></div>
-      <div class="kpi clickable" onclick="drillDown('tasks','overdue')" title="לחצי למשימות באיחור"><div class="icon">⚠️</div><div class="label">משימות באיחור</div><div class="value" style="color:var(--danger)">${overdueTasks.length}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','budget')" title="לחץ לפירוט רכיבי התקציב"><div class="icon">💰</div><div class="label">תקציב שנתי</div><div class="value">₪${effectiveBudget.toLocaleString()}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','committed')" title="לחץ לפירוט מקורות גיוס"><div class="icon">🤝</div><div class="label">גויס (מתחייב)</div><div class="value">₪${totalCommitted.toLocaleString()}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','received')" title="לחץ לפירוט תקבולים"><div class="icon">📥</div><div class="label">התקבל בפועל</div><div class="value">₪${totalRaised.toLocaleString()}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','spent')" title="לחץ לפירוט הוצאות"><div class="icon">📤</div><div class="label">הוצא בפועל</div><div class="value">₪${totalSpent.toLocaleString()}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','gap')" title="לחץ לפירוט פער"><div class="icon">📊</div><div class="label">פער למימון</div><div class="value" style="color:${gap>0?'var(--danger)':'var(--success)'}">₪${gap.toLocaleString()}</div></div>
+      <div class="kpi clickable" onclick="drillDown('tasks','overdue')" title="לחץ למשימות באיחור"><div class="icon">⚠️</div><div class="label">משימות באיחור</div><div class="value" style="color:var(--danger)">${overdueTasks.length}</div></div>
     </div>
 
     <div class="card">
@@ -2555,7 +2555,7 @@ const PARTNER_TYPE_LABELS = {
 
 function _renderPartnersTable(partners, progKey) {
   if (!partners || !partners.length) {
-    return `<div class="empty-state" style="padding:14px">עדיין לא הוגדרו שותפים. ${userRole==='admin'?'לחצי "ערוך שותפים" כדי להוסיף.':''}</div>`;
+    return `<div class="empty-state" style="padding:14px">עדיין לא הוגדרו שותפים. ${userRole==='admin'?'לחץ "ערוך שותפים" כדי להוסיף.':''}</div>`;
   }
   return `<table class="data-table">
     <thead><tr><th>שם</th><th>סוג</th><th>איש קשר</th><th>התחייבות שנתית</th><th>התקבל עד כה</th><th>סטטוס</th></tr></thead>
@@ -2628,7 +2628,7 @@ function renderPartnersEditList() {
         <div class="form-field" style="grid-column:1/-1"><label>הערות</label><input type="text" id="pt_notes_${i}" value="${(p.notes||'').replace(/"/g,'&quot;')}" placeholder="פירוט על שיתוף הפעולה"></div>
       </div>
     </div>
-  `).join('') || '<div class="empty-state" style="padding:14px">אין שותפים. לחצי "+ הוסף שותף".</div>';
+  `).join('') || '<div class="empty-state" style="padding:14px">אין שותפים. לחץ "+ הוסף שותף".</div>';
 }
 
 function _collectPartners() {
@@ -3449,9 +3449,14 @@ window.addEventListener('popstate', (e) => {
   _suppressHistoryPush = false;
 });
 
-// On initial load, honor hash (#vehicles etc.)
+// On initial load, honor hash (#vehicles etc.) — but skip 'program' since it needs a specific program key
 window.addEventListener('DOMContentLoaded', () => {
   const hash = (location.hash||'').replace('#','');
+  // Always start at dashboard if hash is 'program' (no specific program selected) or empty
+  if (!hash || hash === 'program') {
+    setTimeout(() => switchSection('dashboard', null), 200);
+    return;
+  }
   if (hash && document.getElementById('sec-'+hash)) {
     setTimeout(() => switchSection(hash, null), 300);
   }
@@ -3962,7 +3967,7 @@ function renderAreasEditor() {
     <div style="background:#f8fafc;padding:10px;border-radius:8px;margin-bottom:8px;border:1px solid #e5e7eb">
       <div class="form-row">
         <div class="form-field"><label>מזהה (אנגלית, ללא רווחים)</label><input type="text" id="setArea_key_${i}" value="${a.key||''}" placeholder="area-name" dir="ltr"></div>
-        <div class="form-field" style="flex:2"><label>שם התחום</label><input type="text" id="setArea_label_${i}" value="${a.label||''}" placeholder="שם בעברית"></div>
+        <div class="form-field" style="flex:2"><label>שם התחום</label><input type="text" id="setArea_label_${i}" value="${a.label||''}" placeholder="שם בעבורת"></div>
         <div class="form-field" style="display:flex;align-items:flex-end"><button class="btn btn-danger btn-sm" onclick="removeAreaRow(${i})">🗑 מחק</button></div>
       </div>
       <div class="form-row">
@@ -3982,7 +3987,7 @@ function addAreaRow() {
 }
 
 function removeAreaRow(idx) {
-  if (!confirm('למחוק את התחום? שינוי זה ייכנס לתוקף רק אחרי שתלחצי "שמור".')) return;
+  if (!confirm('למחוק את התחום? שינוי זה ייכנס לתוקף רק אחרי שתלחץ "שמור".')) return;
   collectAreaEdits();
   if (currentOrgInfo.areas) currentOrgInfo.areas.splice(idx, 1);
   renderAreasEditor();
@@ -4376,7 +4381,7 @@ async function renderPresentationMode(year) {
      <h2 style="font-size:2rem;font-weight:300;color:#a3b5d4;margin:0">תוכנית עבודה לשנת ${year}</h2>
      <div style="margin-top:40px;font-size:1.2rem;color:#64748b">לחץ ◄ ► לניווט · ESC לסגירה</div>`,
     // Slide 1: Numbers
-    `<h1 style="font-size:3rem;margin:0 0 30px">המספרים שלנו השנה</h1>
+    `<h1 style="font-size:3rem;margin:0 0 30px">המספרם שלנו השנה</h1>
      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">
        <div style="background:rgba(16,185,129,0.15);padding:32px;border-radius:16px;border:1px solid rgba(16,185,129,0.3)"><div style="font-size:1.1rem;color:#86efac">הכנסות</div><div style="font-size:3.5rem;font-weight:700;color:#10b981">₪${totalInc.toLocaleString()}</div></div>
        <div style="background:rgba(245,158,11,0.15);padding:32px;border-radius:16px;border:1px solid rgba(245,158,11,0.3)"><div style="font-size:1.1rem;color:#fde68a">הוצאות (פעילות)</div><div style="font-size:3.5rem;font-weight:700;color:#f59e0b">₪${totalExp.toLocaleString()}</div></div>
@@ -4804,7 +4809,7 @@ async function addExpenseRequest() {
     } else {
       showExpFormError('הבקשה לא נשמרה', [
         `פירוט: <code>${msg.replace(/</g,'&lt;')}</code>`,
-        'פתח את ה-Console של הדפדפן (F12) לפרטים מלאים.'
+        'פתח את ה-Console של הדפדפן (F12) לפרטים מלאם.'
       ]);
     }
   } finally {
@@ -4863,7 +4868,7 @@ async function rejectExpenseRequest(id) {
   const r = (expenseRequestsCache||[]).find(x => x.id === id);
   if (!r) return;
   if (r.approverEmail !== currentUser.email) { toast('רק המאשר שנקבע יכול לדחות','error'); return; }
-  const reason = prompt('סיבת הדחייה (תוצג למגיש):','');
+  const reason = prompt('סיבת הדחהיה (תוצג למגיש):','');
   if (reason === null) return;
   try {
     await db.collection('expenseRequests').doc(id).update({
@@ -4886,7 +4891,7 @@ async function rejectExpenseRequest(id) {
     if (typeof loadTasks === 'function') loadTasks();
   } catch(e) {
     console.error('[EXP] reject failed', e);
-    toast('שגיאה בדחייה: ' + (e.message||e), 'error');
+    toast('שגיאה בדחהיה: ' + (e.message||e), 'error');
   }
 }
 
@@ -5294,7 +5299,7 @@ async function translateElement(btn, srcId) {
     const box = document.createElement('div');
     box.className = 'translation-box';
     box.style.cssText = 'margin-top:8px;padding:10px;background:#f0f9ff;border-right:3px solid #0ea5e9;border-radius:6px;font-size:0.9rem;white-space:pre-wrap';
-    box.innerHTML = '<div style="font-size:0.75rem;color:#0369a1;margin-bottom:4px">🌐 ' + (currentLang==='he'?'English':'עברית') + '</div>' + translated.replace(/</g,'&lt;');
+    box.innerHTML = '<div style="font-size:0.75rem;color:#0369a1;margin-bottom:4px">🌐 ' + (currentLang==='he'?'English':'עבורת') + '</div>' + translated.replace(/</g,'&lt;');
     src.after(box);
     btn.textContent = t('btn.hide_translation');
   } catch(e) {
@@ -5394,7 +5399,7 @@ function buildWeeklyFormHTML(roleKey) {
         <input type="checkbox" id="wk_onBehalf" onchange="toggleOnBehalf()" style="width:auto;margin:0">
         👥 אני ממלא דיווח עבור עובד אחר
       </label>
-      <small style="color:#475569">סמנו אם אתם ממלאים את הדיווח עבור עובד שלא מסוגל למלא בעצמו (חופשה, מילואים, וכו'). הדיווח יישמר עבור העובד שיירשם להלן.</small>
+      <small style="color:#475569">סמנו אם אתם ממלאם את הדיווח עבור עובד שלא מסוגל למלא בעצמו (חופשה, מילואים, וכו'). הדיווח יישמר עבור העובד שיירשם להלן.</small>
       <div id="wk_onBehalfBox" style="display:none;margin-top:10px">
         <div class="form-row">
           <div class="form-field"><label>שם העובד שעבורו הדיווח</label><input type="text" id="wk_employeeName" placeholder="שם העובד..."></div>
@@ -5509,7 +5514,7 @@ function renderWeeklyReportUI() {
           </select>
         </div>
       </div>
-      <div id="wk_formContainer"><div class="empty-state">לצפייה / מילוי דיווח — בחר/י תפקיד למעלה.</div></div>
+      <div id="wk_formContainer"><div class="empty-state">לצפהיה / מילוי דיווח — בחר/י תפקיד למעלה.</div></div>
     `;
     if (historyCard) historyCard.style.display = '';
     if (filterRow) filterRow.style.display = '';
@@ -5523,7 +5528,7 @@ function onAdminRolePick() {
   const sel = document.getElementById('wk_roleSelect');
   const container = document.getElementById('wk_formContainer');
   if (!sel || !container) return;
-  if (!sel.value) { container.innerHTML = '<div class="empty-state">לצפייה / מילוי דיווח — בחר/י תפקיד למעלה.</div>'; return; }
+  if (!sel.value) { container.innerHTML = '<div class="empty-state">לצפהיה / מילוי דיווח — בחר/י תפקיד למעלה.</div>'; return; }
   container.innerHTML = buildWeeklyFormHTML(sel.value);
   wireWeeklyDaysRow();
 }
@@ -5944,7 +5949,7 @@ const EXPENSE_CATEGORIES = {
   personnel: 'שכר/קבלנות',
   logistics: 'לוגיסטיקה',
   materials: 'חומרים/ציוד',
-  travel: 'נסיעות',
+  travel: 'נסהעות',
   food: 'כיבוד/אוכל',
   marketing: 'שיווק',
   other: 'אחר'
@@ -6521,7 +6526,7 @@ async function addVehicle() {
 
 async function delVehicle(id) {
   if (userRole !== 'admin') return;
-  if (!confirm('למחוק את הרכב? פעולה זו לא תימחק את היסטוריית הנסיעות והאירועים.')) return;
+  if (!confirm('למחוק את הרכב? פעולה זו לא תימחק את היסטוריית הנסהעות והאירועים.')) return;
   await db.collection('vehicles').doc(id).delete();
   toast('הרכב נמחק');
   loadVehicles();
@@ -6542,7 +6547,7 @@ async function loadTrips() {
   document.getElementById('veh-trips-month').textContent = monthCount;
 
   const tbody = document.getElementById('tripsTableBody');
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" class="empty-state">אין נסיעות רשומות</td></tr>'; return; }
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" class="empty-state">אין נסהעות רשומות</td></tr>'; return; }
   const canDel = userRole === 'admin' || userRole === 'team';
   tbody.innerHTML = rows.map(r => {
     const veh = vehiclesCache.find(v => v.id === r.vehicleId);
@@ -6607,13 +6612,13 @@ async function addTrip() {
 
     ['tripDriver','tripStart','tripEnd','tripDestination','tripPassengers','tripKmStart','tripKmEnd','tripFuelCost','tripExtraCost','tripNotes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('tripReceipts').value = '';
-    toast('נסיעה נוספה!');
+    toast('נסהעה נוספה!');
     loadVehicles();
   } catch (e) {
     console.error(e);
     toast('שגיאה: ' + (e.message||e), 'error');
   } finally {
-    btn.disabled = false; btn.textContent = '+ הוסף נסיעה';
+    btn.disabled = false; btn.textContent = '+ הוסף נסהעה';
   }
 }
 
@@ -7158,14 +7163,14 @@ const REGULATORY_TEMPLATES = {
     description: 'ישיבה רבעונית של הוועד המנהל',
     category: 'operational', priority: 'medium', recurring: 'quarterly',
     dueOffsetDays: 90, reminderDays: 14,
-    legalNotes: 'נדרש לאישור ניהול תקין: לפחות 4 ישיבות ועד מנהל בשנה.\n\nבכל ישיבה:\n• לנהל פרוטוקול מסודר עם רשימת נוכחים\n• להחליט על פעולות מהותיות (אישור תקציב, חוזים מעל סכום מסוים, קבלת עובדים בכירים)\n• לאשר דו"חות כספיים רבעוניים\n• לסקור ניגודי עניינים ולתעד הצהרות חברי הוועד\n\nפרוטוקולים נשמרים 7 שנים לפחות.'
+    legalNotes: 'נדרש לאישור ניהול תקין: לפחות 4 ישיבות ועד מנהל בשנה.\n\nבכל ישיבה:\n• לנהל פרוטוקול מסודר עם רשימת נוכחים\n• להחליט על פעולות מהותיות (אישור תקציב, חוזים מעל סכום מסוים, קבלת עובדים בכירים)\n• לאשר דו"חות כספיים רבעוניים\n• לסקור ניגודי עניינים ולתעד הצהרות חברי הוועד\n\nפרוטוקולים נשמורם 7 שנים לפחות.'
   },
   section_46: {
     icon: '🎫', title: 'חידוש אישור סעיף 46',
     description: 'בקשה/חידוש אישור מוסד ציבורי לעניין תרומות',
     category: 'regulatory', priority: 'high', recurring: null,
     dueOffsetDays: 1095, reminderDays: 120,
-    legalNotes: 'אישור סעיף 46 מאפשר לתורמים לקבל זיכוי ממס (עד 35% ליחיד, 26% לחברה) עבור תרומות.\n\nתנאים:\n• אישור ניהול תקין תקף\n• פעילות למטרה ציבורית מוכרת (חינוך, דת, רווחה, בריאות וכו\')\n• ועדת שרים מאשרת את הבקשה (תהליך של כ-6-12 חודשים)\n\nחובות דיווח שוטפות: דיווח על תרומות מעל סכום מסוים, שמירה על מטרות מוכרות, דיווח על שינויים מהותיים.\nהפקעת האישור: מובילה לחיוב רטרואקטיבי במס על התורמים. יש לטפל בחידוש הרבה לפני הפקיעה.'
+    legalNotes: 'אישור סעיף 46 מאפשר לתורמים לקבל זיכוי ממס (עד 35% ליחיד, 26% לחברה) עבור תרומות.\n\nתנאים:\n• אישור ניהול תקין תקף\n• פעילות למטרה ציבורית מוכרת (חינוך, דת, רווחה, בריאות וכו\')\n• ועדת שרים מאשרת את הבקשה (תהליך של כ-6-12 חודשים)\n\nחובות דיווח שוטפות: דיווח על תרומות מעל סכום מסוים, שמירה על מטרות מוכרות, דיווח על שינויים מהותיים.\nהפקעת האישור: מובילה לחיוב רטרואקטיבי במס על התורמים. יש לטפל בחידוש הרבה לפני הפקעה.'
   },
   form_126: {
     icon: '💸', title: 'הגשת טופס 126 לרשות המיסים',
@@ -7179,7 +7184,7 @@ const REGULATORY_TEMPLATES = {
     description: 'הכנת דו"ח ועדת ביקורת לקראת האסיפה הכללית',
     category: 'regulatory', priority: 'medium', recurring: 'yearly',
     dueMonth: 5, dueDay: 31, reminderDays: 60,
-    legalNotes: 'לפי סעיף 30 לחוק העמותות, לכל עמותה חייבת להיות ועדת ביקורת (לפחות 2 חברים, שאינם חברי ועד).\n\nתפקידי הוועדה:\n• בדיקת ענייני הכספים של העמותה וספרי החשבונות\n• בדיקת סדרי הניהול והפעולות\n• הגשת דו"ח שנתי לאסיפה הכללית\n• בדיקת תקינות החלטות ועד ההנהלה\n\nחלופה: גוף מבקר (רואה חשבון חיצוני) — לעמותות גדולות.'
+    legalNotes: 'לפי סעיף 30 לחוק העמותות, לכל עמותה חייבת להיות ועדת ביקורת (לפחות 2 חברים, שאינם חברי ועד).\n\nתפקידי הוועדה:\n• בדיקת ענייני הכספים של העמותה וספר החשבונות\n• בדיקת סדרי הניהול והפעולות\n• הגשת דו"ח שנתי לאסיפה הכללית\n• בדיקת תקינות החלטות ועד ההנהלה\n\nחלופה: גוף מבקר (רואה חשבון חיצוני) — לעמותות גדולות.'
   },
   registrar_updates: {
     icon: '📮', title: 'עדכון רשם העמותות על שינויים מהותיים',
@@ -7740,7 +7745,7 @@ async function fetchOrgFromRegistry(regNum) {
   // Normalize fields (Hebrew keys from data.gov.il)
   const cleanTxt = s => (s||'').toString().replace(/~/g,'·').replace(/&#x0D;/g,'').replace(/\s+/g,' ').trim();
   return {
-    name: cleanTxt(rec['שם עמותה בעברית']),
+    name: cleanTxt(rec['שם עמותה בעבורת']),
     englishName: cleanTxt(rec['שם עמותה באנגלית']),
     registrationNumber: String(rec['מספר עמותה']||regNum),
     registrationDate: cleanTxt(rec['תאריך רישום עמותה']),
@@ -8225,7 +8230,7 @@ const REPORT_TEMPLATES = {
       <div class="rpt-row"><strong>עסקאות עם בעלי עניין:</strong> ${d.declarationConflicts || 'לא'}</div>
       ${d.conflictsDetails ? `<div class="rpt-block">${d.conflictsDetails}</div>` : ''}
 
-      <p style="margin-top:24px">אני/אנחנו, הח"מ, מצהיר/ים כי הפרטים המפורטים לעיל נכונים ומלאים.</p>
+      <p style="margin-top:24px">אני/אנחנו, הח"מ, מצהיר/ים כי הפרטים המפורטים לעיל נכונים ומלאם.</p>
       <div class="rpt-sigs">
         <div class="rpt-sig">${d.chairmanName || '_________________'}<br><small>יו"ר ועד מנהל</small></div>
         <div class="rpt-sig">_________________<br><small>חבר ועד מנהל</small></div>
@@ -8280,7 +8285,7 @@ const REPORT_TEMPLATES = {
       <h2>4. עניינים נוספים העלולים ליצור ניגוד</h2>
       <div class="rpt-block">${d.otherInterests || 'אין'}</div>
 
-      <p style="margin-top:16px"><strong>התחייבות:</strong> אני מתחייב/ת לדווח מידית לוועד המנהל על כל שינוי או נסיבה חדשה שעלולה להוות ניגוד עניינים, ולהימנע מהשתתפות בדיונים והחלטות בנושאים שבהם יש לי עניין אישי.</p>
+      <p style="margin-top:16px"><strong>התחייבות:</strong> אני מתחייב/ת לדווח מידית לוועד המנהל על כל שינוי או נסהבה חדשה שעלולה להוות ניגוד עניינים, ולהימנע מהשתתפות בדיונים והחלטות בנושאים שבהם יש לי עניין אישי.</p>
 
       <p style="margin-top:24px">זה שמי, זו חתימתי ותוכן תצהירי אמת.</p>
       <div class="rpt-sigs">
@@ -8317,7 +8322,7 @@ const REPORT_TEMPLATES = {
         <h1>דו"ח ועדת ביקורת שנתי</h1>
         <div class="sub">${ORG_INFO.name} · שנת דיווח ${d.reportYear || '____'}</div>
       </div>
-      <p>בהתאם לסעיף 30 לחוק העמותות, תש"ם-1980, ולתפקידיה של ועדת הביקורת, הוועדה בחנה את פעילות העמותה וספריה במהלך שנת ${d.reportYear || '____'} ומגישה בזאת את דו"חה השנתי.</p>
+      <p>בהתאם לסעיף 30 לחוק העמותות, תש"ם-1980, ולתפקידיה של ועדת הביקורת, הוועדה בחנה את פעילות העמותה וספרה במהלך שנת ${d.reportYear || '____'} ומגישה בזאת את דו"חה השנתי.</p>
 
       <h2>פרטים כלליים</h2>
       <div class="rpt-row"><strong>חברי הוועדה:</strong> ${d.committeeChair || '___'}${d.committeeMember ? ', ' + d.committeeMember : ''}</div>
@@ -8425,7 +8430,7 @@ const REPORT_TEMPLATES = {
       <div class="rpt-row">4. <strong>לעמותה אישור ניהול תקין תקף:</strong> ${d.hasProperMgmt || '___'}${d.properMgmtValidUntil ? ' (תוקף עד: ' + fmtDate(d.properMgmtValidUntil) + ')' : ''}</div>
       <div class="rpt-row">5. <strong>פעילות העמותה עולה בקנה אחד עם המטרות:</strong> ${d.activityConsistent || 'כן'}</div>
       <div class="rpt-row">6. <strong>הכנסות והוצאות העמותה אינן משמשות לרווח אישי של חברי הוועד או העובדים:</strong> ${d.noPersonalBenefits || 'כן'}</div>
-      <div class="rpt-row">7. העמותה מנהלת ספרים כנדרש ומגישה דו"חות שנתיים במועד.</div>
+      <div class="rpt-row">7. העמותה מנהלת ספרם כנדרש ומגישה דו"חות שנתיים במועד.</div>
 
       <p style="margin-top:20px">בהתאם לדרישות פקודת מס הכנסה וסעיף 46 לפקודה, אני/אנו מבקש/ים לאשר את העמותה כמוסד ציבורי לעניין תרומות.</p>
 
@@ -8728,7 +8733,7 @@ const COLLECTIONS_TO_CHECK = [
   {name:'projects', label:'🎯 פרויקטים', icon:'🎯'},
   {name:'tasks', label:'✅ משימות', icon:'✅'},
   {name:'vehicles', label:'🚗 רכבים', icon:'🚗'},
-  {name:'trips', label:'🛣️ נסיעות', icon:'🛣️'},
+  {name:'trips', label:'🛣️ נסהעות', icon:'🛣️'},
   {name:'vehicleEvents', label:'🔧 טיפולים', icon:'🔧'},
   {name:'team', label:'👥 צוות', icon:'👥'}
 ];
@@ -8952,7 +8957,7 @@ function renderActivityReport(data) {
       <tr><td>שעות עבודה מדווחות</td><td>${data.reports.totalHours.toFixed(1)}</td></tr>
       <tr><td>מדווחים ייחודיים</td><td>${Object.keys(data.reports.byUser).length}</td></tr>
       <tr><td>משימות שהושלמו</td><td>${data.tasks.completed}</td></tr>
-      <tr><td>נסיעות רכב</td><td>${data.trips.count} (${data.trips.totalKm} ק"מ)</td></tr>
+      <tr><td>נסהעות רכב</td><td>${data.trips.count} (${data.trips.totalKm} ק"מ)</td></tr>
     </table>
 
     <h2>💰 פירוט כספים לפי מטרה</h2>
@@ -8976,7 +8981,7 @@ function renderActivityReport(data) {
     ${taskRows ? `<h2>✅ משימות שהושלמו בתקופה</h2>
     <table><tr><th>תאריך סגירה</th><th>כותרת</th><th>קטגוריה</th><th>משויכים</th></tr>${taskRows}</table>` : ''}
 
-    ${tripRows ? `<h2>🚗 נסיעות רכב בתקופה</h2>
+    ${tripRows ? `<h2>🚗 נסהעות רכב בתקופה</h2>
     <table><tr><th>תאריך</th><th>נהג</th><th>יעד</th><th>ק"מ</th><th>נוסעים</th></tr>${tripRows}</table>` : ''}
 
     ${projectRows ? `<h2>🎯 מצב פרויקטים (תצלום נוכחי)</h2>
@@ -9014,7 +9019,7 @@ function openManagerSummary() {
   if (body) {
     body.innerHTML = `<div class="empty-state" style="padding:40px 20px;text-align:center">
       <div style="font-size:3rem;margin-bottom:8px">📋</div>
-      <p style="margin:0">בחרי תקופה ולחצי על <strong>"🔄 הפק דוח"</strong> כדי ליצור את הסיכום.</p>
+      <p style="margin:0">בחר תקופה ולחץ על <strong>"🔄 הפק דוח"</strong> כדי ליצור את הסיכום.</p>
     </div>`;
   }
 }
@@ -9109,7 +9114,7 @@ async function renderManagerSummary() {
   reports.sort((a,b) => (a.weekStart||'').localeCompare(b.weekStart||''));
 
   if (!reports.length) {
-    body.innerHTML = `<div class="empty-state" style="padding:40px"><div style="font-size:3rem">📭</div><p>אין דיווחים בטווח <strong>${fmtDate(start)} – ${fmtDate(end)}</strong></p><p style="font-size:0.85rem;color:#94a3b8;margin-top:8px">נסי לבחור טווח אחר.</p></div>`;
+    body.innerHTML = `<div class="empty-state" style="padding:40px"><div style="font-size:3rem">📭</div><p>אין דיווחים בטווח <strong>${fmtDate(start)} – ${fmtDate(end)}</strong></p><p style="font-size:0.85rem;color:#94a3b8;margin-top:8px">נסה לבחור טווח אחר.</p></div>`;
     _resetBtn();
     return;
   }
@@ -9269,7 +9274,7 @@ async function openActivityReport() {
     </div>
     <div class="report-auto-note">
       📊 הדוח נבנה אוטומטית מכל אוספי הנתונים:<br>
-      💰 כספים · 📋 דיווחי עובדים · ✅ משימות · 🚗 נסיעות · 🎯 פרויקטים
+      💰 כספים · 📋 דיווחי עובדים · ✅ משימות · 🚗 נסהעות · 🎯 פרויקטים
     </div>
   `;
 
