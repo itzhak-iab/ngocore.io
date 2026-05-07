@@ -385,8 +385,9 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
       <button type="button" id="i18n-he-btn" onclick="setAppLang('he')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:0.82rem">🇮🇱 עבורת</button>
       <button type="button" id="i18n-en-btn" onclick="setAppLang('en')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;font-size:0.82rem">🇺🇸 English</button>
     </div>
+    <div id="fxBadge" style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.7);padding:6px 8px;background:rgba(255,255,255,0.06);border-radius:6px;margin:4px 12px 0"></div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r44</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r45</div>
   </aside>
 
   <!-- Main Content -->
@@ -1571,7 +1572,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r44 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r45 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -1787,36 +1788,155 @@ const CONTRACT_ROLES = ['ram-plugati','resilience-lead','educational-director','
 // ============================================================
 // ===== CURRENCY — ILS ↔ USD live conversion ===============
 // ============================================================
-let _usdToIls = 3.70; // fallback rate (mid-2026 baseline)
+let _usdToIls = 3.55; // fallback rate (mid-2026 baseline; refreshed live)
 let _fxFetchedAt = null;
+let _fxIsManualOverride = false;
+let _fxSource = 'fallback';
 
-// Restore cached rate
+// Restore cached rate (or admin override)
 try {
-  const c = parseFloat(localStorage.getItem('_usdToIls'));
-  if (c > 0 && c < 10) _usdToIls = c;
+  const override = parseFloat(localStorage.getItem('_usdToIlsOverride'));
+  if (override > 0 && override < 10) {
+    _usdToIls = override;
+    _fxIsManualOverride = true;
+    _fxSource = 'manual';
+  } else {
+    const c = parseFloat(localStorage.getItem('_usdToIls'));
+    if (c > 0 && c < 10) {
+      _usdToIls = c;
+      _fxSource = 'cache';
+    }
+  }
   _fxFetchedAt = localStorage.getItem('_usdRateDate');
 } catch(e) {}
 
 async function loadUsdRate(force) {
-  // Skip if fetched today (unless force)
+  // Manual override always wins — never auto-fetch over it
+  if (_fxIsManualOverride) { updateFxBadge(); return; }
   const today = new Date().toISOString().slice(0,10);
-  if (!force && _fxFetchedAt === today) return;
-  try {
-    const r = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-    if (!r.ok) throw new Error('http ' + r.status);
-    const d = await r.json();
-    if (d && d.rates && d.rates.ILS) {
-      _usdToIls = d.rates.ILS;
-      _fxFetchedAt = today;
-      try {
-        localStorage.setItem('_usdToIls', String(_usdToIls));
-        localStorage.setItem('_usdRateDate', today);
-      } catch(e) {}
-      console.log('[fx] USD→ILS rate:', _usdToIls);
+  if (!force && _fxFetchedAt === today && _fxSource === 'live') return;
+  // Try multiple endpoints — one might be blocked at the user's network/extension
+  const endpoints = [
+    { url:'https://api.exchangerate-api.com/v4/latest/USD', pick:d=>d?.rates?.ILS },
+    { url:'https://open.er-api.com/v6/latest/USD',           pick:d=>d?.rates?.ILS },
+    { url:'https://api.frankfurter.app/latest?from=USD&to=ILS', pick:d=>d?.rates?.ILS }
+  ];
+  for (const ep of endpoints) {
+    try {
+      const r = await fetch(ep.url, { cache:'no-store' });
+      if (!r.ok) continue;
+      const d = await r.json();
+      const rate = ep.pick(d);
+      if (rate && rate > 0 && rate < 10) {
+        _usdToIls = rate;
+        _fxFetchedAt = today;
+        _fxSource = 'live';
+        try {
+          localStorage.setItem('_usdToIls', String(_usdToIls));
+          localStorage.setItem('_usdRateDate', today);
+        } catch(e) {}
+        console.log('[fx] live USD→ILS rate:', _usdToIls.toFixed(4), 'from', ep.url);
+        updateFxBadge();
+        // Re-render any USD numbers already painted on screen
+        try { _refreshFxDependentUI(); } catch(e) {}
+        return;
+      }
+    } catch(e) {
+      console.warn('[fx]', ep.url, 'failed:', e.message);
     }
-  } catch(e) {
-    console.warn('[fx] live rate fetch failed, using fallback', _usdToIls, e.message);
   }
+  console.warn('[fx] all live endpoints failed, using', _fxSource, _usdToIls);
+  updateFxBadge();
+}
+
+// Admin: set a manual override rate (for donor reports tied to a specific date)
+function setManualFxRate(rate) {
+  if (userRole !== 'admin') { toast('רק מנהל יכול לשנות שער חליפין','error'); return; }
+  if (!rate || rate <= 0) {
+    // Clear override → resume live
+    try { localStorage.removeItem('_usdToIlsOverride'); } catch(e) {}
+    _fxIsManualOverride = false;
+    _fxSource = 'cache';
+    loadUsdRate(true);
+    toast('שער החליפין חזר למצב אוטומטי');
+    return;
+  }
+  rate = Number(rate);
+  if (rate < 0.5 || rate > 20) { toast('שער לא תקין (חייב להיות בין 0.5 ל-20)','error'); return; }
+  _usdToIls = rate;
+  _fxIsManualOverride = true;
+  _fxSource = 'manual';
+  try { localStorage.setItem('_usdToIlsOverride', String(rate)); } catch(e) {}
+  updateFxBadge();
+  try { _refreshFxDependentUI(); } catch(e) {}
+  toast(`שער חליפין הוגדר ידנית: 1$ = ${rate.toFixed(2)}₪ ✓`);
+}
+
+function openFxRateDialog() {
+  const current = _usdToIls.toFixed(4);
+  const sourceLabel = _fxIsManualOverride ? 'ידני (override)' :
+                      _fxSource === 'live' ? `חי — מ-${_fxFetchedAt||'היום'}` :
+                      _fxSource === 'cache' ? 'מטמון' : 'ברירת מחדל';
+  const html = `
+    <p style="margin:0 0 10px"><strong>שער נוכחי:</strong> 1$ = ${current}₪ <small style="color:var(--muted)">(${sourceLabel})</small></p>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1">
+        <label>הגדר שער ידני (₪ ל-$)</label>
+        <input type="number" step="0.0001" id="fxOverrideInput" value="${current}" placeholder="למשל: 3.55">
+        <small style="color:var(--muted)">השאר ריק והקש "אוטומטי" כדי לחזור לשער חי</small>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn btn-secondary" onclick="document.getElementById('fxRateModal').remove()">ביטול</button>
+      <button class="btn btn-secondary" onclick="setManualFxRate(0); document.getElementById('fxRateModal').remove()">🔄 חזור לאוטומטי</button>
+      <button class="btn btn-primary" onclick="setManualFxRate(parseFloat(document.getElementById('fxOverrideInput').value)); document.getElementById('fxRateModal').remove()">💾 שמור</button>
+    </div>
+  `;
+  const modal = document.createElement('div');
+  modal.id = 'fxRateModal';
+  modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10001;align-items:center;justify-content:center;padding:20px';
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+  modal.innerHTML = `<div style="background:#fff;border-radius:var(--radius);max-width:480px;width:100%;padding:24px;border-top:4px solid var(--gold)"><h3 style="margin:0 0 14px;color:var(--primary)">💱 שער חליפין USD ⇆ ILS</h3>${html}</div>`;
+  document.body.appendChild(modal);
+}
+
+function updateFxBadge() {
+  const el = document.getElementById('fxBadge');
+  if (!el) return;
+  const r = _usdToIls.toFixed(2);
+  const isAdmin = userRole === 'admin';
+  const tag = _fxIsManualOverride ? '✏️' : (_fxSource === 'live' ? '🟢' : (_fxSource === 'cache' ? '🟡' : '⚠️'));
+  el.innerHTML = `${tag} 1$ ≈ ${r}₪`;
+  el.title = _fxIsManualOverride ? 'שער מוגדר ידנית' :
+             _fxSource === 'live' ? `שער חי — עודכן ${_fxFetchedAt||''}` :
+             _fxSource === 'cache' ? 'שער מהמטמון (לא הצליח להתעדכן היום)' :
+             'ברירת מחדל — לא נטען שער חי';
+  el.style.cursor = isAdmin ? 'pointer' : 'default';
+  el.onclick = isAdmin ? openFxRateDialog : null;
+}
+
+// Re-render any UI that shows USD conversions, after the rate updates
+function _refreshFxDependentUI() {
+  // Program detail (active sec-program)
+  try {
+    const sec = document.getElementById('sec-program');
+    if (sec && sec.classList.contains('active') && typeof renderProgramDetail === 'function') {
+      renderProgramDetail();
+    }
+  } catch(e) {}
+  // Program cards on dashboard
+  try { if (typeof renderProgramCards === 'function') renderProgramCards(); } catch(e) {}
+  // Open program-edit dialog
+  try {
+    if (document.getElementById('progEditModal')?.style.display === 'flex' && typeof renderCostItemsEditor === 'function') {
+      renderCostItemsEditor();
+    }
+  } catch(e) {}
+  // Finance section
+  try { if (typeof renderFinance === 'function') renderFinance(); } catch(e) {}
+  // Donors & partners
+  try { if (typeof renderDonors === 'function') renderDonors(); } catch(e) {}
+  try { if (typeof renderPartners === 'function') renderPartners(); } catch(e) {}
 }
 
 function ilsToUsd(ils) {
@@ -2333,6 +2453,8 @@ function showApp(user) {
   document.getElementById('userName').textContent = user.displayName || user.email;
   document.getElementById('userRole').textContent = ROLES[userRole] || userRole;
   document.getElementById('userPhoto').src = user.photoURL || '';
+  // Refresh FX badge now that userRole is known (admin gets click-to-edit cursor)
+  try { updateFxBadge(); } catch(e) {}
 
   // Admin-only features
   if (userRole === 'admin') {
@@ -3953,6 +4075,9 @@ window.addEventListener('popstate', (e) => {
 
 // On initial load, honor hash (#vehicles etc.) — but skip 'program' since it needs a specific program key
 window.addEventListener('DOMContentLoaded', () => {
+  // Start the live FX fetch immediately — we don't wait for it before showing the page,
+  // but we want it in flight as early as possible so USD numbers are accurate by first render.
+  try { updateFxBadge(); loadUsdRate(); } catch(e) {}
   const hash = (location.hash||'').replace('#','');
   // Always start at dashboard if hash is 'program' (no specific program selected) or empty
   if (!hash || hash === 'program') {
