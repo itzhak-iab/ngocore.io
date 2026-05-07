@@ -388,7 +388,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     </div>
     <div id="fxBadge" style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.7);padding:6px 8px;background:rgba(255,255,255,0.06);border-radius:6px;margin:4px 12px 0"></div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r54</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r55</div>
   </aside>
 
   <!-- Main Content -->
@@ -1582,7 +1582,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r54 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r55 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -2852,11 +2852,31 @@ function _renderProgramDetailInner() {
       (openTasks.length > 10 ? `<small style="color:var(--muted)">מציג 10 מתוך ${openTasks.length} משימות פתוחות</small>` : '');
   }
 
-  // Employees list
-  const employeesHtml = employees.length === 0
-    ? `<div class="empty-state" style="padding:14px">אין עובדים משויכים לתוכנית הזו עדיין</div>`
-    : '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">' +
-      employees.map(e => `<div style="background:var(--primary-soft);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border)"><div style="font-weight:600">${e.name||e.email}</div><div style="font-size:0.78rem;color:var(--muted)">${ROLES[e.role]||e.role||'—'}</div></div>`).join('') + '</div>';
+  // Unified people grid: leader + assigned employees, with the leader marked by a 👑 badge.
+  // If the leader text matches a team-member name, it's flagged on that card; otherwise we
+  // prepend a synthetic card so the leader is visible even when not in the team docs.
+  const leaderText = (info.leader || '').trim();
+  const matchedLeader = employees.find(e => (e.name||'').trim() === leaderText || (e.email||'').toLowerCase() === leaderText.toLowerCase());
+  const peopleCards = [];
+  if (leaderText && !matchedLeader) {
+    peopleCards.push(`<div style="background:linear-gradient(135deg,var(--gold-soft) 0%,var(--primary-soft) 100%);padding:12px 14px;border-radius:var(--radius-sm);border:2px solid var(--gold);position:relative">
+      <span style="position:absolute;top:-9px;right:10px;background:var(--gold);color:#fff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px">👑 מוביל/ת</span>
+      <div style="font-weight:700;color:var(--primary);margin-top:4px">${leaderText}</div>
+      <div style="font-size:0.78rem;color:var(--muted)">מוביל/ת התוכנית</div>
+    </div>`);
+  }
+  employees.forEach(e => {
+    const isLeader = matchedLeader && e.email === matchedLeader.email;
+    const titleLabel = e.roleTitle || ROLES[e.role] || e.role || '—';
+    peopleCards.push(`<div style="background:${isLeader?'linear-gradient(135deg,var(--gold-soft) 0%,var(--primary-soft) 100%)':'var(--primary-soft)'};padding:12px 14px;border-radius:var(--radius-sm);border:${isLeader?'2px solid var(--gold)':'1px solid var(--border)'};position:relative">
+      ${isLeader?'<span style="position:absolute;top:-9px;right:10px;background:var(--gold);color:#fff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px">👑 מוביל/ת</span>':''}
+      <div style="font-weight:700;color:${isLeader?'var(--primary)':'var(--dark)'};margin-top:${isLeader?'4px':'0'}">${e.name || e.email}</div>
+      <div style="font-size:0.78rem;color:var(--muted)">${titleLabel}</div>
+    </div>`);
+  });
+  const employeesHtml = peopleCards.length === 0
+    ? `<div class="empty-state" style="padding:14px">אין מובילים או עובדים משויכים. ${userRole==='admin'?'לחץ "+ שייך עובד".':''}</div>`
+    : `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">${peopleCards.join('')}</div>`;
 
   // Recent finance — rich, editable view
   const recent = finanRecords.slice().sort((a,b) => (b.purchaseDate||b.date||'').localeCompare(a.purchaseDate||a.date||'')).slice(0,15);
@@ -2929,10 +2949,6 @@ function _renderProgramDetailInner() {
           ${_canEdit ? `<button class="btn btn-primary btn-sm" onclick="quickAddExpenseToProgram('${k}')">+ החזר הוצאות</button>` : ''}
           ${userRole==='admin' ? `<button class="btn btn-secondary btn-sm" onclick="openAssignEmployeeToProgram('${k}')">+ שייך עובד</button>` : ''}
         </div>
-      </div>
-      <div style="background:var(--primary-soft);padding:12px 14px;border-radius:var(--radius-sm);border-right:3px solid var(--primary);margin-bottom:12px">
-        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:2px">מוביל/ת התוכנית</div>
-        <div style="font-size:1.05rem;font-weight:700">${info.leader || '—'}</div>
       </div>
       ${employeesHtml}
     </div>
