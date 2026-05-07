@@ -388,7 +388,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     </div>
     <div id="fxBadge" style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.7);padding:6px 8px;background:rgba(255,255,255,0.06);border-radius:6px;margin:4px 12px 0"></div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r50</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r51</div>
   </aside>
 
   <!-- Main Content -->
@@ -1564,7 +1564,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r50 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r51 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -3394,9 +3394,23 @@ function renderPartnersEditList() {
         <div class="form-field" style="display:flex;align-items:flex-end"><button type="button" class="btn btn-danger btn-sm" onclick="removePartnerRow(${i})">🗑 מחק</button></div>
       </div>
       <div class="form-row">
-        <div class="form-field"><label>התחייבות שנתית (₪)</label><input type="number" id="pt_committed_${i}" value="${p.annualCommitment||0}"></div>
-        <div class="form-field"><label>התקבל עד כה (₪)</label><input type="number" id="pt_received_${i}" value="${p.receivedToDate||0}"></div>
-        <div class="form-field" style="flex:2"><label>איש קשר</label><input type="text" id="pt_contact_${i}" value="${(p.contactPerson||'').replace(/"/g,'&quot;')}"></div>
+        <div class="form-field">
+          <label>התחייבות שנתית</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <div style="flex:1"><small style="color:var(--muted);display:block;margin-bottom:2px">בשקלים (₪)</small><input type="number" id="pt_committed_${i}"     value="${p.annualCommitment||0}" oninput="onPtAmountChange(${i},'committed','ils')" style="width:100%"></div>
+            <div style="flex:1"><small style="color:var(--muted);display:block;margin-bottom:2px">בדולרים ($)</small><input type="number" id="pt_committed_usd_${i}" value="${ilsToUsd(p.annualCommitment||0)}" oninput="onPtAmountChange(${i},'committed','usd')" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>התקבל עד כה</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <div style="flex:1"><small style="color:var(--muted);display:block;margin-bottom:2px">בשקלים (₪)</small><input type="number" id="pt_received_${i}"     value="${p.receivedToDate||0}" oninput="onPtAmountChange(${i},'received','ils')" style="width:100%"></div>
+            <div style="flex:1"><small style="color:var(--muted);display:block;margin-bottom:2px">בדולרים ($)</small><input type="number" id="pt_received_usd_${i}" value="${ilsToUsd(p.receivedToDate||0)}" oninput="onPtAmountChange(${i},'received','usd')" style="width:100%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>איש קשר</label><input type="text" id="pt_contact_${i}" value="${(p.contactPerson||'').replace(/"/g,'&quot;')}"></div>
       </div>
       <div class="form-row">
         <div class="form-field" style="grid-column:1/-1"><label>הערות</label><input type="text" id="pt_notes_${i}" value="${(p.notes||'').replace(/"/g,'&quot;')}" placeholder="פירוט על שיתוף הפעולה"></div>
@@ -3414,6 +3428,23 @@ function _collectPartners() {
     contactPerson: (document.getElementById(`pt_contact_${i}`)?.value || '').trim(),
     notes: (document.getElementById(`pt_notes_${i}`)?.value || '').trim()
   }));
+}
+
+// When a partner amount input changes (ILS or USD), keep the other input in sync.
+// The canonical stored value is always ILS — USD is just a convenience.
+function onPtAmountChange(idx, field, currency) {
+  const ilsId = field === 'committed' ? `pt_committed_${idx}` : `pt_received_${idx}`;
+  const usdId = field === 'committed' ? `pt_committed_usd_${idx}` : `pt_received_usd_${idx}`;
+  const ilsEl = document.getElementById(ilsId);
+  const usdEl = document.getElementById(usdId);
+  if (!ilsEl || !usdEl) return;
+  if (currency === 'usd') {
+    const usd = Number(usdEl.value) || 0;
+    ilsEl.value = usdToIls(usd);
+  } else {
+    const ils = Number(ilsEl.value) || 0;
+    usdEl.value = ilsToUsd(ils);
+  }
 }
 
 function addPartnerRow() {
