@@ -386,7 +386,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
       <button type="button" id="i18n-en-btn" onclick="setAppLang('en')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;font-size:0.82rem">🇬🇧 English</button>
     </div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r42</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r43</div>
   </aside>
 
   <!-- Main Content -->
@@ -1377,36 +1377,50 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <h1 data-i18n="page.team.title">ניהול צוות</h1>
         <p>הרשאות גישה למערכת</p>
       </div>
+      <!-- Permission legend — explains what each tier means -->
+      <div class="card" style="background:var(--primary-soft);border-right:4px solid var(--primary)">
+        <h3 style="margin:0 0 10px">🔑 מה זה אומר — רמות הרשאה</h3>
+        <table class="data-table" style="margin:0">
+          <thead><tr><th>רמה</th><th>רואה</th><th>עורך</th><th>שיוך לתוכניות?</th></tr></thead>
+          <tbody>
+            <tr><td><strong>🔓 מנהל</strong></td><td>הכל</td><td>הכל + מנהל צוות + הגדרות</td><td>לא רלוונטי</td></tr>
+            <tr><td><strong>✏️ חבר צוות / עובד / מתנדב / תפקיד חוזה</strong></td><td>הכל</td><td><strong>רק</strong> תוכניות שמשויך אליהן</td><td>חובה</td></tr>
+            <tr><td><strong>👁️ צופה (תורם / שותף / כללי)</strong></td><td>הכל</td><td>אף-אחד (read-only)</td><td>לא רלוונטי</td></tr>
+          </tbody>
+        </table>
+        <p style="margin:10px 0 0;font-size:0.85rem;color:var(--muted)">תפקידי החוזה (ר"מ פלוגתי, מוביל חוסן וכו׳) הם חברי צוות שגם מגישים דוח שבועי לפי החוזה.</p>
+      </div>
+
       <div class="card">
         <h3>הוסף חבר צוות / שותף / תורם</h3>
         <div class="form-row">
           <div class="form-field"><label>אימייל Google</label><input type="email" id="teamEmail" placeholder="user@gmail.com" dir="ltr"></div>
           <div class="form-field"><label>שם</label><input type="text" id="teamName" placeholder="שם מלא"></div>
-          <div class="form-field"><label>קטגוריה</label>
-            <select id="teamRole">
-              <optgroup label="צוות העמותה">
+          <div class="form-field"><label>תפקיד</label>
+            <select id="teamRole" onchange="onTeamRoleChange()">
+              <optgroup label="🔓 גישה מלאה">
                 <option value="admin">מנהל</option>
-                <option value="team">צוות (גישת ניהול)</option>
+              </optgroup>
+              <optgroup label="✏️ חבר צוות (עורך תוכניות שמשויך אליהן)">
+                <option value="team">חבר צוות / מנהל בכיר</option>
                 <option value="employee">עובד</option>
                 <option value="volunteer">מתנדב</option>
+                <option value="ram-plugati">ר"מ פלוגתי (מגיש דוח שבועי)</option>
+                <option value="resilience-lead">מוביל תוכנית חוסן ואמונה (מגיש דוח שבועי)</option>
+                <option value="educational-director">מנהל חינוכי (מגיש דוח שבועי)</option>
+                <option value="grooms-rams-mentor">מוביל תחום חתנים ומדריך ר"מים (מגיש דוח שבועי)</option>
               </optgroup>
-              <optgroup label="תפקידי חוזה">
-                <option value="ram-plugati">ר"מ פלוגתי</option>
-                <option value="resilience-lead">מוביל תוכנית חוסן ואמונה</option>
-                <option value="educational-director">מנהל חינוכי</option>
-                <option value="grooms-rams-mentor">מוביל תחום חתנים ומדריך ר"מים</option>
-              </optgroup>
-              <optgroup label="צפייה בלבד">
-                <option value="partner-viewer">צופה שותף (גישה לתוכניות שקושר אליהן)</option>
-                <option value="donor-viewer">צופה תורם (גישה מוגבלת)</option>
+              <optgroup label="👁️ צפייה בלבד (read-only)">
+                <option value="donor-viewer">תורם — רואה הכל ללא עריכה</option>
+                <option value="partner-viewer">שותף — רואה הכל ללא עריכה</option>
                 <option value="viewer">צופה כללי</option>
               </optgroup>
             </select>
           </div>
         </div>
-        <div class="form-row">
+        <div class="form-row" id="teamProgsRow">
           <div class="form-field" style="grid-column:1/-1">
-            <label>שיוך לתוכניות (ניתן לבחור כמה — או "כל התוכניות")</label>
+            <label>שיוך לתוכניות <span id="teamProgsHint" style="color:var(--muted);font-weight:400;font-size:0.85rem"></span></label>
             <div id="teamProgsWrap" style="background:var(--primary-soft);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border)">
               <label style="display:inline-flex;align-items:center;gap:6px;margin-left:14px;cursor:pointer;font-weight:600">
                 <input type="checkbox" id="teamProgAll" onchange="toggleAllTeamPrograms()" style="width:16px;height:16px"> כל התוכניות
@@ -1557,7 +1571,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r42 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r43 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -1724,17 +1738,50 @@ const MONTHS = {1:'ינואר',2:'פברואר',3:'מרץ',4:'אפריל',5:'מ�
 const STATUSES = {active:'פעיל',planning:'בתכנון',done:'הושלם'};
 const ROLES = {
   admin:'מנהל',
-  team:'צוות',
+  team:'חבר צוות',
   employee:'עובד',
   volunteer:'מתנדב',
-  'partner-viewer':'צופה שותף',
-  'donor-viewer':'צופה תורם',
+  'partner-viewer':'שותף (צפייה)',
+  'donor-viewer':'תורם (צפייה)',
   'ram-plugati':'ר"מ פלוגתי',
   'resilience-lead':'מוביל תוכנית חוסן ואמונה',
   'educational-director':'מנהל חינוכי',
   'grooms-rams-mentor':'מוביל תחום חתנים ומדריך ר"מים',
-  viewer:'צופה'
+  viewer:'צופה כללי'
 };
+
+// Permission tier per role — maps every role to one of: 'admin' | 'team-edit' | 'view-all'
+// admin: full access · team-edit: read all + edit assigned programs · view-all: read-only across all
+const ROLE_PERMISSIONS = {
+  admin: 'admin',
+  team: 'team-edit',
+  employee: 'team-edit',
+  volunteer: 'team-edit',
+  'ram-plugati': 'team-edit',
+  'resilience-lead': 'team-edit',
+  'educational-director': 'team-edit',
+  'grooms-rams-mentor': 'team-edit',
+  'partner-viewer': 'view-all',
+  'donor-viewer': 'view-all',
+  viewer: 'view-all'
+};
+
+// Helper: check if current user can edit a given program
+function canEditProgram(progKey) {
+  const perm = ROLE_PERMISSIONS[userRole] || 'view-all';
+  if (perm === 'admin') return true;
+  if (perm === 'view-all') return false;
+  // team-edit: only assigned programs
+  const me = (teamCache||[]).find(t => t.email === currentUser?.email);
+  const assigned = (me?.programs)||[];
+  return assigned.includes(progKey);
+}
+
+// Quick check for any edit permission (used to hide global "+" buttons for viewers)
+function canEditAny() {
+  const perm = ROLE_PERMISSIONS[userRole] || 'view-all';
+  return perm !== 'view-all';
+}
 const CONTRACT_ROLES = ['ram-plugati','resilience-lead','educational-director','grooms-rams-mentor'];
 
 // ============================================================
@@ -2505,7 +2552,9 @@ function _renderProgramDetailInner() {
   const spentPct = effectiveBudget ? Math.round(totalSpent / effectiveBudget * 100) : 0;
   const fundedPct = effectiveBudget ? Math.round(totalCommitted / effectiveBudget * 100) : 0;
 
-  const editBtn = (userRole === 'admin') ? `<button class="btn btn-secondary btn-sm" onclick="openProgramEdit('${k}')">✏️ ערוך פרטי תוכנית</button>` : '';
+  // Edit permission: admin always; team-edit only if assigned to this program; view-all never
+  const _canEdit = canEditProgram(k);
+  const editBtn = _canEdit ? `<button class="btn btn-secondary btn-sm" onclick="openProgramEdit('${k}')">✏️ ערוך פרטי תוכנית</button>` : '';
 
   // Logic model
   const logicSections = [
@@ -2661,9 +2710,11 @@ function _renderProgramDetailInner() {
     </div>
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
-      <button class="btn btn-primary" onclick="quickAddExpenseToProgram('${k}')">+ החזר הוצאות לתוכנית</button>
-      <button class="btn btn-secondary" onclick="quickAddIncomeToProgram('${k}')">+ הזנת הכנסה</button>
-      <button class="btn btn-secondary" onclick="quickAddTaskToProgram('${k}')">+ משימה חדשה</button>
+      ${_canEdit ? `
+        <button class="btn btn-primary" onclick="quickAddExpenseToProgram('${k}')">+ החזר הוצאות לתוכנית</button>
+        <button class="btn btn-secondary" onclick="quickAddIncomeToProgram('${k}')">+ הזנת הכנסה</button>
+        <button class="btn btn-secondary" onclick="quickAddTaskToProgram('${k}')">+ משימה חדשה</button>
+      ` : ''}
       <button class="btn btn-secondary" onclick="exportProgramToPDF('${k}','he')" style="background:var(--gold-soft);color:var(--gold-dark);border-color:var(--gold)">📄 ייצוא PDF (עברית)</button>
       <button class="btn btn-secondary" onclick="exportProgramToPDF('${k}','en')" style="background:var(--gold-soft);color:var(--gold-dark);border-color:var(--gold)">🌐 Export PDF (English)</button>
     </div>
@@ -3807,9 +3858,12 @@ function switchSection(id, el, opts) {
       catch(e) { console.warn('workplan load:', e); }
     })();
   }
-  // Team: render program checkbox list
+  // Team: render program checkbox list + apply role-tier hint
   if (id === 'team') {
-    setTimeout(() => { try { renderTeamProgramsList(); } catch(e) {} }, 100);
+    setTimeout(() => {
+      try { renderTeamProgramsList(); } catch(e) {}
+      try { onTeamRoleChange(); } catch(e) {}
+    }, 100);
   }
   // Settings: load form values from currentOrgInfo
   if (id === 'settings') {
@@ -7596,16 +7650,45 @@ function toggleAllTeamPrograms() {
   document.querySelectorAll('.team-prog-cb').forEach(cb => { cb.checked = all; cb.disabled = all; });
 }
 
+// When role changes, update the program assignment UI hint based on permission tier
+function onTeamRoleChange() {
+  const role = document.getElementById('teamRole')?.value || 'team';
+  const tier = ROLE_PERMISSIONS[role] || 'view-all';
+  const hint = document.getElementById('teamProgsHint');
+  const row = document.getElementById('teamProgsRow');
+  const allCb = document.getElementById('teamProgAll');
+  if (!hint || !row) return;
+  if (tier === 'admin') {
+    hint.textContent = ' — מנהל רואה ועורך הכל ללא קשר לשיוך';
+    row.style.opacity = '0.5';
+    if (allCb) { allCb.checked = true; toggleAllTeamPrograms(); }
+  } else if (tier === 'view-all') {
+    hint.textContent = ' — צופה רואה הכל ללא קשר לשיוך (השדה למטה אופציונלי)';
+    row.style.opacity = '0.7';
+  } else {
+    // team-edit
+    hint.innerHTML = ' — <strong style="color:var(--gold-dark)">חובה לבחור</strong> — חבר צוות יכול לערוך רק תוכניות אלו';
+    row.style.opacity = '1';
+  }
+}
+
 async function addTeamMember() {
   const email = document.getElementById('teamEmail').value.trim().toLowerCase();
   const name = document.getElementById('teamName').value.trim();
   const role = document.getElementById('teamRole').value;
   if (!email) { toast('יש להזין אימייל','error'); return; }
+  const tier = ROLE_PERMISSIONS[role] || 'view-all';
   // Collect program assignments
   const allChecked = document.getElementById('teamProgAll')?.checked;
   const programs = allChecked
     ? getOrgAreaKeys().slice() // all programs
     : Array.from(document.querySelectorAll('.team-prog-cb:checked')).map(cb => cb.value);
+  // Enforce: team-edit role MUST have at least one program assigned
+  if (tier === 'team-edit' && programs.length === 0) {
+    toast('חבר צוות חייב להיות משויך לפחות לתוכנית אחת','error');
+    document.getElementById('teamProgsWrap')?.scrollIntoView({behavior:'smooth'});
+    return;
+  }
   try {
     await db.collection('team').doc(email).set({
       name, email, role,
