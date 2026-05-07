@@ -386,7 +386,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
       <button type="button" id="i18n-en-btn" onclick="setAppLang('en')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;font-size:0.82rem">🇬🇧 English</button>
     </div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.05-r39</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.05-r40</div>
   </aside>
 
   <!-- Main Content -->
@@ -1558,7 +1558,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.05-r39 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.05-r40 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -1737,6 +1737,171 @@ const ROLES = {
   viewer:'צופה'
 };
 const CONTRACT_ROLES = ['ram-plugati','resilience-lead','educational-director','grooms-rams-mentor'];
+
+// ============================================================
+// ===== CURRENCY — ILS ↔ USD live conversion ===============
+// ============================================================
+let _usdToIls = 3.70; // fallback rate (mid-2026 baseline)
+let _fxFetchedAt = null;
+
+// Restore cached rate
+try {
+  const c = parseFloat(localStorage.getItem('_usdToIls'));
+  if (c > 0 && c < 10) _usdToIls = c;
+  _fxFetchedAt = localStorage.getItem('_usdRateDate');
+} catch(e) {}
+
+async function loadUsdRate(force) {
+  // Skip if fetched today (unless force)
+  const today = new Date().toISOString().slice(0,10);
+  if (!force && _fxFetchedAt === today) return;
+  try {
+    const r = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    if (!r.ok) throw new Error('http ' + r.status);
+    const d = await r.json();
+    if (d && d.rates && d.rates.ILS) {
+      _usdToIls = d.rates.ILS;
+      _fxFetchedAt = today;
+      try {
+        localStorage.setItem('_usdToIls', String(_usdToIls));
+        localStorage.setItem('_usdRateDate', today);
+      } catch(e) {}
+      console.log('[fx] USD→ILS rate:', _usdToIls);
+    }
+  } catch(e) {
+    console.warn('[fx] live rate fetch failed, using fallback', _usdToIls, e.message);
+  }
+}
+
+function ilsToUsd(ils) {
+  if (!ils) return 0;
+  return Math.round(Number(ils) / _usdToIls);
+}
+
+function usdToIls(usd) {
+  if (!usd) return 0;
+  return Math.round(Number(usd) * _usdToIls);
+}
+
+// Format money with both currencies. Returns HTML.
+function fmtMoney(ils, opts) {
+  opts = opts || {};
+  ils = Math.round(Number(ils)||0);
+  const usd = ilsToUsd(ils);
+  if (opts.plain) return `₪${ils.toLocaleString()} · $${usd.toLocaleString()}`;
+  return `₪${ils.toLocaleString()}<span style="font-size:0.7em;color:var(--muted);font-weight:400;display:block">≈ $${usd.toLocaleString()}</span>`;
+}
+
+// Compact inline version
+function fmtMoneyInline(ils) {
+  ils = Math.round(Number(ils)||0);
+  return `₪${ils.toLocaleString()} <small style="color:var(--muted)">($${ilsToUsd(ils).toLocaleString()})</small>`;
+}
+
+// ============================================================
+// ===== TRANSLATION — auto-translate visible Hebrew to EN ====
+// ============================================================
+let _translateCache = {};
+try {
+  const c = localStorage.getItem('_translateCache');
+  if (c) _translateCache = JSON.parse(c);
+} catch(e) { _translateCache = {}; }
+
+function _saveTranslateCache() {
+  try {
+    // Limit cache size to avoid bloat
+    const keys = Object.keys(_translateCache);
+    if (keys.length > 800) {
+      const trimmed = {};
+      keys.slice(-800).forEach(k => trimmed[k] = _translateCache[k]);
+      _translateCache = trimmed;
+    }
+    localStorage.setItem('_translateCache', JSON.stringify(_translateCache));
+  } catch(e) {}
+}
+
+function _isHebrewText(s) {
+  return s && /[֐-׿]/.test(s) && s.trim().length > 1;
+}
+
+// Walk all visible text nodes in a root and collect Hebrew ones
+function _collectHebrewTextNodes(root) {
+  const nodes = [];
+  if (!root) return nodes;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => {
+      const p = n.parentElement;
+      if (!p) return NodeFilter.FILTER_REJECT;
+      if (['SCRIPT','STYLE','CODE','PRE','TEXTAREA'].includes(p.tagName)) return NodeFilter.FILTER_REJECT;
+      // Skip translation explicitly opted-out
+      if (p.closest('[data-no-translate]')) return NodeFilter.FILTER_REJECT;
+      const t = n.textContent;
+      if (!_isHebrewText(t)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  let n;
+  while (n = walker.nextNode()) nodes.push(n);
+  return nodes;
+}
+
+// Translate a section to the target language
+async function translateSection(rootSelector, targetLang) {
+  const root = document.querySelector(rootSelector) || document.body;
+  if (targetLang === 'he') {
+    // Restore Hebrew originals
+    const all = root.querySelectorAll('[data-orig-text]');
+    all.forEach(el => {
+      const orig = el.getAttribute('data-orig-text');
+      if (orig) {
+        el.textContent = orig;
+        el.removeAttribute('data-orig-text');
+      }
+    });
+    return;
+  }
+  if (targetLang !== 'en') return;
+  const nodes = _collectHebrewTextNodes(root);
+  // Group sequential nodes for batching
+  const toTranslate = [];
+  nodes.forEach(n => {
+    const text = n.textContent.trim();
+    if (!text) return;
+    // Already cached
+    if (_translateCache[text]) {
+      n.parentElement.setAttribute('data-orig-text', text);
+      n.textContent = _translateCache[text];
+      return;
+    }
+    toTranslate.push({ node: n, text });
+  });
+
+  // Translate uncached nodes (batched to avoid rate limits)
+  for (const item of toTranslate) {
+    try {
+      if (typeof translateText !== 'function') break;
+      const translated = await translateText(item.text, 'en');
+      if (translated && translated !== item.text) {
+        _translateCache[item.text] = translated;
+        item.node.parentElement.setAttribute('data-orig-text', item.text);
+        item.node.textContent = translated;
+      }
+    } catch(e) {
+      console.warn('[translate]', item.text.slice(0,30), e.message);
+    }
+  }
+  _saveTranslateCache();
+}
+
+// Hook into setAppLang so language switch auto-translates the current view
+async function autoTranslateCurrentView() {
+  if (typeof currentLang === 'undefined') return;
+  // Translate the active section + sidebar
+  const active = document.querySelector('.section.active');
+  if (active) await translateSection('.section.active', currentLang);
+  // Sidebar nav too
+  await translateSection('.sidebar', currentLang);
+}
 
 // ============================================================
 // ===== MULTI-TENANT FOUNDATION =============================
@@ -2143,6 +2308,8 @@ function showApp(user) {
   }
   // Repopulate area dropdowns to use this org's custom areas (or defaults)
   try { if (typeof repopulateAllAreaDropdowns === 'function') repopulateAllAreaDropdowns(); } catch(e) {}
+  // Load USD/ILS exchange rate (cached, only fetches once per day)
+  try { loadUsdRate(); } catch(e) {}
   // Load CEO/board attention widget + program cards (after caches populate)
   setTimeout(() => {
     try { loadAttentionWidget(); } catch(e) {}
@@ -2221,7 +2388,8 @@ function renderProgramCards() {
       ${info.description ? `<div style="font-size:0.85rem;color:var(--dark);margin-bottom:12px;line-height:1.5">${info.description}</div>` : ''}
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding-top:12px;border-top:1px solid var(--border)">
         <div style="text-align:center">
-          <div style="font-size:1.1rem;font-weight:700;color:var(--primary);font-family:'Frank Ruhl Libre',serif">₪${(info.annualBudget||0).toLocaleString()}</div>
+          <div style="font-size:1.05rem;font-weight:700;color:var(--primary);font-family:'Frank Ruhl Libre',serif">₪${(info.annualBudget||0).toLocaleString()}</div>
+          <div style="font-size:0.68rem;color:var(--muted)">≈ $${ilsToUsd(info.annualBudget||0).toLocaleString()}</div>
           <div style="font-size:0.7rem;color:var(--muted)">תקציב שנתי</div>
         </div>
         <div style="text-align:center">
@@ -2383,7 +2551,7 @@ function _renderProgramDetailInner() {
           <td><strong>${it.name||'—'}</strong></td>
           <td><span style="background:var(--primary-soft);color:var(--primary-dark);padding:2px 8px;border-radius:var(--radius-pill);font-size:0.78rem">${TYPE_LABELS[it.type]||it.type||'—'}</span></td>
           <td>${modeBadge}${coverBy}</td>
-          <td style="font-family:'Frank Ruhl Libre',serif;font-weight:700;color:var(--primary)">₪${(Number(it.annualAmount)||0).toLocaleString()}<br><small style="color:var(--muted);font-weight:400">חודשי: ₪${(Number(it.monthlyAmount)||0).toLocaleString()}</small></td>
+          <td style="font-family:'Frank Ruhl Libre',serif;font-weight:700;color:var(--primary)">₪${(Number(it.annualAmount)||0).toLocaleString()}<br><small style="color:var(--muted);font-weight:400">≈ $${ilsToUsd(Number(it.annualAmount)||0).toLocaleString()} · חודשי: ₪${(Number(it.monthlyAmount)||0).toLocaleString()}</small></td>
           <td style="font-size:0.85rem;color:var(--muted)">${it.notes||'—'}</td>
         </tr>`;
       }).join('')}</tbody>
@@ -2499,11 +2667,11 @@ function _renderProgramDetailInner() {
     </div>
 
     <div class="kpi-grid">
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','budget')" title="לחץ לפירוט רכיבי התקציב"><div class="icon">💰</div><div class="label">תקציב שנתי</div><div class="value">₪${effectiveBudget.toLocaleString()}</div></div>
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','committed')" title="לחץ לפירוט מקורות גיוס"><div class="icon">🤝</div><div class="label">גויס (מתחייב)</div><div class="value">₪${totalCommitted.toLocaleString()}</div></div>
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','received')" title="לחץ לפירוט תקבולים"><div class="icon">📥</div><div class="label">התקבל בפועל</div><div class="value">₪${totalRaised.toLocaleString()}</div></div>
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','spent')" title="לחץ לפירוט הוצאות"><div class="icon">📤</div><div class="label">הוצא בפועל</div><div class="value">₪${totalSpent.toLocaleString()}</div></div>
-      <div class="kpi clickable" onclick="showProgramRecords('${k}','gap')" title="לחץ לפירוט פער"><div class="icon">📊</div><div class="label">פער למימון</div><div class="value" style="color:${gap>0?'var(--danger)':'var(--success)'}">₪${gap.toLocaleString()}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','budget')" title="לחץ לפירוט רכיבי התקציב"><div class="icon">💰</div><div class="label">תקציב שנתי</div><div class="value">${fmtMoney(effectiveBudget)}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','committed')" title="לחץ לפירוט מקורות גיוס"><div class="icon">🤝</div><div class="label">גויס (מתחייב)</div><div class="value">${fmtMoney(totalCommitted)}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','received')" title="לחץ לפירוט תקבולים"><div class="icon">📥</div><div class="label">התקבל בפועל</div><div class="value">${fmtMoney(totalRaised)}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','spent')" title="לחץ לפירוט הוצאות"><div class="icon">📤</div><div class="label">הוצא בפועל</div><div class="value">${fmtMoney(totalSpent)}</div></div>
+      <div class="kpi clickable" onclick="showProgramRecords('${k}','gap')" title="לחץ לפירוט פער"><div class="icon">📊</div><div class="label">פער למימון</div><div class="value" style="color:${gap>0?'var(--danger)':'var(--success)'}">${fmtMoney(gap)}</div></div>
       <div class="kpi clickable" onclick="drillDown('tasks','overdue')" title="לחץ למשימות באיחור"><div class="icon">⚠️</div><div class="label">משימות באיחור</div><div class="value" style="color:var(--danger)">${overdueTasks.length}</div></div>
     </div>
 
@@ -2817,8 +2985,8 @@ function _renderPartnersTable(partners, progKey) {
         <td><strong>${p.name||'—'}</strong>${p.notes?`<br><small style="color:var(--muted)">${p.notes}</small>`:''}</td>
         <td><span style="background:var(--primary-soft);color:var(--primary-dark);padding:2px 8px;border-radius:var(--radius-pill);font-size:0.78rem">${PARTNER_TYPE_LABELS[p.type]||p.type||'—'}</span></td>
         <td style="font-size:0.85rem">${p.contactPerson||'—'}</td>
-        <td style="font-family:'Frank Ruhl Libre',serif;font-weight:700;color:var(--primary)">₪${committed.toLocaleString()}</td>
-        <td style="font-family:'Frank Ruhl Libre',serif;font-weight:600">₪${received.toLocaleString()}</td>
+        <td style="font-family:'Frank Ruhl Libre',serif;font-weight:700;color:var(--primary)">₪${committed.toLocaleString()}<br><small style="color:var(--muted);font-weight:400">≈ $${ilsToUsd(committed).toLocaleString()}</small></td>
+        <td style="font-family:'Frank Ruhl Libre',serif;font-weight:600">₪${received.toLocaleString()}<br><small style="color:var(--muted);font-weight:400">≈ $${ilsToUsd(received).toLocaleString()}</small></td>
         <td>${statusBadge}</td>
       </tr>`;
     }).join('')}</tbody>
@@ -3134,8 +3302,14 @@ function renderCostItemsEditor() {
         ${isInKind ? `<div class="form-field" style="flex:2"><label>מי מכסה? (שותף/ספונסר)</label><input type="text" id="ci_covered_${i}" value="${(it.coveredByPartner||'').replace(/"/g,'&quot;')}" placeholder="למשל: צה״ל / קרן עם ישראל חי / חברת X"></div>` : ''}
       </div>
       <div class="form-row">
-        <div class="form-field"><label>שווי חודשי (₪)</label><input type="number" id="ci_monthly_${i}" value="${it.monthlyAmount||0}" oninput="onCostItemMonthly(${i})"></div>
-        <div class="form-field"><label>שווי שנתי (₪) ${isInKind?'<small style="color:var(--gold-dark)">— שווי כספי משוער</small>':''}</label><input type="number" id="ci_annual_${i}" value="${it.annualAmount||0}" oninput="onCostItemAnnual(${i})"></div>
+        <div class="form-field">
+          <label>שווי חודשי (₪) <span id="ci_monthly_usd_${i}" style="color:var(--muted);font-weight:400">≈ $${ilsToUsd(it.monthlyAmount||0).toLocaleString()}</span></label>
+          <input type="number" id="ci_monthly_${i}" value="${it.monthlyAmount||0}" oninput="onCostItemMonthly(${i})">
+        </div>
+        <div class="form-field">
+          <label>שווי שנתי (₪) <span id="ci_annual_usd_${i}" style="color:var(--muted);font-weight:400">≈ $${ilsToUsd(it.annualAmount||0).toLocaleString()}</span> ${isInKind?'<small style="color:var(--gold-dark)">— שווי כספי משוער</small>':''}</label>
+          <input type="number" id="ci_annual_${i}" value="${it.annualAmount||0}" oninput="onCostItemAnnual(${i})">
+        </div>
       </div>
       <div class="form-row">
         <div class="form-field" style="grid-column:1/-1"><label>הערות / פירוט</label><input type="text" id="ci_notes_${i}" value="${(it.notes||'').replace(/"/g,'&quot;')}" placeholder="פירוט מה כולל הרכיב"></div>
@@ -3148,7 +3322,7 @@ function renderCostItemsEditor() {
 function recomputeCostSum() {
   const sum = _peCostItems.reduce((s,it) => s + (Number(it.annualAmount)||0), 0);
   const el = document.getElementById('pe_costSum');
-  if (el) el.textContent = `סה"כ שנתי: ₪${sum.toLocaleString()}  (חודשי: ₪${Math.round(sum/12).toLocaleString()})`;
+  if (el) el.innerHTML = `סה"כ שנתי: <strong>₪${sum.toLocaleString()}</strong> <span style="color:var(--muted);font-weight:400">≈ $${ilsToUsd(sum).toLocaleString()}</span> · חודשי: ₪${Math.round(sum/12).toLocaleString()}`;
 }
 
 function _collectCostItems() {
@@ -3176,21 +3350,27 @@ function removeCostItemRow(idx) {
 }
 
 function onCostItemMonthly(i) {
-  // Auto-set annual = monthly * 12 if annual is currently 0 or matches old monthly*12
   const monthly = Number(document.getElementById(`ci_monthly_${i}`).value)||0;
   const annualEl = document.getElementById(`ci_annual_${i}`);
   const oldAnnual = Number(annualEl.value)||0;
-  // Auto-fill annual if it's 0 or was clearly derived from old monthly (within rounding)
   if (oldAnnual === 0 || Math.abs(oldAnnual - (_peCostItems[i].monthlyAmount||0) * 12) < 1) {
     annualEl.value = monthly * 12;
   }
   _peCostItems[i].monthlyAmount = monthly;
   _peCostItems[i].annualAmount = Number(annualEl.value)||0;
+  // Update USD previews
+  const mUsd = document.getElementById(`ci_monthly_usd_${i}`);
+  const aUsd = document.getElementById(`ci_annual_usd_${i}`);
+  if (mUsd) mUsd.textContent = `≈ $${ilsToUsd(monthly).toLocaleString()}`;
+  if (aUsd) aUsd.textContent = `≈ $${ilsToUsd(_peCostItems[i].annualAmount).toLocaleString()}`;
   recomputeCostSum();
 }
 
 function onCostItemAnnual(i) {
-  _peCostItems[i].annualAmount = Number(document.getElementById(`ci_annual_${i}`).value)||0;
+  const annual = Number(document.getElementById(`ci_annual_${i}`).value)||0;
+  _peCostItems[i].annualAmount = annual;
+  const aUsd = document.getElementById(`ci_annual_usd_${i}`);
+  if (aUsd) aUsd.textContent = `≈ $${ilsToUsd(annual).toLocaleString()}`;
   recomputeCostSum();
 }
 
@@ -3616,6 +3796,8 @@ function switchSection(id, el, opts) {
   if (id === 'program') {
     setTimeout(() => { try { renderProgramDetail(); } catch(e) {} }, 100);
   }
+  // Auto-translate if user is in English mode (run after renders complete)
+  try { if (typeof _autoTranslateOnNav === 'function') _autoTranslateOnNav(); } catch(e) {}
   // Workplan: load year data + render
   if (id === 'workplan') {
     (async () => {
@@ -5460,6 +5642,19 @@ function setAppLang(lang) {
   try { if (typeof loadProjects === 'function' && projectsCache && projectsCache.length) loadProjects(); } catch(e) {}
   try { if (typeof renderTasks === 'function' && tasksCache && tasksCache.length) renderTasks(); } catch(e) {}
   try { renderWeeklyReportUI(); } catch(e) {}
+  // Auto-translate dynamic Hebrew content (cards, tables, etc.) — runs after re-renders
+  try {
+    if (typeof autoTranslateCurrentView === 'function') {
+      setTimeout(() => autoTranslateCurrentView().catch(e => console.warn('[autotrans]', e)), 600);
+    }
+  } catch(e) {}
+}
+
+// When user switches sections, auto-translate the new section if currentLang === 'en'
+function _autoTranslateOnNav() {
+  if (currentLang === 'en' && typeof translateSection === 'function') {
+    setTimeout(() => translateSection('.section.active', 'en').catch(()=>{}), 400);
+  }
 }
 
 // ===== Google Translate on-demand (for user-generated data) =====
