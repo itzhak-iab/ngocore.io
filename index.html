@@ -388,7 +388,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     </div>
     <div id="fxBadge" style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.7);padding:6px 8px;background:rgba(255,255,255,0.06);border-radius:6px;margin:4px 12px 0"></div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r56</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r57</div>
   </aside>
 
   <!-- Main Content -->
@@ -1582,7 +1582,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r56 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r57 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -2945,10 +2945,7 @@ function _renderProgramDetailInner() {
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
         <h3 style="margin:0">👤 מוביל/ת ועובדים משויכים</h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${_canEdit ? `<button class="btn btn-primary btn-sm" onclick="quickAddExpenseToProgram('${k}')">+ החזר הוצאות</button>` : ''}
-          ${userRole==='admin' ? `<button class="btn btn-secondary btn-sm" onclick="openAssignEmployeeToProgram('${k}')">+ שייך עובד</button>` : ''}
-        </div>
+        ${userRole==='admin' ? `<button class="btn btn-secondary btn-sm" onclick="openAssignEmployeeToProgram('${k}')">+ שייך עובד</button>` : ''}
       </div>
       ${employeesHtml}
     </div>
@@ -3146,6 +3143,10 @@ function _renderProgramDetailInner() {
     <h2 style="margin:30px 0 12px;color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--gold);padding-bottom:8px">📊 פעילות פיננסית משויכת לתוכנית</h2>
 
     <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+        <h3 style="margin:0">רשומות הכנסה והוצאה</h3>
+        ${_canEdit ? `<button class="btn btn-primary btn-sm" onclick="quickAddExpenseToProgram('${k}')">+ החזר הוצאות</button>` : ''}
+      </div>
       <p style="color:var(--muted);font-size:0.88rem;margin:0 0 12px">רשומות הכנסה והוצאה אחרונות שהוקצו לתוכנית זו. לחץ "ערוך" כדי לעדכן רשומה או להעביר אותה לתוכנית אחרת.</p>
       ${financeHtml}
     </div>
@@ -3366,9 +3367,10 @@ async function exportProgramToPDF(progKey, lang) {
         if (audiences[i].description) audiences[i].description = await translateText(audiences[i].description, 'en');
       }
       for (let i=0; i<meetings.length; i++) {
-        if (meetings[i].title) meetings[i].title = await translateText(meetings[i].title, 'en');
+        if (meetings[i].date)        meetings[i].date        = await translateText(meetings[i].date, 'en');
+        if (meetings[i].title)       meetings[i].title       = await translateText(meetings[i].title, 'en');
         if (meetings[i].responsible) meetings[i].responsible = await translateText(meetings[i].responsible, 'en');
-        if (meetings[i].notes) meetings[i].notes = await translateText(meetings[i].notes, 'en');
+        if (meetings[i].notes)       meetings[i].notes       = await translateText(meetings[i].notes, 'en');
       }
       for (let i=0; i<testimonials.length; i++) {
         if (testimonials[i].quote) testimonials[i].quote = await translateText(testimonials[i].quote, 'en');
