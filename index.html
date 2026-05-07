@@ -388,7 +388,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     </div>
     <div id="fxBadge" style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.7);padding:6px 8px;background:rgba(255,255,255,0.06);border-radius:6px;margin:4px 12px 0"></div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r52</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r53</div>
   </aside>
 
   <!-- Main Content -->
@@ -1564,7 +1564,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r52 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r53 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -2922,16 +2922,7 @@ function _renderProgramDetailInner() {
       <p style="color:var(--muted);margin:4px 0">${info.description || ''}</p>
     </div>
 
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
-      ${_canEdit ? `
-        <button class="btn btn-primary" onclick="quickAddExpenseToProgram('${k}')">+ החזר הוצאות</button>
-        <button class="btn btn-secondary" onclick="quickAddIncomeToProgram('${k}')">+ הזנת הכנסה</button>
-        <button class="btn btn-secondary" onclick="quickAddTaskToProgram('${k}')">+ משימה חדשה</button>
-        ${editBtn}
-      ` : ''}
-      <button class="btn btn-secondary" onclick="exportProgramToPDF('${k}','he')" style="background:var(--gold-soft);color:var(--gold-dark);border-color:var(--gold)">📄 ייצוא PDF (עברית)</button>
-      <button class="btn btn-secondary" onclick="exportProgramToPDF('${k}','en')" style="background:var(--gold-soft);color:var(--gold-dark);border-color:var(--gold)">🌐 Export PDF (English)</button>
-    </div>
+    ${_canEdit ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">${editBtn}</div>` : ''}
 
     <!-- AT-A-GLANCE DASHBOARD (sticky to top of page) -->
     <div class="kpi-grid">
@@ -2952,7 +2943,10 @@ function _renderProgramDetailInner() {
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
         <h3 style="margin:0">👤 מוביל/ת ועובדים משויכים</h3>
-        ${userRole==='admin' ? `<button class="btn btn-primary btn-sm" onclick="openAssignEmployeeToProgram('${k}')">+ שייך עובד</button>` : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${_canEdit ? `<button class="btn btn-primary btn-sm" onclick="quickAddExpenseToProgram('${k}')">+ החזר הוצאות</button>` : ''}
+          ${userRole==='admin' ? `<button class="btn btn-secondary btn-sm" onclick="openAssignEmployeeToProgram('${k}')">+ שייך עובד</button>` : ''}
+        </div>
       </div>
       <div style="background:var(--primary-soft);padding:12px 14px;border-radius:var(--radius-sm);border-right:3px solid var(--primary);margin-bottom:12px">
         <div style="font-size:0.85rem;color:var(--muted);margin-bottom:2px">מוביל/ת התוכנית</div>
@@ -3039,7 +3033,10 @@ function _renderProgramDetailInner() {
       </div>
 
       <!-- 📥 SOURCES OF FUNDS — מאיפה מגיע הכסף -->
-      <h4 style="margin:18px 0 10px;color:var(--primary);border-bottom:2px solid var(--gold);padding-bottom:6px">📥 מקורות מימון — מאיפה מגיע הכסף</h4>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:18px 0 10px;border-bottom:2px solid var(--gold);padding-bottom:6px">
+        <h4 style="margin:0;color:var(--primary)">📥 מקורות מימון — מאיפה מגיע הכסף</h4>
+        ${_canEdit ? `<button class="btn btn-primary btn-sm" onclick="quickAddIncomeToProgram('${k}')">+ הזנת הכנסה</button>` : ''}
+      </div>
       <table class="data-table" style="margin-bottom:18px">
         <thead><tr><th>מקור</th><th>סוג</th><th style="text-align:left">סכום (₪)</th><th style="text-align:left">≈ USD</th><th style="text-align:left;width:80px">% מתקציב</th></tr></thead>
         <tbody>
@@ -3117,7 +3114,10 @@ function _renderProgramDetailInner() {
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
         <h3 style="margin:0">משימות פתוחות בתוכנית</h3>
-        <button class="btn btn-secondary btn-sm" onclick="switchSectionByName('tasks')">לכל המשימות →</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${_canEdit ? `<button class="btn btn-primary btn-sm" onclick="quickAddTaskToProgram('${k}')">+ משימה חדשה</button>` : ''}
+          <button class="btn btn-secondary btn-sm" onclick="switchSectionByName('tasks')">לכל המשימות →</button>
+        </div>
       </div>
       ${tasksHtml}
     </div>
@@ -3204,6 +3204,18 @@ function _renderProgramDetailInner() {
         </div>
       </div>`
       : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">אין עדויות מתועדות</p><button class="btn btn-secondary btn-sm" onclick="openProgramFieldEdit('${k}','pe_testimonials')" style="padding:6px 14px">+ הוסף עדויות</button></div>` : '')}
+
+    <!-- ============================================================ -->
+    <!-- 📄 SECTION 9 — ייצוא ל-PDF (bottom of page)                    -->
+    <!-- ============================================================ -->
+    <h2 style="margin:30px 0 12px;color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--gold);padding-bottom:8px">📄 ייצוא ל-PDF</h2>
+    <div class="card" style="text-align:center">
+      <p style="color:var(--muted);font-size:0.9rem;margin:0 0 12px">ייצוא דף התוכנית לקובץ PDF — מתאים למשלוח לתורמים, שותפים, או לארכיון פנימי. הקובץ כולל את הלוגו, התקציב, השותפים והמודל הלוגי.</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="exportProgramToPDF('${k}','he')" style="background:var(--gold-soft);color:var(--gold-dark);border-color:var(--gold);padding:10px 22px">📄 ייצוא PDF — עברית</button>
+        <button class="btn btn-secondary" onclick="exportProgramToPDF('${k}','en')" style="background:var(--gold-soft);color:var(--gold-dark);border-color:var(--gold);padding:10px 22px">🌐 Export PDF — English</button>
+      </div>
+    </div>
   `;
 }
 
