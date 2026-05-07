@@ -387,7 +387,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     </div>
     <div id="fxBadge" style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.7);padding:6px 8px;background:rgba(255,255,255,0.06);border-radius:6px;margin:4px 12px 0"></div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r48</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r49</div>
   </aside>
 
   <!-- Main Content -->
@@ -1548,7 +1548,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r48 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r49 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -2893,62 +2893,85 @@ function _renderProgramDetailInner() {
       <div class="kpi clickable" onclick="drillDown('tasks','overdue')" title="לחץ למשימות באיחור"><div class="icon">⚠️</div><div class="label">משימות באיחור</div><div class="value" style="color:var(--danger)">${overdueTasks.length}</div></div>
     </div>
 
-    ${info.vision ? `
-    <div class="card" style="background:linear-gradient(135deg,var(--primary-soft) 0%,var(--gold-soft) 100%);border-right:4px solid var(--gold)">
-      <h3 style="margin:0 0 8px;color:var(--primary)">✨ חזון התוכנית</h3>
-      <div style="font-size:1.02rem;line-height:1.7;color:var(--dark);font-family:'Frank Ruhl Libre',serif;white-space:pre-wrap">${info.vision}</div>
-    </div>` : ''}
+    ${(() => {
+      // Inline edit button shown only to users who can edit this program. The button calls
+      // openProgramFieldEdit(progKey, fieldId), which opens the main edit modal scrolled+focused
+      // on the relevant field. Empty cards still render so admins can populate them.
+      const ie = (fid, title) => _canEdit ? `<button class="btn btn-secondary btn-sm" onclick="openProgramFieldEdit('${k}','${fid}')" title="${title}" style="padding:4px 10px;font-size:0.78rem">✏️ ערוך</button>` : '';
+      const emptyAdminHint = (fid, msg) => _canEdit ? `<button class="btn btn-secondary btn-sm" onclick="openProgramFieldEdit('${k}','${fid}')" style="padding:6px 14px">+ ${msg}</button>` : '';
 
-    ${(info.targetAudiences||[]).length ? `
-    <div class="card">
-      <h3 style="margin:0 0 12px">👥 קהלי יעד</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
-        ${(info.targetAudiences||[]).map(a => `
-          <div style="background:var(--primary-soft);padding:14px;border-radius:var(--radius-sm);border-right:3px solid var(--primary)">
-            <div style="font-weight:700;color:var(--primary);margin-bottom:6px;font-size:1.02rem">${a.name||''}</div>
-            <div style="font-size:0.92rem;line-height:1.55;color:var(--dark)">${a.description||''}</div>
+      const visionCard = info.vision ? `
+        <div class="card" style="background:linear-gradient(135deg,var(--primary-soft) 0%,var(--gold-soft) 100%);border-right:4px solid var(--gold)">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+            <h3 style="margin:0;color:var(--primary)">✨ חזון התוכנית</h3>${ie('pe_vision','עריכת חזון')}
           </div>
-        `).join('')}
-      </div>
-    </div>` : ''}
+          <div style="font-size:1.02rem;line-height:1.7;color:var(--dark);font-family:'Frank Ruhl Libre',serif;white-space:pre-wrap">${info.vision}</div>
+        </div>`
+        : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">לא הוגדר חזון לתוכנית</p>${emptyAdminHint('pe_vision','הוסף חזון')}</div>` : '');
 
-    ${((info.goals||[]).length || (info.kpis||[]).length) ? `
-    <div class="card">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px">
-        ${(info.goals||[]).length ? `
-        <div>
-          <h3 style="margin:0 0 10px;color:var(--primary)">🎯 מטרות מרכזיות</h3>
-          <ul style="margin:0;padding-right:20px;line-height:1.7">${(info.goals||[]).map(g => `<li>${g}</li>`).join('')}</ul>
-        </div>` : ''}
-        ${(info.kpis||[]).length ? `
-        <div>
-          <h3 style="margin:0 0 10px;color:var(--primary)">📈 מדדי הצלחה (KPIs)</h3>
-          <ul style="margin:0;padding-right:20px;line-height:1.7">${(info.kpis||[]).map(k => `<li><strong>${k}</strong></li>`).join('')}</ul>
-        </div>` : ''}
-      </div>
-    </div>` : ''}
+      const audiencesCard = (info.targetAudiences||[]).length ? `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+            <h3 style="margin:0">👥 קהלי יעד</h3>${ie('pe_audiences','עריכת קהלי יעד')}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+            ${(info.targetAudiences||[]).map(a => `
+              <div style="background:var(--primary-soft);padding:14px;border-radius:var(--radius-sm);border-right:3px solid var(--primary)">
+                <div style="font-weight:700;color:var(--primary);margin-bottom:6px;font-size:1.02rem">${a.name||''}</div>
+                <div style="font-size:0.92rem;line-height:1.55;color:var(--dark)">${a.description||''}</div>
+              </div>`).join('')}
+          </div>
+        </div>`
+        : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">לא הוגדרו קהלי יעד</p>${emptyAdminHint('pe_audiences','הוסף קהלי יעד')}</div>` : '');
 
-    ${(info.meetings||[]).length ? `
-    <div class="card">
-      <h3 style="margin:0 0 12px">📅 לוח מפגשים שנתי</h3>
-      <table class="data-table" style="margin:0">
-        <thead><tr><th style="width:130px">תאריך</th><th>כותרת</th><th>אחראי/ת</th><th>הערה</th></tr></thead>
-        <tbody>
-          ${(info.meetings||[]).map(m => `<tr>
-            <td><strong style="color:var(--primary)">${m.date||''}</strong></td>
-            <td>${m.title||''}</td>
-            <td>${m.responsible||''}</td>
-            <td><small style="color:var(--muted)">${m.notes||''}</small></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>` : ''}
+      const goalsKpisCard = ((info.goals||[]).length || (info.kpis||[]).length) ? `
+        <div class="card">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px">
+            ${(info.goals||[]).length ? `
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="margin:0;color:var(--primary)">🎯 מטרות מרכזיות</h3>${ie('pe_goals','עריכת מטרות')}</div>
+                <ul style="margin:0;padding-right:20px;line-height:1.7">${(info.goals||[]).map(g => `<li>${g}</li>`).join('')}</ul>
+              </div>`
+              : (_canEdit ? `<div style="text-align:center;padding:14px;border:1px dashed var(--border);border-radius:var(--radius-sm)"><p style="margin:0 0 8px;color:var(--muted);font-size:0.9rem">לא הוגדרו מטרות</p>${emptyAdminHint('pe_goals','הוסף מטרות')}</div>` : '')}
+            ${(info.kpis||[]).length ? `
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="margin:0;color:var(--primary)">📈 מדדי הצלחה (KPIs)</h3>${ie('pe_kpis','עריכת מדדים')}</div>
+                <ul style="margin:0;padding-right:20px;line-height:1.7">${(info.kpis||[]).map(kp => `<li><strong>${kp}</strong></li>`).join('')}</ul>
+              </div>`
+              : (_canEdit ? `<div style="text-align:center;padding:14px;border:1px dashed var(--border);border-radius:var(--radius-sm)"><p style="margin:0 0 8px;color:var(--muted);font-size:0.9rem">לא הוגדרו KPIs</p>${emptyAdminHint('pe_kpis','הוסף מדדים')}</div>` : '')}
+          </div>
+        </div>` : '';
 
-    ${(info.openQuestions||[]).length ? `
-    <div class="card" style="background:#fffbeb;border-right:4px solid var(--warning)">
-      <h3 style="margin:0 0 10px">❓ נושאים פתוחים להכרעה</h3>
-      <ul style="margin:0;padding-right:20px;line-height:1.7">${(info.openQuestions||[]).map(q => `<li>${q}</li>`).join('')}</ul>
-    </div>` : ''}
+      const meetingsCard = (info.meetings||[]).length ? `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+            <h3 style="margin:0">📅 לוח מפגשים שנתי</h3>${ie('pe_meetings','עריכת לוח מפגשים')}
+          </div>
+          <table class="data-table" style="margin:0">
+            <thead><tr><th style="width:130px">תאריך</th><th>כותרת</th><th>אחראי/ת</th><th>הערה</th></tr></thead>
+            <tbody>
+              ${(info.meetings||[]).map(m => `<tr>
+                <td><strong style="color:var(--primary)">${m.date||''}</strong></td>
+                <td>${m.title||''}</td>
+                <td>${m.responsible||''}</td>
+                <td><small style="color:var(--muted)">${m.notes||''}</small></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`
+        : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">לא הוגדר לוח מפגשים</p>${emptyAdminHint('pe_meetings','הוסף לוח מפגשים')}</div>` : '');
+
+      const questionsCard = (info.openQuestions||[]).length ? `
+        <div class="card" style="background:#fffbeb;border-right:4px solid var(--warning)">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+            <h3 style="margin:0">❓ נושאים פתוחים להכרעה</h3>${ie('pe_questions','עריכת נושאים פתוחים')}
+          </div>
+          <ul style="margin:0;padding-right:20px;line-height:1.7">${(info.openQuestions||[]).map(q => `<li>${q}</li>`).join('')}</ul>
+        </div>`
+        : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">אין נושאים פתוחים מתועדים</p>${emptyAdminHint('pe_questions','הוסף נושא פתוח')}</div>` : '');
+
+      return visionCard + audiencesCard + goalsKpisCard + meetingsCard + questionsCard;
+    })()}
 
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
@@ -3015,7 +3038,9 @@ function _renderProgramDetailInner() {
 
     ${(info.testimonials||[]).length ? `
     <div class="card" style="background:var(--gold-soft);border-right:4px solid var(--gold)">
-      <h3 style="margin:0 0 12px">💬 עדויות מהשטח</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <h3 style="margin:0">💬 עדויות מהשטח</h3>${_canEdit ? `<button class="btn btn-secondary btn-sm" onclick="openProgramFieldEdit('${k}','pe_testimonials')" style="padding:4px 10px;font-size:0.78rem">✏️ ערוך</button>` : ''}
+      </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
         ${(info.testimonials||[]).map(t => `
           <blockquote style="margin:0;padding:14px 18px;background:#fff;border-radius:var(--radius-sm);border-right:3px solid var(--gold);font-style:italic;line-height:1.6">
@@ -3024,7 +3049,8 @@ function _renderProgramDetailInner() {
           </blockquote>
         `).join('')}
       </div>
-    </div>` : ''}
+    </div>`
+    : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">אין עדויות מתועדות</p><button class="btn btn-secondary btn-sm" onclick="openProgramFieldEdit('${k}','pe_testimonials')" style="padding:6px 14px">+ הוסף עדויות</button></div>` : '')}
 
     <div class="card">
       <h3>📊 פעילות פיננסית אחרונה</h3>
@@ -3798,6 +3824,23 @@ function openProgramEdit(key) {
 function closeProgramEdit() {
   const m = document.getElementById('progEditModal');
   if (m) m.style.display = 'none';
+}
+
+// Open the program edit modal and focus a specific field (used by inline ✏️ buttons on cards)
+function openProgramFieldEdit(progKey, fieldId) {
+  openProgramEdit(progKey);
+  setTimeout(() => {
+    const el = document.getElementById(fieldId);
+    if (!el) return;
+    el.scrollIntoView({ behavior:'smooth', block:'center' });
+    el.focus();
+    // Visual highlight pulse
+    const oldShadow = el.style.boxShadow;
+    const oldBorder = el.style.borderColor;
+    el.style.boxShadow = '0 0 0 3px var(--gold)';
+    el.style.borderColor = 'var(--gold)';
+    setTimeout(() => { el.style.boxShadow = oldShadow; el.style.borderColor = oldBorder; }, 1800);
+  }, 280);
 }
 
 async function saveProgramEdit(key) {
