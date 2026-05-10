@@ -53,23 +53,113 @@
 body{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:var(--light);color:var(--dark);direction:rtl;min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.6}
 h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
 
-/* LOGIN */
-.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#e6f3f5 0%,#f7f0d9 50%,#e6f3f5 100%)}
-.login-box{background:#fff;border-radius:16px;padding:36px 40px;text-align:center;box-shadow:var(--shadow-lg);max-width:580px;width:92%;border:1px solid var(--border);border-top:4px solid var(--gold)}
-.login-box h1{font-size:2rem;color:var(--dark);margin-bottom:6px;font-weight:900;font-family:'Frank Ruhl Libre',serif}
-.login-box p{color:var(--muted);font-size:0.92rem;margin:0 0 8px}
-.login-box .logo{font-size:3rem;margin-bottom:12px}
-.login-box .features{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:20px 0 22px;text-align:right}
-.login-box .feature{background:#f8fafc;padding:10px 12px;border-radius:8px;border-right:3px solid var(--primary);font-size:0.85rem;display:flex;gap:8px;align-items:flex-start}
-.login-box .feature-icon{font-size:1.15rem;flex-shrink:0}
-.login-box .feature strong{display:block;color:var(--primary);margin-bottom:2px}
-.login-box .feature span{color:var(--muted);font-size:0.78rem}
-.login-box .beta-tag{display:inline-block;background:linear-gradient(135deg,var(--gold) 0%,#a87a2a 100%);color:#fff;padding:4px 12px;border-radius:14px;font-size:0.72rem;font-weight:700;margin-bottom:14px;letter-spacing:0.4px}
+/* ============================================================ */
+/* LANDING PAGE — Branded, luxurious, conversion-focused          */
+/* ============================================================ */
+.login-screen{min-height:100vh;background:linear-gradient(180deg,#fffaf0 0%,#f0f8fa 50%,#fffaf0 100%);overflow-x:hidden}
+.landing-wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* Top nav */
+.landing-nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid rgba(26,138,154,0.12)}
+.landing-nav .brand{display:flex;align-items:center;gap:10px;font-weight:900;font-family:'Frank Ruhl Libre',serif;font-size:1.3rem;color:var(--primary)}
+.landing-nav .brand-logo-svg{width:38px;height:38px;flex-shrink:0}
+.landing-nav .nav-links{display:flex;gap:18px;align-items:center}
+.landing-nav .nav-links a{color:var(--dark);text-decoration:none;font-weight:600;font-size:0.9rem;cursor:pointer}
+.landing-nav .nav-links a:hover{color:var(--primary)}
+
+/* Hero */
+.landing-hero{display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;padding:64px 0 80px;position:relative}
+.landing-hero::before{content:"";position:absolute;top:-40px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(200,168,76,0.18) 0%,transparent 60%);z-index:0;pointer-events:none}
+.landing-hero::after{content:"";position:absolute;bottom:-60px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(26,138,154,0.18) 0%,transparent 60%);z-index:0;pointer-events:none}
+.landing-hero > *{position:relative;z-index:1}
+.hero-content{text-align:right}
+.hero-badge{display:inline-block;background:linear-gradient(135deg,var(--gold) 0%,#a87a2a 100%);color:#fff;padding:5px 14px;border-radius:18px;font-size:0.74rem;font-weight:700;margin-bottom:18px;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(200,168,76,0.35)}
+.hero-content h1{font-size:3rem;line-height:1.18;font-family:'Frank Ruhl Libre',serif;font-weight:900;color:var(--dark);margin:0 0 18px}
+.hero-content h1 .accent{background:linear-gradient(120deg,var(--primary) 0%,var(--gold-dark) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero-content .lede{font-size:1.1rem;line-height:1.65;color:var(--muted);margin:0 0 24px;max-width:540px}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:20px}
+.cta{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:var(--radius-pill);font-weight:700;font-size:0.98rem;cursor:pointer;border:0;font-family:inherit;transition:var(--transition);text-decoration:none}
+.cta-primary{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;box-shadow:0 6px 18px rgba(26,138,154,0.35)}
+.cta-primary:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(26,138,154,0.45)}
+.cta-primary img{width:22px;height:22px;background:#fff;border-radius:50%;padding:2px}
+.cta-secondary{background:#fff;color:var(--primary);border:2px solid var(--primary)}
+.cta-secondary:hover{background:var(--primary-soft);transform:translateY(-2px)}
+.hero-microcopy{font-size:0.82rem;color:var(--muted);margin:0}
+.hero-microcopy strong{color:var(--gold-dark)}
+
+/* Hero mockup */
+.hero-mockup{background:#fff;border-radius:18px;box-shadow:0 30px 80px -20px rgba(26,138,154,0.35),0 8px 24px rgba(0,0,0,0.08);padding:18px;border:1px solid rgba(26,138,154,0.12);transform:perspective(1200px) rotateY(-4deg) rotateX(2deg)}
+.hero-mockup .mock-bar{display:flex;gap:6px;margin-bottom:14px}
+.hero-mockup .mock-bar i{width:11px;height:11px;border-radius:50%;background:#e5e7eb;display:block}
+.hero-mockup .mock-kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.hero-mockup .mock-kpi{background:linear-gradient(135deg,var(--primary-soft),var(--gold-soft));padding:10px;border-radius:10px;text-align:center;border-right:3px solid var(--primary)}
+.hero-mockup .mock-kpi-l{font-size:0.65rem;color:var(--muted);margin-bottom:2px}
+.hero-mockup .mock-kpi-v{font-size:1.05rem;font-weight:900;color:var(--primary);font-family:'Frank Ruhl Libre',serif}
+.hero-mockup .mock-bars{display:flex;flex-direction:column;gap:7px}
+.hero-mockup .mock-bar-row{display:flex;align-items:center;gap:8px;font-size:0.72rem;color:var(--dark)}
+.hero-mockup .mock-bar-row .lbl{flex:0 0 110px;text-align:right;color:var(--muted);font-size:0.7rem}
+.hero-mockup .mock-bar-row .track{flex:1;background:#f3f4f6;height:7px;border-radius:4px;overflow:hidden}
+.hero-mockup .mock-bar-row .fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--gold))}
+.hero-mockup .mock-bar-row .pct{flex:0 0 36px;text-align:left;font-weight:700;color:var(--primary)}
+
+/* Features */
+.landing-section{padding:64px 0}
+.landing-section h2{font-size:2.2rem;font-family:'Frank Ruhl Libre',serif;font-weight:900;text-align:center;margin:0 0 8px;color:var(--dark)}
+.landing-section .sub{text-align:center;color:var(--muted);font-size:1.05rem;margin:0 0 40px}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feat-card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.04);border:1px solid rgba(26,138,154,0.08);transition:var(--transition)}
+.feat-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(26,138,154,0.18);border-color:var(--gold)}
+.feat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:14px;background:linear-gradient(135deg,var(--primary-soft),var(--gold-soft))}
+.feat-card h3{font-size:1.1rem;color:var(--primary);margin:0 0 8px;font-weight:800}
+.feat-card p{font-size:0.92rem;color:var(--muted);margin:0;line-height:1.6}
+
+/* How it works */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:30px}
+.step{text-align:center;position:relative}
+.step-num{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--gold));color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;font-family:'Frank Ruhl Libre',serif;margin:0 auto 14px;box-shadow:0 6px 18px rgba(26,138,154,0.3)}
+.step h3{font-size:1.15rem;color:var(--dark);margin:0 0 6px;font-weight:800}
+.step p{color:var(--muted);font-size:0.92rem;margin:0;line-height:1.5}
+
+/* Pricing teaser */
+.pricing-card{background:linear-gradient(135deg,var(--primary) 0%,var(--gold-dark) 100%);border-radius:18px;padding:46px;color:#fff;text-align:center;box-shadow:0 20px 50px rgba(26,138,154,0.35);max-width:680px;margin:0 auto}
+.pricing-card h2{color:#fff;font-size:1.9rem;margin:0 0 10px}
+.pricing-card .price{font-size:3.2rem;font-weight:900;font-family:'Frank Ruhl Libre',serif;line-height:1;margin:14px 0 4px}
+.pricing-card .price small{font-size:1rem;font-weight:600;opacity:0.85;display:block;margin-top:6px}
+.pricing-card p{margin:14px 0 0;line-height:1.6;font-size:0.95rem;opacity:0.95}
+.pricing-card .perks{display:flex;justify-content:center;gap:22px;margin:22px 0;flex-wrap:wrap;font-size:0.88rem}
+.pricing-card .perks span::before{content:"✓ ";color:#c8a84c;font-weight:900}
+
+/* Landing footer */
+.landing-footer{padding:30px 0;border-top:1px solid rgba(26,138,154,0.12);text-align:center;color:var(--muted);font-size:0.85rem;margin-top:40px}
+.landing-footer a{color:var(--primary);text-decoration:none;font-weight:600}
+
+/* Onboarding box (post-signin for new users) — simple modal style on landing */
+.onboarding-overlay{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding:40px 20px;background:linear-gradient(135deg,#e6f3f5 0%,#f7f0d9 50%,#e6f3f5 100%)}
+
+/* Mobile */
+@media (max-width:860px){
+  .landing-hero{grid-template-columns:1fr;padding:40px 0 50px;gap:30px}
+  .hero-content h1{font-size:2.1rem}
+  .hero-mockup{transform:none;max-width:480px;margin:0 auto}
+  .features-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:30px}
+  .landing-section{padding:44px 0}
+  .landing-section h2{font-size:1.6rem}
+  .landing-nav .nav-links{gap:10px}
+  .landing-nav .nav-links a{font-size:0.82rem}
+  .pricing-card{padding:32px 22px}
+}
+
 .google-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:var(--radius-pill);border:1px solid var(--border);background:#fff;cursor:pointer;font-size:1rem;font-weight:600;transition:var(--transition);box-shadow:var(--shadow);min-height:48px;font-family:inherit}
 .google-btn:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--gold)}
 .google-btn img{width:22px;height:22px}
-.login-error{color:var(--danger);font-size:0.85rem;margin-top:16px;display:none}
-.access-denied{display:none;color:var(--danger);margin-top:16px;font-size:0.9rem}
+.login-error{color:var(--danger);font-size:0.85rem;margin-top:16px;display:none;text-align:center}
+.access-denied{display:none;color:var(--danger);margin-top:16px;font-size:0.9rem;text-align:center}
+
+/* Demo mode banner (top of app when ?demo=1) */
+.demo-banner{position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#c8a84c,#a87a2a);color:#fff;text-align:center;padding:8px 16px;font-size:0.88rem;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+.demo-banner a{color:#fff;text-decoration:underline;font-weight:700;margin-right:8px}
+.demo-banner .x{position:absolute;left:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.2);border:0;color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:0.9rem}
 
 /* APP LAYOUT */
 .app{display:none}
@@ -300,38 +390,159 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- ============================================================ -->
+<!-- LANDING PAGE — full marketing site for unauthenticated users   -->
+<!-- ============================================================ -->
 <div class="login-screen" id="loginScreen">
-  <!-- Default landing/login card (shown to non-authenticated visitors) -->
-  <div class="login-box" id="loginPrimaryBox">
-    <div class="logo" id="loginLogo">🏛️</div>
-    <span class="beta-tag">בטא · חינם בשלב זה</span>
-    <h1>NGO Core</h1>
-    <p style="color:var(--dark);font-size:1rem;margin-bottom:6px">מערכת ניהול לעמותות במגזר השלישי</p>
-    <p style="color:var(--muted);font-size:0.86rem;margin-bottom:18px">תוכניות · תקציב · שותפים · שקיפות לתורמים — במקום אחד</p>
+  <div id="loginPrimaryBox">
+    <div class="landing-wrap">
 
-    <div class="features">
-      <div class="feature"><span class="feature-icon">💰</span><div><strong>תקציב חי</strong><span>פירוט מקורות מימון, רכיבים, ביצוע — בלחיצה</span></div></div>
-      <div class="feature"><span class="feature-icon">🤝</span><div><strong>ניהול שותפים</strong><span>קרנות, ספונסרים והתחייבויות בכל תוכנית</span></div></div>
-      <div class="feature"><span class="feature-icon">📄</span><div><strong>PDF לתורמים</strong><span>ייצוא דף תוכנית בעברית/אנגלית עם הלוגו שלך</span></div></div>
-      <div class="feature"><span class="feature-icon">👥</span><div><strong>צוות והרשאות</strong><span>מנהלים, עובדים, צופים — לכל אחד מה שצריך</span></div></div>
+      <!-- Top nav -->
+      <nav class="landing-nav">
+        <div class="brand">
+          <svg class="brand-logo-svg" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg" aria-label="NGO Core logo">
+            <defs>
+              <linearGradient id="ngoLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1a8a9a"/><stop offset="55%" stop-color="#5fa9b3"/><stop offset="100%" stop-color="#c8a84c"/>
+              </linearGradient>
+            </defs>
+            <path d="M50 5 L92 25 L92 75 L50 105 L8 75 L8 25 Z" fill="url(#ngoLogoGrad)" stroke="#fff" stroke-width="3"/>
+            <text x="50" y="62" text-anchor="middle" font-family="'Frank Ruhl Libre',Georgia,serif" font-weight="900" font-size="32" fill="#fff" letter-spacing="-1">NC</text>
+            <text x="50" y="84" text-anchor="middle" font-family="'Heebo',sans-serif" font-weight="600" font-size="8" fill="#fff" letter-spacing="3">CORE</text>
+          </svg>
+          <span>NGO Core</span>
+        </div>
+        <div class="nav-links">
+          <a onclick="document.getElementById('featuresSection').scrollIntoView({behavior:'smooth'})">תכונות</a>
+          <a onclick="document.getElementById('howSection').scrollIntoView({behavior:'smooth'})">איך זה עובד</a>
+          <a onclick="document.getElementById('pricingSection').scrollIntoView({behavior:'smooth'})">מחיר</a>
+          <a class="cta cta-primary" style="padding:8px 18px;font-size:0.85rem" onclick="signIn()">התחל</a>
+        </div>
+      </nav>
+
+      <!-- Hero -->
+      <section class="landing-hero">
+        <div class="hero-content">
+          <span class="hero-badge">בטא · חינם בשלב זה</span>
+          <h1>הניהול של עמותה אמיתית.<br><span class="accent">בלי גליונות, בלי מייל ארוך.</span></h1>
+          <p class="lede">NGO Core מאחד תוכניות, תקציב, שותפים ושקיפות לתורמים — במערכת אחת, בעברית, מותאמת לרשם העמותות בישראל. תוך 5 דקות העמותה שלך מוכנה להציג את האימפקט.</p>
+          <div class="cta-row">
+            <button class="cta cta-primary" onclick="signIn()">
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
+              התחל עם Google
+            </button>
+            <button class="cta cta-secondary" onclick="enterDemoMode()">🎬 צפה בדמו</button>
+          </div>
+          <p class="hero-microcopy">חינם לארגון אחד בשלב הביטא. <strong>הרשמה מוקדמת תקבל 50% הנחה לצמיתות.</strong></p>
+        </div>
+
+        <!-- Hero mockup: stylized dashboard preview -->
+        <div class="hero-mockup">
+          <div class="mock-bar"><i></i><i></i><i></i></div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px">דאשבורד · רוח חשמונאית</div>
+          <div class="mock-kpi-row">
+            <div class="mock-kpi"><div class="mock-kpi-l">תקציב</div><div class="mock-kpi-v">₪2.3M</div></div>
+            <div class="mock-kpi"><div class="mock-kpi-l">גויס</div><div class="mock-kpi-v">₪1.8M</div></div>
+            <div class="mock-kpi"><div class="mock-kpi-l">% מכוסה</div><div class="mock-kpi-v">78%</div></div>
+          </div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px">תקציב לפי תוכנית</div>
+          <div class="mock-bars">
+            <div class="mock-bar-row"><span class="lbl">רוח חשמונאית</span><span class="track"><span class="fill" style="width:92%"></span></span><span class="pct">92%</span></div>
+            <div class="mock-bar-row"><span class="lbl">בית נאמן</span><span class="track"><span class="fill" style="width:64%"></span></span><span class="pct">64%</span></div>
+            <div class="mock-bar-row"><span class="lbl">לב דוד</span><span class="track"><span class="fill" style="width:78%"></span></span><span class="pct">78%</span></div>
+            <div class="mock-bar-row"><span class="lbl">מפעל התורה</span><span class="track"><span class="fill" style="width:45%"></span></span><span class="pct">45%</span></div>
+            <div class="mock-bar-row"><span class="lbl">שער יציאה</span><span class="track"><span class="fill" style="width:30%"></span></span><span class="pct">30%</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="landing-section" id="featuresSection">
+        <h2>הכל מה שעמותה צריכה — במקום אחד</h2>
+        <p class="sub">בלי לשלם על 5 כלים שונים. בלי גליונות שאף אחד לא מבין.</p>
+        <div class="features-grid">
+          <div class="feat-card">
+            <div class="feat-icon">💰</div>
+            <h3>תקציב שקוף וחי</h3>
+            <p>רכיבי תקציב, מקורות מימון (שותפים, תרומות, בעין), ביצוע — בטבלה אחת ניתנת לעריכה. עם המרה אוטומטית לדולר לפי שער חי.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🤝</div>
+            <h3>שותפים והתחייבויות</h3>
+            <p>קרנות, ספונסרים ותורמים-על. מעקב אחרי התחייבויות מול תקבולים בפועל, בכל תוכנית בנפרד.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📄</div>
+            <h3>PDF לתורמים — בלחיצה</h3>
+            <p>דף תוכנית מקצועי, מוכן לשליחה. עברית או אנגלית, עם הלוגו של העמותה ותוכן מותאם — לא צריך מעצב.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📐</div>
+            <h3>מודל לוגי מובנה</h3>
+            <p>תשומות → פעילויות → תפוקות → תוצאות → אימפקט. מותאם לדרישות של תורמים אסטרטגיים בארץ ובחו"ל.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">👥</div>
+            <h3>צוות והרשאות חכמות</h3>
+            <p>מנהלים, עובדים, צופים. תורם רואה רק קריאה. עובד עורך רק את התוכנית שלו. מנהל רואה הכל.</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🔒</div>
+            <h3>פרטיות מלאה לארגון</h3>
+            <p>כל ארגון מבודד לחלוטין. אנחנו לא רואים את הנתונים שלך. גיבוי אוטומטי, ייצוא חופשי בכל רגע.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="landing-section" id="howSection" style="background:rgba(26,138,154,0.04);border-radius:24px;margin:30px -24px;padding:60px 24px">
+        <h2>3 צעדים — ואתה בפנים</h2>
+        <p class="sub">בלי הטמעה ארוכה, בלי איש IT, בלי קורס.</p>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><h3>נרשם עם Google</h3><p>חשבון Gmail או Google Workspace של העמותה. לא צריך סיסמה חדשה.</p></div>
+          <div class="step"><div class="step-num">2</div><h3>מקים את הארגון</h3><p>שם העמותה, מספר ע.ר., לוגו. דקה ואתה בפנים.</p></div>
+          <div class="step"><div class="step-num">3</div><h3>מתחיל לנהל</h3><p>תוכניות, תקציב, צוות. הזמן את שאר הצוות שלך — וחיים.</p></div>
+        </div>
+      </section>
+
+      <!-- Pricing -->
+      <section class="landing-section" id="pricingSection">
+        <div class="pricing-card">
+          <h2>חינם בשלב הביטא</h2>
+          <div class="price">₪0<small>לארגון, ללא הגבלת זמן בשלב הביטא</small></div>
+          <div class="perks">
+            <span>תוכניות ללא הגבלה</span>
+            <span>צוות עד 20 משתמשים</span>
+            <span>PDF לתורמים</span>
+            <span>אחסון 5GB</span>
+          </div>
+          <p>כשנעבור לתשלום בעוד מספר חודשים, ארגונים שיירשמו עכשיו יקבלו <strong>50% הנחה לצמיתות</strong>. ללא קישור אשראי בשלב זה.</p>
+          <button class="cta cta-primary" style="margin-top:18px;background:#fff;color:var(--primary);box-shadow:0 4px 14px rgba(0,0,0,0.15)" onclick="signIn()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
+            התחל עכשיו
+          </button>
+        </div>
+      </section>
+
+      <div class="login-error" id="loginError"></div>
+      <div class="access-denied" id="accessDenied" style="max-width:520px;margin:20px auto;background:#fff;padding:24px;border-radius:12px">
+        <p>⛔ אין לך הרשאת גישה למערכת.</p>
+        <p style="font-size:0.8rem;margin-top:8px;">פנה למנהל המערכת כדי לקבל גישה.</p>
+        <button class="btn btn-danger btn-sm" style="margin-top:12px" onclick="signOutUser()">התנתק</button>
+      </div>
+
+      <footer class="landing-footer">
+        <p>NGO Core · Multi-tenant SaaS for nonprofits · <a href="mailto:hello@ngocore.io">hello@ngocore.io</a></p>
+        <p style="margin-top:6px;font-size:0.78rem">© 2026 · נבנה בישראל</p>
+      </footer>
     </div>
 
-    <button class="google-btn" onclick="signIn()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
-      התחל עם חשבון Google
-    </button>
-    <p style="margin-top:10px;font-size:0.75rem;color:var(--muted)">חינם לארגון אחד בשלב הביטא · ngocore.io</p>
-    <div class="login-error" id="loginError"></div>
-    <div class="access-denied" id="accessDenied">
-      <p>⛔ אין לך הרשאת גישה למערכת.</p>
-      <p style="font-size:0.8rem;margin-top:8px;">פנה למנהל המערכת כדי לקבל גישה.</p>
-      <button class="btn btn-danger btn-sm" style="margin-top:12px" onclick="signOutUser()">התנתק</button>
-    </div>
+    <!-- Hidden, only used by old _dbg fallback -->
+    <div id="loginLogo" style="display:none"></div>
   </div>
 
   <!-- Self-service onboarding form (shown only after Google sign-in if user has no org yet) -->
-  <div class="login-box" id="onboardingBox" style="display:none;max-width:640px;text-align:right">
+  <div class="login-box onboarding-overlay" id="onboardingBox" style="display:none;max-width:640px;text-align:right">
     <div style="text-align:center">
       <div class="logo" style="font-size:2.4rem;margin-bottom:6px">🎉</div>
       <h1 style="font-size:1.6rem">ברוך הבא ל-NGO Core</h1>
@@ -437,7 +648,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     </div>
     <div id="fxBadge" style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.7);padding:6px 8px;background:rgba(255,255,255,0.06);border-radius:6px;margin:4px 12px 0"></div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r60</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r61</div>
   </aside>
 
   <!-- Main Content -->
@@ -1631,7 +1842,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r60 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r61 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -2510,7 +2721,99 @@ auth.getRedirectResult().then(result => {
 });
 
 function signOutUser() {
+  // Clear any demo mode flag
+  try { sessionStorage.removeItem('_ngocore_demo'); } catch(e) {}
   auth.signOut().then(() => location.reload());
+}
+
+// ============================================================
+// ===== DEMO MODE — read-only preview, no auth ===============
+// ============================================================
+// Triggered from the landing page "צפה בדמו" button. Loads the live Hashmonaim org
+// data (the demo seed) into the app as a read-only viewer, with a banner on top.
+function enterDemoMode() {
+  try { sessionStorage.setItem('_ngocore_demo', '1'); } catch(e) {}
+  location.href = location.pathname + '?demo=1#dashboard';
+  setTimeout(() => location.reload(), 100);
+}
+
+function isDemoMode() {
+  try {
+    if ((location.search||'').indexOf('demo=1') >= 0) return true;
+    if (sessionStorage.getItem('_ngocore_demo') === '1') return true;
+  } catch(e) {}
+  return false;
+}
+
+function showDemoBanner() {
+  if (document.getElementById('demoBanner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'demoBanner';
+  banner.className = 'demo-banner';
+  banner.innerHTML = `🎬 מצב דמו — שינויים לא נשמרים · <a onclick="exitDemoMode()">להתחיל ארגון אמיתי שלך</a><button class="x" onclick="exitDemoMode()" title="צא ממצב דמו">×</button>`;
+  document.body.appendChild(banner);
+  // Push the app down so banner doesn't cover content
+  document.body.style.paddingTop = '44px';
+}
+
+function exitDemoMode() {
+  try { sessionStorage.removeItem('_ngocore_demo'); } catch(e) {}
+  location.href = location.pathname;
+  setTimeout(() => location.reload(), 100);
+}
+
+// Bootstrapped at page load — if demo flag is on, fake a session and load the demo org
+async function bootstrapDemoMode() {
+  if (!isDemoMode()) return false;
+  console.log('[demo] entering demo mode');
+  // Fake a current user for demo
+  window.currentUser = { email: 'demo@ngocore.io', displayName: 'משתמש דמו', photoURL: '' };
+  window.userRole = 'viewer';
+  window.userPermission = 'view-only';
+  window.userRoleTitle = 'צופה (דמו)';
+  // Load the Hashmonaim demo org from Firestore (anyone can read public-anon orgs? — fall back to PROGRAM_INFO seed)
+  try {
+    const demoOrgId = 'hashmonaim';  // the seed org
+    const orgDoc = await db.collection('orgs').doc(demoOrgId).get();
+    if (orgDoc.exists) {
+      window.currentOrgId = demoOrgId;
+      window.currentOrgInfo = { id: demoOrgId, ...orgDoc.data() };
+    } else {
+      // Fallback: synthesize a demo org from the seed PROGRAM_INFO
+      window.currentOrgId = 'demo';
+      window.currentOrgInfo = { id:'demo', name:'עמותת הדמו (לדוגמה)', registrationNumber:'580000000', programs: PROGRAM_INFO };
+    }
+  } catch(e) {
+    console.warn('[demo] could not load Hashmonaim org, falling back to seed', e);
+    window.currentOrgId = 'demo';
+    window.currentOrgInfo = { id:'demo', name:'עמותת הדמו (לדוגמה)', programs: PROGRAM_INFO };
+  }
+  // Try to fetch some sample finance/tasks from Hashmonaim for richer display (best-effort)
+  try {
+    const finSnap = await db.collection('finance').where('orgId','==',window.currentOrgId).limit(20).get();
+    window.financeCache = []; finSnap.forEach(d => window.financeCache.push({id:d.id,...d.data()}));
+  } catch(e) { window.financeCache = []; }
+  try {
+    const tSnap = await db.collection('tasks').where('orgId','==',window.currentOrgId).limit(10).get();
+    window.tasksCache = []; tSnap.forEach(d => window.tasksCache.push({id:d.id,...d.data()}));
+  } catch(e) { window.tasksCache = []; }
+  // Show the app
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  showDemoBanner();
+  // Set sidebar user info
+  const nameEl = document.getElementById('userName');     if (nameEl) nameEl.textContent = 'משתמש דמו';
+  const roleEl = document.getElementById('userRole');     if (roleEl) roleEl.textContent = 'צופה (דמו)';
+  const photoEl = document.getElementById('userPhoto');   if (photoEl) photoEl.style.display = 'none';
+  // Apply org logo
+  try { applyOrgLogoToUI(); } catch(e) {}
+  // Render dashboard
+  setTimeout(() => {
+    try { switchSection('dashboard', null); } catch(e) {}
+    try { renderProgramCards(); } catch(e) {}
+    try { renderProgramNav(); } catch(e) {}
+  }, 200);
+  return true;
 }
 
 // ============================================================
@@ -2597,6 +2900,8 @@ async function submitNewOrgOnboarding() {
 
 auth.onAuthStateChanged(async user => {
   if (typeof _dbg === 'function') _dbg('2️⃣ onAuthStateChanged: user=' + (user?.email || 'NULL'), user ? '#16a34a' : '#dc2626');
+  // Demo mode — bypass auth flow entirely
+  if (isDemoMode()) return;
   // Public routes (transparency / presentation) — render without login
   try {
     if (typeof checkPublicRoute === 'function' && checkPublicRoute()) return;
@@ -5047,6 +5352,8 @@ window.addEventListener('DOMContentLoaded', () => {
   // Start the live FX fetch immediately — we don't wait for it before showing the page,
   // but we want it in flight as early as possible so USD numbers are accurate by first render.
   try { updateFxBadge(); loadUsdRate(); } catch(e) {}
+  // Demo mode bootstrap — when ?demo=1 is in URL, skip auth and load demo data
+  try { bootstrapDemoMode(); } catch(e) { console.warn('[demo] bootstrap failed', e); }
   const hash = (location.hash||'').replace('#','');
   // Always start at dashboard if hash is 'program' (no specific program selected) or empty
   if (!hash || hash === 'program') {
