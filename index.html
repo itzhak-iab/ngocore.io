@@ -648,7 +648,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     </div>
     <div id="fxBadge" style="text-align:center;font-size:0.75rem;color:rgba(255,255,255,0.7);padding:6px 8px;background:rgba(255,255,255,0.06);border-radius:6px;margin:4px 12px 0"></div>
     <div class="nav-item logout" onclick="signOutUser()"><span class="icon">🚪</span> <span data-i18n="nav.logout">התנתק</span></div>
-    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r61</div>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:8px">v2026.05.07-r62</div>
   </aside>
 
   <!-- Main Content -->
@@ -1842,7 +1842,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r61 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r62 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -2721,9 +2721,7 @@ auth.getRedirectResult().then(result => {
 });
 
 function signOutUser() {
-  // Clear any demo mode flag
-  try { sessionStorage.removeItem('_ngocore_demo'); } catch(e) {}
-  auth.signOut().then(() => location.reload());
+  auth.signOut().then(() => { location.href = location.pathname; });
 }
 
 // ============================================================
@@ -2731,16 +2729,15 @@ function signOutUser() {
 // ============================================================
 // Triggered from the landing page "צפה בדמו" button. Loads the live Hashmonaim org
 // data (the demo seed) into the app as a read-only viewer, with a banner on top.
+// IMPORTANT: demo mode is detected ONLY from the URL query string. We do NOT use
+// sessionStorage/localStorage so users can't accidentally get stuck in demo mode.
 function enterDemoMode() {
-  try { sessionStorage.setItem('_ngocore_demo', '1'); } catch(e) {}
   location.href = location.pathname + '?demo=1#dashboard';
-  setTimeout(() => location.reload(), 100);
 }
 
 function isDemoMode() {
   try {
-    if ((location.search||'').indexOf('demo=1') >= 0) return true;
-    if (sessionStorage.getItem('_ngocore_demo') === '1') return true;
+    return (location.search||'').indexOf('demo=1') >= 0;
   } catch(e) {}
   return false;
 }
@@ -2757,9 +2754,7 @@ function showDemoBanner() {
 }
 
 function exitDemoMode() {
-  try { sessionStorage.removeItem('_ngocore_demo'); } catch(e) {}
   location.href = location.pathname;
-  setTimeout(() => location.reload(), 100);
 }
 
 // Bootstrapped at page load — if demo flag is on, fake a session and load the demo org
@@ -2779,14 +2774,14 @@ async function bootstrapDemoMode() {
       window.currentOrgId = demoOrgId;
       window.currentOrgInfo = { id: demoOrgId, ...orgDoc.data() };
     } else {
-      // Fallback: synthesize a demo org from the seed PROGRAM_INFO
+      // Fallback: synthesize a demo org from the seed
       window.currentOrgId = 'demo';
-      window.currentOrgInfo = { id:'demo', name:'עמותת הדמו (לדוגמה)', registrationNumber:'580000000', programs: PROGRAM_INFO };
+      window.currentOrgInfo = { id:'demo', name:'עמותת הדמו (לדוגמה)', registrationNumber:'580000000', programs: (typeof DEFAULT_PROGRAM_INFO !== 'undefined' ? DEFAULT_PROGRAM_INFO : {}) };
     }
   } catch(e) {
     console.warn('[demo] could not load Hashmonaim org, falling back to seed', e);
     window.currentOrgId = 'demo';
-    window.currentOrgInfo = { id:'demo', name:'עמותת הדמו (לדוגמה)', programs: PROGRAM_INFO };
+    window.currentOrgInfo = { id:'demo', name:'עמותת הדמו (לדוגמה)', programs: (typeof DEFAULT_PROGRAM_INFO !== 'undefined' ? DEFAULT_PROGRAM_INFO : {}) };
   }
   // Try to fetch some sample finance/tasks from Hashmonaim for richer display (best-effort)
   try {
