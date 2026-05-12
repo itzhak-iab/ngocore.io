@@ -823,7 +823,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <img id="ngoLogoSidebar" src="" alt="" style="height:22px;width:auto">
         <span>Powered by <strong>NGO Core</strong></span>
       </a>
-      <div class="ngocore-version">v2026.05.07-r73</div>
+      <div class="ngocore-version">v2026.05.07-r74</div>
     </div>
   </aside>
 
@@ -2050,7 +2050,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r73 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r74 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -4063,105 +4063,75 @@ function _renderProgramDetailInner() {
       ${tasksHtml}
     </div>
 
-    ${(info.meetings||[]).length ? `
+    ${(() => {
+      // ============================================================
+      // 📅 SECTION 5.5 — לוח מפגשים שנתי (clickable rows → drill-down)
+      // ============================================================
+      const meetings = info.meetings || [];
+      if (!meetings.length && !_canEdit) return '';
+      const STATUS_BADGE = {
+        planned:   '<span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:600">📅 מתוכנן</span>',
+        done:      '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:600">✓ הסתיים</span>',
+        cancelled: '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:600">✕ בוטל</span>'
+      };
+      const upcoming  = meetings.filter(m => (m.status||'planned')==='planned').length;
+      const completed = meetings.filter(m => m.status==='done').length;
+      return meetings.length ? `
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-          <h3 style="margin:0">📅 לוח מפגשים שנתי</h3>${ie('pe_meetings','עריכת לוח מפגשים')}
+          <h3 style="margin:0">📅 לוח מפגשים שנתי <small style="color:var(--muted);font-weight:400">· ${escapeHtml(String(upcoming))} מתוכננים · ${escapeHtml(String(completed))} התקיימו</small></h3>${ie('pe_meetings','עריכת לוח מפגשים')}
         </div>
+        <p style="color:var(--muted);font-size:0.85rem;margin:0 0 10px">💡 לחצי על שורה של מפגש כדי להיכנס לתכנון מפורט, לעדכן משתתפים בפועל ולכתוב לקחים שנלמדו.</p>
         <table class="data-table" style="margin:0">
-          <thead><tr><th style="width:130px">תאריך</th><th>כותרת</th><th>אחראי/ת</th><th>הערה</th></tr></thead>
+          <thead><tr><th style="width:130px">תאריך</th><th>כותרת</th><th>אחראי/ת</th><th style="text-align:center">משתתפים</th><th>סטטוס</th><th></th></tr></thead>
           <tbody>
-            ${(info.meetings||[]).map(m => `<tr>
-              <td><strong style="color:var(--primary)">${escapeHtml(m.date||'')}</strong></td>
-              <td>${escapeHtml(m.title||'')}</td>
-              <td>${escapeHtml(m.responsible||'')}</td>
-              <td><small style="color:var(--muted)">${escapeHtml(m.notes||'')}</small></td>
-            </tr>`).join('')}
+            ${meetings.map((m, idx) => {
+              const st = m.status || 'planned';
+              const exp = m.expectedAttendees, act = m.actualAttendees;
+              const attendStr = (exp || act) ? `${escapeHtml(String(exp||'—'))} / <strong>${escapeHtml(String(act||'—'))}</strong>` : '<span style="color:var(--muted)">—</span>';
+              return `<tr onclick="openMeetingDetail('${escapeHtml(k)}', ${idx})" style="cursor:pointer" onmouseover="this.style.background='var(--bg-soft,#f6f7fb)'" onmouseout="this.style.background=''">
+                <td><strong style="color:var(--primary)">${escapeHtml(m.date||'')}</strong></td>
+                <td><strong>${escapeHtml(m.title||'')}</strong>${m.notes?`<br><small style="color:var(--muted)">${escapeHtml(m.notes)}</small>`:''}</td>
+                <td>${escapeHtml(m.responsible||'')}</td>
+                <td style="text-align:center;font-size:0.9rem">${attendStr}</td>
+                <td>${STATUS_BADGE[st] || STATUS_BADGE.planned}</td>
+                <td style="text-align:left;font-size:1.2rem;color:var(--muted)">›</td>
+              </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>`
-      : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">לא הוגדר לוח מפגשים</p>${emptyAdminHint('pe_meetings','הוסף לוח מפגשים')}</div>` : '')}
-
-    <!-- ============================================================ -->
-    <!-- 📅 SECTION 5.5 — אירועים והפקת לקחים                          -->
-    <!-- ============================================================ -->
-    ${(() => {
-      const evs = info.events || [];
-      if (!evs.length && !_canEdit) return '';
-      const STATUS_BADGE = {
-        planned:    '<span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:600">📅 מתוכנן</span>',
-        done:       '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:600">✓ הסתיים</span>',
-        cancelled:  '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:600">✕ בוטל</span>'
-      };
-      const upcoming = evs.filter(e => (e.status||'planned')==='planned').length;
-      const completed = evs.filter(e => e.status==='done').length;
-      return `
-      <h2 style="margin:30px 0 12px;color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--gold);padding-bottom:8px">📅 אירועים והפקת לקחים</h2>
-      ${evs.length ? `
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-          <h3 style="margin:0">לוח אירועים <small style="color:var(--muted);font-weight:400">· ${escapeHtml(String(upcoming))} מתוכננים · ${escapeHtml(String(completed))} בוצעו</small></h3>
-          ${ie('pe_events','עריכת אירועים')}
-        </div>
-        <table class="data-table" style="margin:0">
-          <thead><tr><th style="width:110px">תאריך</th><th>אירוע</th><th>מיקום</th><th style="text-align:center">משתתפים (צפויים / בפועל)</th><th>סטטוס</th><th>לקחים</th></tr></thead>
-          <tbody>
-            ${evs.map(e => `<tr>
-              <td><strong style="color:var(--primary)">${escapeHtml(e.date||'')}</strong></td>
-              <td><strong>${escapeHtml(e.title||'')}</strong></td>
-              <td style="font-size:0.9rem;color:var(--dark)">${escapeHtml(e.location||'—')}</td>
-              <td style="text-align:center;font-size:0.9rem">${escapeHtml(String(e.expectedAttendees||'—'))} / <strong>${escapeHtml(String(e.actualAttendees||'—'))}</strong></td>
-              <td>${STATUS_BADGE[e.status||'planned'] || STATUS_BADGE.planned}</td>
-              <td style="font-size:0.85rem;color:var(--dark);max-width:280px;white-space:normal;line-height:1.5">${escapeHtml(e.lessonsLearned||'—')}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-        <p style="color:var(--muted);font-size:0.82rem;margin:10px 0 0">💡 לאחר כל אירוע — מלא את "משתתפים בפועל" ואת "לקחים" לבנות בסיס ידע ארגוני שלא יאבד.</p>
-      </div>` : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">לא תועדו אירועים עדיין</p>${emptyAdminHint('pe_events','תיעוד אירוע ראשון')}</div>` : '')}`;
+      : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">לא הוגדר לוח מפגשים</p>${emptyAdminHint('pe_meetings','הוסף לוח מפגשים')}</div>` : '');
     })()}
 
     <!-- ============================================================ -->
-    <!-- 👥 SECTION 5.7 — קהל היעד: אנשי קשר (CRM)                     -->
+    <!-- 👥 SECTION 5.6 — CRM של קהל היעד (קישור לעמוד ייעודי)         -->
     <!-- ============================================================ -->
     ${(() => {
-      const cts = info.contacts || [];
-      const types = info.contactTypes || [];
-      if (!cts.length && !types.length && !_canEdit) return '';
-      // Group contacts by type
-      const groups = {};
-      cts.forEach(c => {
-        const t = (c.contactType || 'כללי').trim() || 'כללי';
-        if (!groups[t]) groups[t] = [];
-        groups[t].push(c);
-      });
-      const groupKeys = Object.keys(groups);
+      const ca = info.crmAccess || {};
+      const viewers = Array.isArray(ca.viewers) ? ca.viewers : [];
+      const editors = Array.isArray(ca.editors) ? ca.editors : [];
+      const me = (currentUser && currentUser.email) || '';
+      const hasAccess = userRole === 'admin' || viewers.includes(me) || editors.includes(me);
+      const canEditCrm = userRole === 'admin' || editors.includes(me);
+      if (!hasAccess && !_canEdit) return '';
       return `
-      <h2 style="margin:30px 0 12px;color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--gold);padding-bottom:8px">👥 קהל היעד — אנשי קשר</h2>
-      ${cts.length ? `
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-          <h3 style="margin:0">${escapeHtml(String(cts.length))} אנשי קשר${groupKeys.length>1?` · ${escapeHtml(String(groupKeys.length))} סוגים`:''}</h3>
-          ${ie('pe_contacts','עריכת אנשי קשר')}
-        </div>
-        ${groupKeys.map(t => `
-          <div style="margin-bottom:18px">
-            <h4 style="margin:8px 0;color:var(--primary-dark);font-size:1rem">${escapeHtml(t)} <small style="color:var(--muted);font-weight:400">(${escapeHtml(String(groups[t].length))})</small></h4>
-            <table class="data-table" style="margin:0">
-              <thead><tr><th>שם</th><th>טלפון</th><th>אימייל</th><th>כתובת</th><th>הערות</th></tr></thead>
-              <tbody>
-                ${groups[t].map(c => `<tr>
-                  <td><strong>${escapeHtml(c.name||'—')}</strong></td>
-                  <td dir="ltr" style="font-size:0.9rem">${c.phone ? `<a href="${safeUrl('tel:'+c.phone)}" style="color:var(--primary)">${escapeHtml(c.phone)}</a>` : '—'}</td>
-                  <td dir="ltr" style="font-size:0.9rem">${c.email ? `<a href="${safeUrl('mailto:'+c.email)}" style="color:var(--primary)">${escapeHtml(c.email)}</a>` : '—'}</td>
-                  <td style="font-size:0.88rem">${escapeHtml(c.address||'—')}</td>
-                  <td style="font-size:0.85rem;color:var(--muted);max-width:240px;white-space:normal;line-height:1.4">${escapeHtml(c.notes||'—')}</td>
-                </tr>`).join('')}
-              </tbody>
-            </table>
+      <div class="card" style="background:linear-gradient(135deg, #f0f9ff 0%, #faf5ff 100%);border-right:4px solid var(--primary)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div style="flex:1;min-width:240px">
+            <h3 style="margin:0 0 6px">👥 CRM של קהל היעד <span style="font-size:0.72rem;background:var(--gold);color:#000;padding:2px 8px;border-radius:var(--radius-pill);vertical-align:middle">🔒 פרטי</span></h3>
+            <p style="margin:0;color:var(--muted);font-size:0.92rem;line-height:1.5">מסד נתונים פרטי לאנשי קשר של התוכנית (כגון נשות סגל, הורים, חיילים מנותקי קשר). הנתונים נשמרים בקולקציה נפרדת ומאובטחת, נגישים רק לאימיילים המוגדרים בהרשאות התוכנית.</p>
           </div>
-        `).join('')}
-        <p style="color:var(--muted);font-size:0.82rem;margin:6px 0 0">🔒 הנתונים האלה רגישים — נראים רק לחברי צוות עם הרשאת עריכה לתוכנית הזו. לא נכללים ב-PDF שמיוצא לתורמים.</p>
-      </div>` : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">אין אנשי קשר תועדו עדיין</p>${emptyAdminHint('pe_contacts','הוסף איש קשר ראשון')}</div>` : '')}`;
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+            ${hasAccess ? `<button class="btn btn-primary" onclick="openCrmPanel('${escapeHtml(k)}')">פתח CRM ›</button>` : `<span style="color:var(--muted);font-size:0.85rem">אין לך הרשאה לראות את ה-CRM של תוכנית זו</span>`}
+            ${_canEdit && userRole==='admin' ? `<button class="btn btn-secondary btn-sm" onclick="openProgramFieldEdit('${escapeHtml(k)}','pe_crmViewers')" style="font-size:0.78rem">🔒 הגדר הרשאות</button>` : ''}
+          </div>
+        </div>
+        ${hasAccess ? `<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:0.82rem;color:var(--muted)">
+          הרשאתך: ${canEditCrm ? '<strong style="color:var(--success)">✏️ עריכה מלאה</strong>' : '<strong>📖 צפייה בלבד</strong>'}
+          ${userRole === 'admin' ? ` · ${viewers.length} צופים, ${editors.length} עורכים מוגדרים` : ''}
+        </div>` : ''}
+      </div>`;
     })()}
 
     <!-- ============================================================ -->
@@ -5211,26 +5181,24 @@ function openProgramEdit(key) {
       <div class="form-field" style="grid-column:1/-1"><label>💬 עדויות מהשטח <small style="color:var(--muted);font-weight:400">(שורה לכל עדות: <code>הציטוט | מזהה הדובר</code>)</small></label><textarea id="pe_testimonials" rows="3" placeholder='המפגשים החזירו לי את בני | אב לחייל, ירושלים&#10;הבנתי שאני לא לבד | רעית חייל, בני ברק'>${formatStructured(info.testimonials||[],['quote','author']).replace(/<\/textarea>/gi,'')}</textarea></div>
     </div>
 
-    <h4 style="margin:18px 0 10px;color:var(--primary);border-bottom:2px solid var(--gold);padding-bottom:6px">📅 אירועים והפקת לקחים</h4>
+    <h4 style="margin:18px 0 10px;color:var(--primary);border-bottom:2px solid var(--gold);padding-bottom:6px">🔒 הרשאות גישה ל-CRM של קהל היעד</h4>
     <div class="form-row">
       <div class="form-field" style="grid-column:1/-1">
-        <label>אירועים <small style="color:var(--muted);font-weight:400">(שורה לאירוע: <code>תאריך | כותרת | מיקום | משתתפים-צפויים | משתתפים-בפועל | סטטוס | לקחים</code> · סטטוס: planned/done/cancelled)</small></label>
-        <textarea id="pe_events" rows="4" placeholder='2026-05-22 | מפגש פתיחה גדוד יונתן | בית הכנסת המרכזי | 30 | 28 | done | המודל של חלוקה לקבוצות קטנות עבד מצוין&#10;2026-06-15 | מפגש שייכות חטיבתי | אולם החטיבה | 80 | | planned |'>${formatStructured(info.events||[],['date','title','location','expectedAttendees','actualAttendees','status','lessonsLearned']).replace(/<\/textarea>/gi,'')}</textarea>
-      </div>
-    </div>
-
-    <h4 style="margin:18px 0 10px;color:var(--primary);border-bottom:2px solid var(--gold);padding-bottom:6px">👥 קהל היעד — אנשי קשר</h4>
-    <div class="form-row">
-      <div class="form-field" style="grid-column:1/-1">
-        <label>סוגי אנשי קשר <small style="color:var(--muted);font-weight:400">(אופציונלי, ערך בכל שורה — למשל "נשות סגל", "הורים", "חיילים מנותקי קשר")</small></label>
-        <textarea id="pe_contactTypes" rows="2" placeholder='נשות סגל&#10;הורים&#10;חיילים מנותקי קשר'>${formatStringLines(info.contactTypes||[]).replace(/<\/textarea>/gi,'')}</textarea>
+        <label>📖 רשאים לצפות בלבד <small style="color:var(--muted);font-weight:400">(אימייל בכל שורה — רואים את אנשי הקשר אך אינם יכולים לערוך)</small></label>
+        <textarea id="pe_crmViewers" rows="3" placeholder='manager@example.com&#10;board@example.com'>${formatStringLines((info.crmAccess&&info.crmAccess.viewers)||[]).replace(/<\/textarea>/gi,'')}</textarea>
       </div>
     </div>
     <div class="form-row">
       <div class="form-field" style="grid-column:1/-1">
-        <label>אנשי קהל היעד <small style="color:var(--muted);font-weight:400">(שורה לאיש: <code>שם | טלפון | אימייל | סוג | כתובת | הערות</code>)</small></label>
-        <textarea id="pe_contacts" rows="5" placeholder='רחל כהן | 050-1234567 | rachel@example.com | נשות סגל | ירושלים, רח׳ הרצל 12 | אישתו של ר"מ פלוגתי&#10;יצחק לוי | 052-9876543 | | הורים | בני ברק | אב לחייל בגדוד יונתן'>${formatStructured(info.contacts||[],['name','phone','email','contactType','address','notes']).replace(/<\/textarea>/gi,'')}</textarea>
-        <small style="color:var(--muted);display:block;margin-top:4px">💡 הנתונים פרטיים לתוכנית הזו — רואים רק חברי צוות עם הרשאת עריכה לתוכנית, מנהל המערכת, וצופים. <strong>לא ניתן לייצוא ל-PDF</strong> בלי אישור חוזר (הגנת פרטיות).</small>
+        <label>✏️ רשאים להזין ולערוך <small style="color:var(--muted);font-weight:400">(אימייל בכל שורה — מוסיפים, מעדכנים ומוחקים אנשי קשר)</small></label>
+        <textarea id="pe_crmEditors" rows="3" placeholder='coordinator@example.com&#10;assistant@example.com'>${formatStringLines((info.crmAccess&&info.crmAccess.editors)||[]).replace(/<\/textarea>/gi,'')}</textarea>
+        <small style="color:var(--muted);display:block;margin-top:6px">🔐 רק האימיילים שמצוינים כאן (וכמובן מנהל המערכת) יכולים לגשת ל-CRM של תוכנית זו. הנתונים נשמרים בקולקציה נפרדת ב-Firestore עם כללי אבטחה שאוכפים את ההרשאות גם ברמת השרת. <strong>לא נכלל בייצוא ל-PDF.</strong></small>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1">
+        <label>🏷️ קטגוריות אנשי קשר <small style="color:var(--muted);font-weight:400">(אופציונלי — שורה לכל קטגוריה, למשל "נשות סגל", "הורים", "חיילים מנותקי קשר")</small></label>
+        <textarea id="pe_crmCategories" rows="2" placeholder='נשות סגל&#10;הורים&#10;חיילים מנותקי קשר'>${formatStringLines((info.crmAccess&&info.crmAccess.categories)||info.contactTypes||[]).replace(/<\/textarea>/gi,'')}</textarea>
       </div>
     </div>
 
@@ -5532,6 +5500,369 @@ function openProgramFieldEdit(progKey, fieldId) {
   }, 280);
 }
 
+// ====================================================================
+// 📅 MEETING DRILL-DOWN — per-meeting planning + lessons learned
+// ====================================================================
+// Each meeting in info.meetings[] is identified by its array index for
+// persistence, but we also persist a stable `id` once first saved.
+// ====================================================================
+
+function _meetingGenId() {
+  return 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+}
+
+function openMeetingDetail(progKey, meetingIdx) {
+  if (!currentOrgInfo || !currentOrgInfo.programs || !currentOrgInfo.programs[progKey]) {
+    toast('תוכנית לא נמצאה', 'error'); return;
+  }
+  const prog = currentOrgInfo.programs[progKey];
+  const meetings = Array.isArray(prog.meetings) ? prog.meetings : [];
+  const m = meetings[meetingIdx];
+  if (!m) { toast('מפגש לא נמצא', 'error'); return; }
+  // Determine edit capability — reuse canEditProgram if available, else fall back to admin
+  const canEditThis = (typeof canEditProgram === 'function')
+    ? canEditProgram(progKey)
+    : (userRole === 'admin');
+  const ro = canEditThis ? '' : 'readonly disabled';
+
+  const statusOpts = [
+    {v:'planned',   l:'📅 מתוכנן'},
+    {v:'done',      l:'✓ הסתיים'},
+    {v:'cancelled', l:'✕ בוטל'}
+  ];
+  const curStatus = m.status || 'planned';
+
+  const html = `
+    <div class="form-row">
+      <div class="form-field"><label>📆 תאריך</label><input type="text" id="md_date" value="${escapeHtml(m.date||'')}" ${ro} placeholder='י"ט אייר / 2026-05-22'></div>
+      <div class="form-field"><label>📌 סטטוס</label><select id="md_status" ${ro}>${statusOpts.map(o=>`<option value="${o.v}" ${curStatus===o.v?'selected':''}>${o.l}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1"><label>📝 כותרת המפגש</label><input type="text" id="md_title" value="${escapeHtml(m.title||'')}" ${ro}></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>👤 אחראי/ת</label><input type="text" id="md_responsible" value="${escapeHtml(m.responsible||'')}" ${ro}></div>
+      <div class="form-field"><label>📍 מיקום</label><input type="text" id="md_location" value="${escapeHtml(m.location||'')}" ${ro}></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>👥 משתתפים צפויים</label><input type="number" id="md_expected" value="${escapeHtml(String(m.expectedAttendees||''))}" ${ro} min="0"></div>
+      <div class="form-field"><label>✅ משתתפים בפועל <small style="color:var(--muted);font-weight:400">(אחרי המפגש)</small></label><input type="number" id="md_actual" value="${escapeHtml(String(m.actualAttendees||''))}" ${ro} min="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1"><label>🗒️ הערות תכנון</label><textarea id="md_notes" rows="2" ${ro} placeholder='נושאים שיועלו, סוגיות בהכנה, לוגיסטיקה'>${escapeHtml(m.notes||'')}</textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1"><label>📋 סיכום המפגש <small style="color:var(--muted);font-weight:400">(אחרי המפגש)</small></label><textarea id="md_summary" rows="3" ${ro} placeholder='מה קרה במפגש, מי השתתף, אווירה כללית'>${escapeHtml(m.summary||'')}</textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1"><label>💡 לקחים שנלמדו</label><textarea id="md_lessons" rows="3" ${ro} placeholder='מה עבד, מה לא, מה לשנות בפעם הבאה'>${escapeHtml(m.lessonsLearned||'')}</textarea></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1"><label>✅ משימות המשך <small style="color:var(--muted);font-weight:400">(שורה למשימה)</small></label><textarea id="md_actions" rows="3" ${ro} placeholder='להתקשר ל-X בנושא Y&#10;לעדכן את הנוהל סעיף 4'>${escapeHtml(m.actionItems||'')}</textarea></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:14px">
+      <small style="color:var(--muted)">${m.id ? `מזהה: <code style="font-size:0.75rem">${escapeHtml(m.id)}</code>` : '<em>מפגש חדש, מזהה ייוצר בשמירה</em>'}</small>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" onclick="closeMeetingDetail()">סגור</button>
+        ${canEditThis ? `<button class="btn btn-primary" onclick="saveMeetingDetail('${escapeHtml(progKey)}', ${meetingIdx})">💾 שמור</button>` : ''}
+      </div>
+    </div>
+  `;
+  let modal = document.getElementById('meetingDetailModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'meetingDetailModal';
+    modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10001;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+    modal.onclick = (e) => { if (e.target === modal) closeMeetingDetail(); };
+    modal.innerHTML = `<div style="background:#fff;border-radius:var(--radius);max-width:680px;width:100%;margin-top:30px;padding:24px;border-top:4px solid var(--primary)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 style="margin:0;color:var(--primary)">📅 תכנון מפגש</h3><button class="btn btn-secondary btn-sm" onclick="closeMeetingDetail()" aria-label="סגור">✕</button></div><div id="meetingDetailBody"></div></div>`;
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'flex';
+  }
+  document.getElementById('meetingDetailBody').innerHTML = html;
+}
+
+function closeMeetingDetail() {
+  const m = document.getElementById('meetingDetailModal');
+  if (m) m.style.display = 'none';
+}
+
+async function saveMeetingDetail(progKey, meetingIdx) {
+  if (!currentOrgInfo || !currentOrgInfo.programs || !currentOrgInfo.programs[progKey]) return;
+  const prog = currentOrgInfo.programs[progKey];
+  const meetings = Array.isArray(prog.meetings) ? [...prog.meetings] : [];
+  if (!meetings[meetingIdx]) return;
+  const existing = meetings[meetingIdx] || {};
+  const updated = Object.assign({}, existing, {
+    id: existing.id || _meetingGenId(),
+    date:              (document.getElementById('md_date')?.value || '').trim(),
+    title:             (document.getElementById('md_title')?.value || '').trim(),
+    responsible:       (document.getElementById('md_responsible')?.value || '').trim(),
+    location:          (document.getElementById('md_location')?.value || '').trim(),
+    notes:             (document.getElementById('md_notes')?.value || '').trim(),
+    summary:           (document.getElementById('md_summary')?.value || '').trim(),
+    status:            (document.getElementById('md_status')?.value || 'planned'),
+    expectedAttendees: parseInt(document.getElementById('md_expected')?.value || '0') || 0,
+    actualAttendees:   parseInt(document.getElementById('md_actual')?.value || '0') || 0,
+    lessonsLearned:    (document.getElementById('md_lessons')?.value || '').trim(),
+    actionItems:       (document.getElementById('md_actions')?.value || '').trim(),
+    updatedBy:         (currentUser && currentUser.email) || '',
+    updatedAt:         new Date().toISOString()
+  });
+  meetings[meetingIdx] = updated;
+  currentOrgInfo.programs[progKey].meetings = meetings;
+  try {
+    await db.collection('orgs').doc(currentOrgId).set({
+      programs: currentOrgInfo.programs,
+      updatedBy: currentUser.email,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    toast('המפגש עודכן ✓');
+    closeMeetingDetail();
+    renderProgramDetail();
+  } catch(e) {
+    console.error('[saveMeetingDetail]', e);
+    toast('שגיאה בשמירה: ' + (e.message||e), 'error');
+  }
+}
+
+// ====================================================================
+// 👥 CRM PANEL — per-program contacts database with granular permissions
+// ====================================================================
+// Data lives in Firestore collection `programContacts` (not in org doc).
+// Access controlled by orgs/{orgId}.programs.{key}.crmAccess: { viewers, editors, categories }
+// Firestore rules enforce read/write via get() on org doc.
+// ====================================================================
+
+let _crmCurrentProg = null;     // current program key
+let _crmContacts    = [];        // loaded contacts (in-memory cache)
+let _crmFilter      = { category:'__all__', search:'' };
+
+function openCrmPanel(progKey) {
+  _crmCurrentProg = progKey;
+  _crmContacts = [];
+  _crmFilter = { category:'__all__', search:'' };
+  let modal = document.getElementById('crmModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'crmModal';
+    modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10001;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+    modal.onclick = (e) => { if (e.target === modal) closeCrmPanel(); };
+    modal.innerHTML = `<div style="background:#fff;border-radius:var(--radius);max-width:1000px;width:100%;margin-top:20px;padding:24px;border-top:4px solid var(--primary)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap"><div><h3 id="crmModalTitle" style="margin:0;color:var(--primary)">👥 CRM של קהל היעד</h3><small id="crmModalSubtitle" style="color:var(--muted)"></small></div><button class="btn btn-secondary btn-sm" onclick="closeCrmPanel()" aria-label="סגור">✕ סגור</button></div><div id="crmModalBody"><div style="text-align:center;padding:40px;color:var(--muted)">טוען אנשי קשר…</div></div></div>`;
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'flex';
+  }
+  _crmLoadAndRender();
+}
+
+function closeCrmPanel() {
+  const m = document.getElementById('crmModal');
+  if (m) m.style.display = 'none';
+  _crmCurrentProg = null;
+  _crmContacts = [];
+}
+
+async function _crmLoadAndRender() {
+  if (!_crmCurrentProg) return;
+  const me = (currentUser && currentUser.email) || '';
+  const prog = (currentOrgInfo && currentOrgInfo.programs && currentOrgInfo.programs[_crmCurrentProg]) || {};
+  const ca = prog.crmAccess || {};
+  const viewers = Array.isArray(ca.viewers) ? ca.viewers : [];
+  const editors = Array.isArray(ca.editors) ? ca.editors : [];
+  const hasAccess = userRole === 'admin' || viewers.includes(me) || editors.includes(me);
+  if (!hasAccess) {
+    document.getElementById('crmModalBody').innerHTML = '<div style="padding:30px;text-align:center;color:var(--danger);border:1px solid var(--danger);border-radius:var(--radius);background:#fef2f2">🔒 אין לך הרשאת גישה ל-CRM של תוכנית זו.<br><small style="color:var(--muted)">פנה למנהל המערכת כדי לקבל גישה.</small></div>';
+    return;
+  }
+  const subtitle = document.getElementById('crmModalSubtitle');
+  if (subtitle) subtitle.textContent = `תוכנית: ${(currentOrgInfo.areas||[]).find(a=>a.key===_crmCurrentProg)?.label || _crmCurrentProg}`;
+  try {
+    // Demo mode: don't hit Firestore, use synthetic empty list
+    if (typeof isDemoMode === 'function' && isDemoMode()) {
+      _crmContacts = [];
+    } else {
+      const snap = await db.collection('programContacts')
+        .where('orgId','==', currentOrgId)
+        .where('programKey','==', _crmCurrentProg)
+        .get();
+      _crmContacts = snap.docs.map(d => Object.assign({id:d.id}, d.data()));
+    }
+    _crmRender();
+  } catch(e) {
+    console.error('[crmLoad]', e);
+    document.getElementById('crmModalBody').innerHTML = `<div style="padding:20px;text-align:center;color:var(--danger);border:1px solid var(--danger);border-radius:var(--radius);background:#fef2f2">שגיאה בטעינת אנשי הקשר: ${escapeHtml(e.message||String(e))}<br><small style="color:var(--muted)">ייתכן שכללי האבטחה של Firestore חסמו את הקריאה. בדוק שהוספת את ${escapeHtml(me)} לרשימת הצופים/עורכים בעריכת התוכנית.</small></div>`;
+  }
+}
+
+function _crmRender() {
+  const me = (currentUser && currentUser.email) || '';
+  const prog = (currentOrgInfo && currentOrgInfo.programs && currentOrgInfo.programs[_crmCurrentProg]) || {};
+  const ca = prog.crmAccess || {};
+  const editors = Array.isArray(ca.editors) ? ca.editors : [];
+  const canEditCrm = userRole === 'admin' || editors.includes(me);
+  const categories = Array.isArray(ca.categories) ? ca.categories : [];
+  // Apply filter
+  const q = (_crmFilter.search||'').trim().toLowerCase();
+  const filtered = _crmContacts.filter(c => {
+    if (_crmFilter.category !== '__all__' && (c.category||'') !== _crmFilter.category) return false;
+    if (q && !((c.name||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.notes||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  // Group by category for display
+  const groups = {};
+  filtered.forEach(c => {
+    const cat = c.category || 'ללא קטגוריה';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(c);
+  });
+  const groupKeys = Object.keys(groups).sort();
+  const catOpts = ['<option value="__all__">כל הקטגוריות</option>']
+    .concat(categories.map(c => `<option value="${escapeHtml(c)}" ${_crmFilter.category===c?'selected':''}>${escapeHtml(c)}</option>`))
+    .join('');
+  const body = document.getElementById('crmModalBody');
+  if (!body) return;
+  body.innerHTML = `
+    <div style="background:#fef9c3;border-right:4px solid #ca8a04;padding:10px 14px;border-radius:var(--radius-sm);font-size:0.85rem;margin-bottom:14px">
+      🔒 <strong>פרטיות:</strong> הנתונים כאן רגישים. גישה: <strong>${canEditCrm ? 'עריכה מלאה' : 'צפייה בלבד'}</strong>.
+      הנתונים נשמרים בקולקציית Firestore נפרדת עם כללי אבטחה. <strong>לא נכלל בייצוא ל-PDF.</strong>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+      <input type="search" id="crmSearch" placeholder="🔍 חפש שם / טלפון / מייל / הערה" value="${escapeHtml(_crmFilter.search)}" style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)" oninput="_crmFilter.search=this.value;_crmRender()">
+      <select id="crmCatFilter" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)" onchange="_crmFilter.category=this.value;_crmRender()">${catOpts}</select>
+      ${canEditCrm ? `<button class="btn btn-primary btn-sm" onclick="openCrmContactEdit(null)">+ הוסף איש קשר</button>` : ''}
+    </div>
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:8px">סה"כ ${escapeHtml(String(_crmContacts.length))} אנשי קשר${filtered.length!==_crmContacts.length?` (מציג ${escapeHtml(String(filtered.length))} לאחר סינון)`:''}</div>
+    ${filtered.length ? groupKeys.map(cat => `
+      <div style="margin-bottom:20px">
+        <h4 style="margin:8px 0;color:var(--primary-dark);font-size:1rem;display:flex;align-items:center;gap:6px">🏷️ ${escapeHtml(cat)} <small style="color:var(--muted);font-weight:400">(${escapeHtml(String(groups[cat].length))})</small></h4>
+        <table class="data-table" style="margin:0">
+          <thead><tr><th>שם</th><th>טלפון</th><th>אימייל</th><th>כתובת</th><th>הערות</th>${canEditCrm?'<th style="width:90px"></th>':''}</tr></thead>
+          <tbody>
+            ${groups[cat].map(c => `<tr>
+              <td><strong>${escapeHtml(c.name||'—')}</strong></td>
+              <td dir="ltr" style="font-size:0.9rem">${c.phone ? `<a href="${safeUrl('tel:'+c.phone)}" style="color:var(--primary)">${escapeHtml(c.phone)}</a>` : '—'}</td>
+              <td dir="ltr" style="font-size:0.9rem">${c.email ? `<a href="${safeUrl('mailto:'+c.email)}" style="color:var(--primary)">${escapeHtml(c.email)}</a>` : '—'}</td>
+              <td style="font-size:0.88rem">${escapeHtml(c.address||'—')}</td>
+              <td style="font-size:0.85rem;color:var(--muted);max-width:240px;white-space:normal;line-height:1.4">${escapeHtml(c.notes||'—')}</td>
+              ${canEditCrm?`<td><button class="btn btn-secondary btn-sm" onclick="openCrmContactEdit('${escapeHtml(c.id)}')" style="padding:4px 8px;font-size:0.78rem">✏️</button> <button class="btn btn-secondary btn-sm" onclick="deleteCrmContact('${escapeHtml(c.id)}')" style="padding:4px 8px;font-size:0.78rem;color:var(--danger)">🗑️</button></td>`:''}
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    `).join('') : `<div style="padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:var(--radius)">${_crmContacts.length===0 ? 'אין עדיין אנשי קשר בתוכנית הזו.' : 'לא נמצאו אנשי קשר התואמים את הסינון.'}${canEditCrm && _crmContacts.length===0 ? '<br><button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openCrmContactEdit(null)">+ הוסף איש קשר ראשון</button>' : ''}</div>`}
+  `;
+}
+
+function openCrmContactEdit(contactId) {
+  if (!_crmCurrentProg) return;
+  const me = (currentUser && currentUser.email) || '';
+  const prog = (currentOrgInfo && currentOrgInfo.programs && currentOrgInfo.programs[_crmCurrentProg]) || {};
+  const ca = prog.crmAccess || {};
+  const editors = Array.isArray(ca.editors) ? ca.editors : [];
+  const canEditCrm = userRole === 'admin' || editors.includes(me);
+  if (!canEditCrm) { toast('אין לך הרשאת עריכה ל-CRM זה', 'error'); return; }
+  const categories = Array.isArray(ca.categories) ? ca.categories : [];
+  const c = contactId ? (_crmContacts.find(x => x.id === contactId) || {}) : {};
+  const isNew = !contactId;
+  const catOpts = ['<option value="">— בחר קטגוריה —</option>']
+    .concat(categories.map(cat => `<option value="${escapeHtml(cat)}" ${c.category===cat?'selected':''}>${escapeHtml(cat)}</option>`))
+    .join('');
+  const html = `
+    <div class="form-row">
+      <div class="form-field"><label>👤 שם <span style="color:var(--danger)">*</span></label><input type="text" id="cc_name" value="${escapeHtml(c.name||'')}" required></div>
+      <div class="form-field"><label>🏷️ קטגוריה</label><select id="cc_category">${catOpts}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>📞 טלפון</label><input type="tel" id="cc_phone" value="${escapeHtml(c.phone||'')}" dir="ltr"></div>
+      <div class="form-field"><label>📧 אימייל</label><input type="email" id="cc_email" value="${escapeHtml(c.email||'')}" dir="ltr"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1"><label>🏠 כתובת</label><input type="text" id="cc_address" value="${escapeHtml(c.address||'')}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1"><label>📝 הערות <small style="color:var(--muted);font-weight:400">(הקשר עם התוכנית, פרטים אישיים רלוונטיים, רגישויות)</small></label><textarea id="cc_notes" rows="4">${escapeHtml(c.notes||'')}</textarea></div>
+    </div>
+    ${!isNew && c.createdBy ? `<small style="color:var(--muted)">נוצר ע"י ${escapeHtml(c.createdBy)}${c.updatedBy && c.updatedBy!==c.createdBy ? ` · עודכן לאחרונה ע"י ${escapeHtml(c.updatedBy)}` : ''}</small>` : ''}
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="btn btn-secondary" onclick="closeCrmContactEdit()">ביטול</button>
+      <button class="btn btn-primary" onclick="saveCrmContact('${escapeHtml(contactId||'')}')">💾 שמור</button>
+    </div>
+  `;
+  let modal = document.getElementById('crmContactModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'crmContactModal';
+    modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10002;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+    modal.onclick = (e) => { if (e.target === modal) closeCrmContactEdit(); };
+    modal.innerHTML = `<div style="background:#fff;border-radius:var(--radius);max-width:600px;width:100%;margin-top:30px;padding:24px;border-top:4px solid var(--gold)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 id="crmContactModalTitle" style="margin:0;color:var(--primary)">${isNew?'+ איש קשר חדש':'✏️ עריכת איש קשר'}</h3><button class="btn btn-secondary btn-sm" onclick="closeCrmContactEdit()" aria-label="סגור">✕</button></div><div id="crmContactBody"></div></div>`;
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'flex';
+    document.getElementById('crmContactModalTitle').textContent = isNew ? '+ איש קשר חדש' : '✏️ עריכת איש קשר';
+  }
+  document.getElementById('crmContactBody').innerHTML = html;
+  setTimeout(() => document.getElementById('cc_name')?.focus(), 80);
+}
+
+function closeCrmContactEdit() {
+  const m = document.getElementById('crmContactModal');
+  if (m) m.style.display = 'none';
+}
+
+async function saveCrmContact(contactId) {
+  if (!_crmCurrentProg) return;
+  const name = (document.getElementById('cc_name')?.value || '').trim();
+  if (!name) { toast('שם הוא שדה חובה', 'error'); return; }
+  const me = (currentUser && currentUser.email) || '';
+  const payload = {
+    orgId:      currentOrgId,
+    programKey: _crmCurrentProg,
+    name:       name,
+    category:   (document.getElementById('cc_category')?.value || '').trim(),
+    phone:      (document.getElementById('cc_phone')?.value || '').trim(),
+    email:      (document.getElementById('cc_email')?.value || '').trim(),
+    address:    (document.getElementById('cc_address')?.value || '').trim(),
+    notes:      (document.getElementById('cc_notes')?.value || '').trim(),
+    updatedBy:  me,
+    updatedAt:  firebase.firestore.FieldValue.serverTimestamp()
+  };
+  try {
+    if (typeof isDemoMode === 'function' && isDemoMode()) {
+      toast('במצב דמו לא נשמרים נתונים', 'error'); return;
+    }
+    if (contactId) {
+      await db.collection('programContacts').doc(contactId).update(payload);
+      toast('איש הקשר עודכן ✓');
+    } else {
+      payload.createdBy = me;
+      payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('programContacts').add(payload);
+      toast('איש קשר נוסף ✓');
+    }
+    closeCrmContactEdit();
+    await _crmLoadAndRender();
+  } catch(e) {
+    console.error('[saveCrmContact]', e);
+    toast('שגיאה בשמירה: ' + (e.message||e), 'error');
+  }
+}
+
+async function deleteCrmContact(contactId) {
+  if (!contactId) return;
+  const c = _crmContacts.find(x => x.id === contactId);
+  if (!c) return;
+  if (!confirm(`למחוק את ${c.name || 'איש הקשר'}? פעולה זו אינה ניתנת לביטול.`)) return;
+  try {
+    await db.collection('programContacts').doc(contactId).delete();
+    toast('איש הקשר נמחק');
+    await _crmLoadAndRender();
+  } catch(e) {
+    console.error('[deleteCrmContact]', e);
+    toast('שגיאה במחיקה: ' + (e.message||e), 'error');
+  }
+}
+
 async function saveProgramEdit(key) {
   if (userRole !== 'admin') return;
   const newLabel = document.getElementById('pe_label').value.trim();
@@ -5559,13 +5890,24 @@ async function saveProgramEdit(key) {
     targetAudiences: parseStructured(document.getElementById('pe_audiences')?.value || '', ['name','description']),
     goals:           parseStringLines(document.getElementById('pe_goals')?.value || ''),
     kpis:            parseStringLines(document.getElementById('pe_kpis')?.value || ''),
-    meetings:        parseStructured(document.getElementById('pe_meetings')?.value || '', ['date','title','responsible','notes']),
+    // Meetings: merge basic-edit fields with existing extended fields (drill-down planning shouldn't be wiped by bulk edit)
+    meetings:        (() => {
+      const parsed = parseStructured(document.getElementById('pe_meetings')?.value || '', ['date','title','responsible','notes']);
+      const existing = ((currentOrgInfo && currentOrgInfo.programs && currentOrgInfo.programs[key]) || {}).meetings || [];
+      return parsed.map((m, i) => {
+        const ex = existing[i] || {};
+        // Preserve extended planning fields (id, status, location, expectedAttendees, actualAttendees, lessonsLearned, actionItems, summary)
+        return Object.assign({}, ex, m);
+      });
+    })(),
     openQuestions:   parseStringLines(document.getElementById('pe_questions')?.value || ''),
     testimonials:    parseStructured(document.getElementById('pe_testimonials')?.value || '', ['quote','author']),
-    // NEW r73: events log + audience CRM
-    events:          parseStructured(document.getElementById('pe_events')?.value || '', ['date','title','location','expectedAttendees','actualAttendees','status','lessonsLearned']),
-    contactTypes:    parseStringLines(document.getElementById('pe_contactTypes')?.value || ''),
-    contacts:        parseStructured(document.getElementById('pe_contacts')?.value || '', ['name','phone','email','contactType','address','notes'])
+    // r74: CRM access list (viewers/editors/categories) — actual contact data lives in `programContacts` Firestore collection
+    crmAccess: {
+      viewers:    parseStringLines(document.getElementById('pe_crmViewers')?.value || ''),
+      editors:    parseStringLines(document.getElementById('pe_crmEditors')?.value || ''),
+      categories: parseStringLines(document.getElementById('pe_crmCategories')?.value || '')
+    }
   };
   // Save into currentOrgInfo.programs[key]
   if (!currentOrgInfo) currentOrgInfo = {};
