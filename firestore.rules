@@ -128,6 +128,51 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ===== PROGRAM CONTACTS (per-program CRM) =====
+    // Each program has a granular access list under orgs/{orgId}.programs[key].crmAccess
+    //   { viewers: ['email1', ...], editors: ['email1', ...], categories: ['cat', ...] }
+    // - Viewers can read contacts; editors can read + create + update + delete.
+    // - Admins always have full access.
+    // - Field validation prevents oversized name/phone/email/etc.
+    match /programContacts/{contactId} {
+      function crm(orgId, progKey) {
+        return get(/databases/$(database)/documents/orgs/$(orgId)).data.programs[progKey].crmAccess;
+      }
+      function isCrmEditor(orgId, progKey) {
+        return isSignedIn() && (
+          isAdmin() ||
+          (crm(orgId, progKey).editors is list && myEmail() in crm(orgId, progKey).editors)
+        );
+      }
+      function isCrmViewer(orgId, progKey) {
+        return isSignedIn() && (
+          isAdmin() ||
+          (crm(orgId, progKey).viewers is list && myEmail() in crm(orgId, progKey).viewers) ||
+          (crm(orgId, progKey).editors is list && myEmail() in crm(orgId, progKey).editors)
+        );
+      }
+      function validContact() {
+        return request.resource.data.orgId is string
+          && request.resource.data.programKey is string
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0 && request.resource.data.name.size() < 200
+          && (!('phone'    in request.resource.data) || (request.resource.data.phone    is string && request.resource.data.phone.size()    < 60))
+          && (!('email'    in request.resource.data) || (request.resource.data.email    is string && request.resource.data.email.size()    < 200))
+          && (!('address'  in request.resource.data) || (request.resource.data.address  is string && request.resource.data.address.size()  < 500))
+          && (!('notes'    in request.resource.data) || (request.resource.data.notes    is string && request.resource.data.notes.size()    < 5000))
+          && (!('category' in request.resource.data) || (request.resource.data.category is string && request.resource.data.category.size() < 200));
+      }
+      allow read: if isCrmViewer(resource.data.orgId, resource.data.programKey);
+      allow create: if isCrmEditor(request.resource.data.orgId, request.resource.data.programKey)
+                     && request.resource.data.createdBy == myEmail()
+                     && validContact();
+      allow update: if isCrmEditor(resource.data.orgId, resource.data.programKey)
+                     && request.resource.data.orgId == resource.data.orgId
+                     && request.resource.data.programKey == resource.data.programKey
+                     && validContact();
+      allow delete: if isCrmEditor(resource.data.orgId, resource.data.programKey);
+    }
+
     // Landing-page leads — anyone (unauthenticated) can submit a contact request,
     // only super-admins can read/manage them
     match /leads/{leadId} {
