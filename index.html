@@ -823,7 +823,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <img id="ngoLogoSidebar" src="" alt="" style="height:22px;width:auto">
         <span>Powered by <strong>NGO Core</strong></span>
       </a>
-      <div class="ngocore-version">v2026.05.07-r71</div>
+      <div class="ngocore-version">v2026.05.07-r72</div>
     </div>
   </aside>
 
@@ -2050,7 +2050,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r71 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r72 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -2336,7 +2336,15 @@ function applyOrgLogoToUI() {
   const src = getOrgLogoSrc();
   document.querySelectorAll('img.org-logo').forEach(img => { img.src = src; });
   const loginLogo = document.getElementById('loginLogo');
-  if (loginLogo) loginLogo.innerHTML = `<img src="${src}" alt="לוגו" style="width:80px;height:80px;object-fit:contain">`;
+  if (loginLogo) {
+    // SECURITY: use DOM API instead of innerHTML to prevent attribute-escape XSS via Firestore logoUrl
+    loginLogo.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = safeUrl(src);
+    img.alt = 'לוגו';
+    img.style.cssText = 'width:80px;height:80px;object-fit:contain';
+    loginLogo.appendChild(img);
+  }
 }
 
 
@@ -3868,7 +3876,7 @@ function _renderProgramDetailInner() {
     <div class="page-header">
       <button class="btn btn-secondary btn-sm" onclick="switchSectionByName('dashboard')" style="margin-bottom:8px">← חזרה לדשבורד</button>
       <h1>${label}</h1>
-      <p style="color:var(--muted);margin:4px 0">${info.description || ''}</p>
+      <p style="color:var(--muted);margin:4px 0">${escapeHtml(info.description || '')}</p>
     </div>
 
     ${_canEdit ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">${editBtn}</div>` : ''}
@@ -3892,7 +3900,7 @@ function _renderProgramDetailInner() {
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
           <h3 style="margin:0;color:var(--primary)">✨ חזון התוכנית</h3>${ie('pe_vision','עריכת חזון')}
         </div>
-        <div style="font-size:1.02rem;line-height:1.7;color:var(--dark);font-family:'Frank Ruhl Libre',serif;white-space:pre-wrap">${info.vision}</div>
+        <div style="font-size:1.02rem;line-height:1.7;color:var(--dark);font-family:'Frank Ruhl Libre',serif;white-space:pre-wrap">${escapeHtml(info.vision)}</div>
       </div>`
       : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">לא הוגדר חזון לתוכנית</p>${emptyAdminHint('pe_vision','הוסף חזון')}</div>` : '')}
 
@@ -3904,8 +3912,8 @@ function _renderProgramDetailInner() {
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
           ${(info.targetAudiences||[]).map(a => `
             <div style="background:var(--primary-soft);padding:14px;border-radius:var(--radius-sm);border-right:3px solid var(--primary)">
-              <div style="font-weight:700;color:var(--primary);margin-bottom:6px;font-size:1.02rem">${a.name||''}</div>
-              <div style="font-size:0.92rem;line-height:1.55;color:var(--dark)">${a.description||''}</div>
+              <div style="font-weight:700;color:var(--primary);margin-bottom:6px;font-size:1.02rem">${escapeHtml(a.name||'')}</div>
+              <div style="font-size:0.92rem;line-height:1.55;color:var(--dark)">${escapeHtml(a.description||'')}</div>
             </div>`).join('')}
         </div>
       </div>`
@@ -3916,13 +3924,13 @@ function _renderProgramDetailInner() {
         <div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="margin:0;color:var(--primary)">🎯 מטרות מרכזיות</h3>${ie('pe_goals','עריכת מטרות')}</div>
           ${(info.goals||[]).length
-            ? `<ul style="margin:0;padding-right:20px;line-height:1.7">${(info.goals||[]).map(g => `<li>${g}</li>`).join('')}</ul>`
+            ? `<ul style="margin:0;padding-right:20px;line-height:1.7">${(info.goals||[]).map(g => `<li>${escapeHtml(g)}</li>`).join('')}</ul>`
             : `<p style="color:var(--muted);font-style:italic;margin:0">לא הוגדרו מטרות. ${emptyAdminHint('pe_goals','הוסף מטרות')}</p>`}
         </div>
         <div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="margin:0;color:var(--primary)">📈 מדדי הצלחה (KPIs)</h3>${ie('pe_kpis','עריכת מדדים')}</div>
           ${(info.kpis||[]).length
-            ? `<ul style="margin:0;padding-right:20px;line-height:1.7">${(info.kpis||[]).map(kp => `<li><strong>${kp}</strong></li>`).join('')}</ul>`
+            ? `<ul style="margin:0;padding-right:20px;line-height:1.7">${(info.kpis||[]).map(kp => `<li><strong>${escapeHtml(kp)}</strong></li>`).join('')}</ul>`
             : `<p style="color:var(--muted);font-style:italic;margin:0">לא הוגדרו KPIs. ${emptyAdminHint('pe_kpis','הוסף מדדים')}</p>`}
         </div>
       </div>
@@ -4064,10 +4072,10 @@ function _renderProgramDetailInner() {
           <thead><tr><th style="width:130px">תאריך</th><th>כותרת</th><th>אחראי/ת</th><th>הערה</th></tr></thead>
           <tbody>
             ${(info.meetings||[]).map(m => `<tr>
-              <td><strong style="color:var(--primary)">${m.date||''}</strong></td>
-              <td>${m.title||''}</td>
-              <td>${m.responsible||''}</td>
-              <td><small style="color:var(--muted)">${m.notes||''}</small></td>
+              <td><strong style="color:var(--primary)">${escapeHtml(m.date||'')}</strong></td>
+              <td>${escapeHtml(m.title||'')}</td>
+              <td>${escapeHtml(m.responsible||'')}</td>
+              <td><small style="color:var(--muted)">${escapeHtml(m.notes||'')}</small></td>
             </tr>`).join('')}
           </tbody>
         </table>
@@ -4115,7 +4123,7 @@ function _renderProgramDetailInner() {
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
           <h3 style="margin:0">החלטות שטרם נסגרו</h3>${ie('pe_questions','עריכת נושאים פתוחים')}
         </div>
-        <ul style="margin:0;padding-right:20px;line-height:1.7">${(info.openQuestions||[]).map(q => `<li>${q}</li>`).join('')}</ul>
+        <ul style="margin:0;padding-right:20px;line-height:1.7">${(info.openQuestions||[]).map(q => `<li>${escapeHtml(q)}</li>`).join('')}</ul>
       </div>`
       : (_canEdit ? `
       <h2 style="margin:30px 0 12px;color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--gold);padding-bottom:8px">❓ נושאים פתוחים</h2>
@@ -4134,8 +4142,8 @@ function _renderProgramDetailInner() {
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
           ${(info.testimonials||[]).map(t => `
             <blockquote style="margin:0;padding:14px 18px;background:#fff;border-radius:var(--radius-sm);border-right:3px solid var(--gold);font-style:italic;line-height:1.6">
-              <div style="font-family:'Frank Ruhl Libre',serif;color:var(--dark);font-size:0.97rem">"${t.quote||''}"</div>
-              ${t.author ? `<footer style="margin-top:8px;font-size:0.85rem;color:var(--muted);font-style:normal">— ${t.author}</footer>` : ''}
+              <div style="font-family:'Frank Ruhl Libre',serif;color:var(--dark);font-size:0.97rem">"${escapeHtml(t.quote||'')}"</div>
+              ${t.author ? `<footer style=\"margin-top:8px;font-size:0.85rem;color:var(--muted);font-style:normal\">— ${escapeHtml(t.author)}</footer>` : ''}
             </blockquote>
           `).join('')}
         </div>
@@ -4429,7 +4437,7 @@ async function exportProgramToPDF(progKey, lang) {
   // Meetings table
   const meetingsHtml = meetings.length ? `<h3>${labels.meetingsHdr}</h3><table>
     <thead><tr><th style="width:130px">${lang==='en'?'Date':'תאריך'}</th><th>${lang==='en'?'Title':'כותרת'}</th><th>${lang==='en'?'Responsible':'אחראי/ת'}</th><th>${lang==='en'?'Notes':'הערה'}</th></tr></thead>
-    <tbody>${meetings.map(m => `<tr><td><strong>${m.date||''}</strong></td><td>${m.title||''}</td><td>${m.responsible||''}</td><td><small>${m.notes||''}</small></td></tr>`).join('')}</tbody>
+    <tbody>${meetings.map(m => `<tr><td><strong>${m.date||''}</strong></td><td>${escapeHtml(m.title||'')}</td><td>${escapeHtml(m.responsible||'')}</td><td><small>${m.notes||''}</small></td></tr>`).join('')}</tbody>
   </table>` : '';
 
   // Logic model
@@ -4583,10 +4591,12 @@ function _renderPartnersTable(partners, progKey) {
       const statusBadge = pct >= 100 ? '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:600">הושלם</span>' :
                           pct > 0 ? `<span style="background:var(--gold-soft);color:var(--gold-dark);padding:2px 8px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:600">בתהליך (${pct}%)</span>` :
                           '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:600">בהמתנה</span>';
+      // SECURITY: escape all partner fields (user-editable, stored XSS risk)
+      const typeLabel = PARTNER_TYPE_LABELS[p.type] || p.type || '—';
       return `<tr>
-        <td><strong>${p.name||'—'}</strong>${p.notes?`<br><small style="color:var(--muted)">${p.notes}</small>`:''}</td>
-        <td><span style="background:var(--primary-soft);color:var(--primary-dark);padding:2px 8px;border-radius:var(--radius-pill);font-size:0.78rem">${PARTNER_TYPE_LABELS[p.type]||p.type||'—'}</span></td>
-        <td style="font-size:0.85rem">${p.contactPerson||'—'}</td>
+        <td><strong>${escapeHtml(p.name||'—')}</strong>${p.notes?`<br><small style="color:var(--muted)">${escapeHtml(p.notes)}</small>`:''}</td>
+        <td><span style="background:var(--primary-soft);color:var(--primary-dark);padding:2px 8px;border-radius:var(--radius-pill);font-size:0.78rem">${escapeHtml(typeLabel)}</span></td>
+        <td style="font-size:0.85rem">${escapeHtml(p.contactPerson||'—')}</td>
         <td style="font-family:'Frank Ruhl Libre',serif;font-weight:700;color:var(--primary)">₪${committed.toLocaleString()}<br><small style="color:var(--muted);font-weight:400">≈ $${ilsToUsd(committed).toLocaleString()}</small></td>
         <td style="font-family:'Frank Ruhl Libre',serif;font-weight:600">₪${received.toLocaleString()}<br><small style="color:var(--muted);font-weight:400">≈ $${ilsToUsd(received).toLocaleString()}</small></td>
         <td>${statusBadge}</td>
@@ -6789,10 +6799,11 @@ function openPresentationMode() {
 }
 
 async function renderPublicTransparency(year) {
+  // SECURITY: all Firestore fields below are escaped because this view is public/unauth
   document.body.innerHTML = `<div id="publicRoot" style="font-family:Heebo,system-ui,sans-serif;direction:rtl;background:#f8fafc;min-height:100vh">
     <div style="background:linear-gradient(135deg,#1e3a8a 0%,#3730a3 100%);color:#fff;padding:32px 24px;text-align:center">
-      <h1 style="margin:0 0 8px;font-size:2rem">🏛️ עמותת החשמונאים — שקיפות ציבורית</h1>
-      <div style="opacity:0.85">תוכנית עבודה ופעילות לשנת ${year} · ${ORG_INFO?.name || ''}${ORG_INFO?.registrationNumber?` · ע.ר. ${ORG_INFO.registrationNumber}`:''}</div>
+      <h1 style="margin:0 0 8px;font-size:2rem">🏛️ ${escapeHtml(ORG_INFO?.name || 'עמותה')} — שקיפות ציבורית</h1>
+      <div style="opacity:0.85">תוכנית עבודה ופעילות לשנת ${escapeHtml(String(year))} · ${escapeHtml(ORG_INFO?.name || '')}${ORG_INFO?.registrationNumber?` · ע.ר. ${escapeHtml(ORG_INFO.registrationNumber)}`:''}</div>
     </div>
     <div style="max-width:1100px;margin:0 auto;padding:24px">
       <div id="pubKpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px"></div>
@@ -6836,13 +6847,13 @@ async function renderPublicTransparency(year) {
     const kpis = (a.kpis||[]).map(kp => {
       const pct = kp.target ? Math.min(100, Math.round((kp.current||0)/kp.target*100)) : 0;
       return `<div style="margin-bottom:6px">
-        <div style="display:flex;justify-content:space-between;font-size:0.88rem"><strong>${kp.metric||''}</strong><span>${(kp.current||0).toLocaleString()} / ${(kp.target||0).toLocaleString()} ${kp.unit||''}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.88rem"><strong>${escapeHtml(kp.metric||'')}</strong><span>${(kp.current||0).toLocaleString()} / ${(kp.target||0).toLocaleString()} ${escapeHtml(kp.unit||'')}</span></div>
         <div style="background:#e2e8f0;height:8px;border-radius:4px;margin-top:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6)"></div></div>
       </div>`;
     }).join('') || '<div style="color:#94a3b8;font-size:0.85rem">—</div>';
     return `<div style="background:#fff;padding:20px;border-radius:12px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);border-right:5px solid var(--primary,#3730a3)">
-      <h2 style="margin:0 0 8px;color:#1e3a8a">${PURPOSES[k]||k}</h2>
-      <p style="color:#374151;line-height:1.6;margin:0 0 12px;white-space:pre-wrap">${goalsText}</p>
+      <h2 style="margin:0 0 8px;color:#1e3a8a">${escapeHtml(PURPOSES[k]||k)}</h2>
+      <p style="color:#374151;line-height:1.6;margin:0 0 12px;white-space:pre-wrap">${escapeHtml(goalsText)}</p>
       <div style="margin-top:10px"><strong style="color:#64748b;font-size:0.88rem">📊 מדדי תוצאה</strong>${kpis}</div>
     </div>`;
   }).join('');
@@ -8468,7 +8479,7 @@ async function loadDonors() {
   const canDel = userRole === 'admin' || userRole === 'team';
   tbody.innerHTML = rows.map(r => {
     const creatorCell = creatorUpdaterCell(r);
-    return `<tr><td>${r.name||'—'}</td><td dir="ltr">${r.phone||'—'}</td><td dir="ltr">${r.email||'—'}</td><td class="amount-positive">₪${(r.amount||0).toLocaleString()}</td><td>${PURPOSES[r.purpose]||'—'}</td><td>${creatorCell}</td><td>${canDel?'<button class="btn btn-danger btn-sm" onclick="delDoc(\'donors\',\''+r.id+'\')">מחק</button>':''}</td></tr>`;
+    return `<tr><td>${escapeHtml(r.name||'—')}</td><td dir="ltr">${escapeHtml(r.phone||'—')}</td><td dir="ltr">${escapeHtml(r.email||'—')}</td><td class="amount-positive">₪${(r.amount||0).toLocaleString()}</td><td>${PURPOSES[r.purpose]||'—'}</td><td>${creatorCell}</td><td>${canDel?'<button class="btn btn-danger btn-sm" onclick="delDoc(\'donors\',\''+r.id+'\')">מחק</button>':''}</td></tr>`;
   }).join('');
 }
 
