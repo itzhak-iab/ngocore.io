@@ -823,7 +823,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <img id="ngoLogoSidebar" src="" alt="" style="height:22px;width:auto">
         <span>Powered by <strong>NGO Core</strong></span>
       </a>
-      <div class="ngocore-version">v2026.05.07-r72</div>
+      <div class="ngocore-version">v2026.05.07-r73</div>
     </div>
   </aside>
 
@@ -2050,7 +2050,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r72 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r73 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -4083,6 +4083,88 @@ function _renderProgramDetailInner() {
       : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">לא הוגדר לוח מפגשים</p>${emptyAdminHint('pe_meetings','הוסף לוח מפגשים')}</div>` : '')}
 
     <!-- ============================================================ -->
+    <!-- 📅 SECTION 5.5 — אירועים והפקת לקחים                          -->
+    <!-- ============================================================ -->
+    ${(() => {
+      const evs = info.events || [];
+      if (!evs.length && !_canEdit) return '';
+      const STATUS_BADGE = {
+        planned:    '<span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:600">📅 מתוכנן</span>',
+        done:       '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:600">✓ הסתיים</span>',
+        cancelled:  '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:600">✕ בוטל</span>'
+      };
+      const upcoming = evs.filter(e => (e.status||'planned')==='planned').length;
+      const completed = evs.filter(e => e.status==='done').length;
+      return `
+      <h2 style="margin:30px 0 12px;color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--gold);padding-bottom:8px">📅 אירועים והפקת לקחים</h2>
+      ${evs.length ? `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <h3 style="margin:0">לוח אירועים <small style="color:var(--muted);font-weight:400">· ${escapeHtml(String(upcoming))} מתוכננים · ${escapeHtml(String(completed))} בוצעו</small></h3>
+          ${ie('pe_events','עריכת אירועים')}
+        </div>
+        <table class="data-table" style="margin:0">
+          <thead><tr><th style="width:110px">תאריך</th><th>אירוע</th><th>מיקום</th><th style="text-align:center">משתתפים (צפויים / בפועל)</th><th>סטטוס</th><th>לקחים</th></tr></thead>
+          <tbody>
+            ${evs.map(e => `<tr>
+              <td><strong style="color:var(--primary)">${escapeHtml(e.date||'')}</strong></td>
+              <td><strong>${escapeHtml(e.title||'')}</strong></td>
+              <td style="font-size:0.9rem;color:var(--dark)">${escapeHtml(e.location||'—')}</td>
+              <td style="text-align:center;font-size:0.9rem">${escapeHtml(String(e.expectedAttendees||'—'))} / <strong>${escapeHtml(String(e.actualAttendees||'—'))}</strong></td>
+              <td>${STATUS_BADGE[e.status||'planned'] || STATUS_BADGE.planned}</td>
+              <td style="font-size:0.85rem;color:var(--dark);max-width:280px;white-space:normal;line-height:1.5">${escapeHtml(e.lessonsLearned||'—')}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <p style="color:var(--muted);font-size:0.82rem;margin:10px 0 0">💡 לאחר כל אירוע — מלא את "משתתפים בפועל" ואת "לקחים" לבנות בסיס ידע ארגוני שלא יאבד.</p>
+      </div>` : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">לא תועדו אירועים עדיין</p>${emptyAdminHint('pe_events','תיעוד אירוע ראשון')}</div>` : '')}`;
+    })()}
+
+    <!-- ============================================================ -->
+    <!-- 👥 SECTION 5.7 — קהל היעד: אנשי קשר (CRM)                     -->
+    <!-- ============================================================ -->
+    ${(() => {
+      const cts = info.contacts || [];
+      const types = info.contactTypes || [];
+      if (!cts.length && !types.length && !_canEdit) return '';
+      // Group contacts by type
+      const groups = {};
+      cts.forEach(c => {
+        const t = (c.contactType || 'כללי').trim() || 'כללי';
+        if (!groups[t]) groups[t] = [];
+        groups[t].push(c);
+      });
+      const groupKeys = Object.keys(groups);
+      return `
+      <h2 style="margin:30px 0 12px;color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--gold);padding-bottom:8px">👥 קהל היעד — אנשי קשר</h2>
+      ${cts.length ? `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <h3 style="margin:0">${escapeHtml(String(cts.length))} אנשי קשר${groupKeys.length>1?` · ${escapeHtml(String(groupKeys.length))} סוגים`:''}</h3>
+          ${ie('pe_contacts','עריכת אנשי קשר')}
+        </div>
+        ${groupKeys.map(t => `
+          <div style="margin-bottom:18px">
+            <h4 style="margin:8px 0;color:var(--primary-dark);font-size:1rem">${escapeHtml(t)} <small style="color:var(--muted);font-weight:400">(${escapeHtml(String(groups[t].length))})</small></h4>
+            <table class="data-table" style="margin:0">
+              <thead><tr><th>שם</th><th>טלפון</th><th>אימייל</th><th>כתובת</th><th>הערות</th></tr></thead>
+              <tbody>
+                ${groups[t].map(c => `<tr>
+                  <td><strong>${escapeHtml(c.name||'—')}</strong></td>
+                  <td dir="ltr" style="font-size:0.9rem">${c.phone ? `<a href="${safeUrl('tel:'+c.phone)}" style="color:var(--primary)">${escapeHtml(c.phone)}</a>` : '—'}</td>
+                  <td dir="ltr" style="font-size:0.9rem">${c.email ? `<a href="${safeUrl('mailto:'+c.email)}" style="color:var(--primary)">${escapeHtml(c.email)}</a>` : '—'}</td>
+                  <td style="font-size:0.88rem">${escapeHtml(c.address||'—')}</td>
+                  <td style="font-size:0.85rem;color:var(--muted);max-width:240px;white-space:normal;line-height:1.4">${escapeHtml(c.notes||'—')}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        `).join('')}
+        <p style="color:var(--muted);font-size:0.82rem;margin:6px 0 0">🔒 הנתונים האלה רגישים — נראים רק לחברי צוות עם הרשאת עריכה לתוכנית הזו. לא נכללים ב-PDF שמיוצא לתורמים.</p>
+      </div>` : (_canEdit ? `<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--border)"><p style="margin:0 0 8px;color:var(--muted)">אין אנשי קשר תועדו עדיין</p>${emptyAdminHint('pe_contacts','הוסף איש קשר ראשון')}</div>` : '')}`;
+    })()}
+
+    <!-- ============================================================ -->
     <!-- 📊 SECTION 5 — פעילות פיננסית משויכת לתוכנית                  -->
     <!-- ============================================================ -->
     <h2 style="margin:30px 0 12px;color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--gold);padding-bottom:8px">📊 פעילות פיננסית משויכת לתוכנית</h2>
@@ -5129,6 +5211,29 @@ function openProgramEdit(key) {
       <div class="form-field" style="grid-column:1/-1"><label>💬 עדויות מהשטח <small style="color:var(--muted);font-weight:400">(שורה לכל עדות: <code>הציטוט | מזהה הדובר</code>)</small></label><textarea id="pe_testimonials" rows="3" placeholder='המפגשים החזירו לי את בני | אב לחייל, ירושלים&#10;הבנתי שאני לא לבד | רעית חייל, בני ברק'>${formatStructured(info.testimonials||[],['quote','author']).replace(/<\/textarea>/gi,'')}</textarea></div>
     </div>
 
+    <h4 style="margin:18px 0 10px;color:var(--primary);border-bottom:2px solid var(--gold);padding-bottom:6px">📅 אירועים והפקת לקחים</h4>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1">
+        <label>אירועים <small style="color:var(--muted);font-weight:400">(שורה לאירוע: <code>תאריך | כותרת | מיקום | משתתפים-צפויים | משתתפים-בפועל | סטטוס | לקחים</code> · סטטוס: planned/done/cancelled)</small></label>
+        <textarea id="pe_events" rows="4" placeholder='2026-05-22 | מפגש פתיחה גדוד יונתן | בית הכנסת המרכזי | 30 | 28 | done | המודל של חלוקה לקבוצות קטנות עבד מצוין&#10;2026-06-15 | מפגש שייכות חטיבתי | אולם החטיבה | 80 | | planned |'>${formatStructured(info.events||[],['date','title','location','expectedAttendees','actualAttendees','status','lessonsLearned']).replace(/<\/textarea>/gi,'')}</textarea>
+      </div>
+    </div>
+
+    <h4 style="margin:18px 0 10px;color:var(--primary);border-bottom:2px solid var(--gold);padding-bottom:6px">👥 קהל היעד — אנשי קשר</h4>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1">
+        <label>סוגי אנשי קשר <small style="color:var(--muted);font-weight:400">(אופציונלי, ערך בכל שורה — למשל "נשות סגל", "הורים", "חיילים מנותקי קשר")</small></label>
+        <textarea id="pe_contactTypes" rows="2" placeholder='נשות סגל&#10;הורים&#10;חיילים מנותקי קשר'>${formatStringLines(info.contactTypes||[]).replace(/<\/textarea>/gi,'')}</textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1">
+        <label>אנשי קהל היעד <small style="color:var(--muted);font-weight:400">(שורה לאיש: <code>שם | טלפון | אימייל | סוג | כתובת | הערות</code>)</small></label>
+        <textarea id="pe_contacts" rows="5" placeholder='רחל כהן | 050-1234567 | rachel@example.com | נשות סגל | ירושלים, רח׳ הרצל 12 | אישתו של ר"מ פלוגתי&#10;יצחק לוי | 052-9876543 | | הורים | בני ברק | אב לחייל בגדוד יונתן'>${formatStructured(info.contacts||[],['name','phone','email','contactType','address','notes']).replace(/<\/textarea>/gi,'')}</textarea>
+        <small style="color:var(--muted);display:block;margin-top:4px">💡 הנתונים פרטיים לתוכנית הזו — רואים רק חברי צוות עם הרשאת עריכה לתוכנית, מנהל המערכת, וצופים. <strong>לא ניתן לייצוא ל-PDF</strong> בלי אישור חוזר (הגנת פרטיות).</small>
+      </div>
+    </div>
+
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
       <button class="btn btn-secondary" onclick="closeProgramEdit()">ביטול</button>
       <button class="btn btn-primary" onclick="saveProgramEdit('${key}')">💾 שמור שינויים</button>
@@ -5456,7 +5561,11 @@ async function saveProgramEdit(key) {
     kpis:            parseStringLines(document.getElementById('pe_kpis')?.value || ''),
     meetings:        parseStructured(document.getElementById('pe_meetings')?.value || '', ['date','title','responsible','notes']),
     openQuestions:   parseStringLines(document.getElementById('pe_questions')?.value || ''),
-    testimonials:    parseStructured(document.getElementById('pe_testimonials')?.value || '', ['quote','author'])
+    testimonials:    parseStructured(document.getElementById('pe_testimonials')?.value || '', ['quote','author']),
+    // NEW r73: events log + audience CRM
+    events:          parseStructured(document.getElementById('pe_events')?.value || '', ['date','title','location','expectedAttendees','actualAttendees','status','lessonsLearned']),
+    contactTypes:    parseStringLines(document.getElementById('pe_contactTypes')?.value || ''),
+    contacts:        parseStructured(document.getElementById('pe_contacts')?.value || '', ['name','phone','email','contactType','address','notes'])
   };
   // Save into currentOrgInfo.programs[key]
   if (!currentOrgInfo) currentOrgInfo = {};
