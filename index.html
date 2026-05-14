@@ -66,14 +66,14 @@
 <!-- Content Security Policy: lenient enough to keep inline event handlers (the codebase uses many) but blocks unknown script/style sources -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://*.googleapis.com https://*.firebaseio.com https://www.googletagmanager.com https://browser.sentry-cdn.com;
+  script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://*.googleapis.com https://*.firebaseio.com https://www.googletagmanager.com https://browser.sentry-cdn.com https://accounts.google.com;
   worker-src 'self' blob:;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com data:;
   img-src 'self' data: blob: https:;
   media-src 'self' data: blob: https:;
   connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://firestore.googleapis.com https://www.gstatic.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.cloudfunctions.net https://open.er-api.com https://api.exchangerate-api.com https://api.frankfurter.app https://translate.googleapis.com https://api.mymemory.translated.net https://*.ingest.sentry.io https://*.sentry.io;
-  frame-src 'self' https://*.firebaseapp.com https://*.web.app https://accounts.google.com https://ngocore.io https://www.ngocore.io;
+  frame-src 'self' https://*.firebaseapp.com https://*.web.app https://accounts.google.com https://*.google.com https://ngocore.io https://www.ngocore.io;
   object-src 'none';
   base-uri 'self';
   form-action 'self';
@@ -127,6 +127,11 @@ window.addEventListener('unhandledrejection', e => {
 });
 </script>
 
+<!-- Google Identity Services — modern OAuth, no iframes, FedCM-aware. Used instead of
+     Firebase Auth's signInWithPopup/Redirect (which rely on a third-party iframe to
+     authDomain that Chrome blocks on custom domains). We get an ID token from GIS and
+     hand it to firebase.auth().signInWithCredential() to keep the rest of the app working. -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -865,7 +870,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <img id="ngoLogoSidebar" src="" alt="" style="height:22px;width:auto">
         <span>Powered by <strong>NGO Core</strong></span>
       </a>
-      <div class="ngocore-version">v2026.05.07-r82</div>
+      <div class="ngocore-version">v2026.05.07-r84</div>
     </div>
   </aside>
 
@@ -2102,7 +2107,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r82 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r84 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -2943,6 +2948,10 @@ function _dbg(msg, color) {
   el.scrollTop = el.scrollHeight;
 }
 
+// Google Identity Services OAuth client ID (web). Whitelisted in GCP Console with
+// redirect URIs and JS origins for firebaseapp.com, web.app, ngocore.io.
+const GIS_CLIENT_ID = '996341650604-8hqp8ffl0614r1q6dgrf96h7b88h3tmi.apps.googleusercontent.com';
+
 function signIn() {
   if (_signInInFlight) return;
   _signInInFlight = true;
@@ -2951,47 +2960,108 @@ function signIn() {
   const errEl = document.getElementById('loginError');
   if (errEl) errEl.style.display = 'none';
 
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: 'select_account' });
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+    _signInInFlight = false;
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+    showLoginError('Google Identity Services לא טען', 'בדוק שאין חוסם פרסומות. אנא רענן ונסה שוב.');
+    return;
+  }
 
-  // Popup-first auth flow:
-  // - Popup uses window.postMessage to transfer credentials, which works first-party
-  //   even when authDomain differs from current host.
-  // - signInWithRedirect was failing on custom domains because the post-redirect
-  //   credential transfer relies on a third-party iframe to authDomain, which Chrome
-  //   blocks since 2024. Popup bypasses this entirely.
-  // - If popup is blocked by browser (rare with user gesture), fall back to redirect.
-  _dbg('1️⃣ פותחת popup...', '#0891b2');
+  _dbg('1️⃣ Google Identity Services — מבקש credential...', '#0891b2');
 
-  auth.signInWithPopup(provider)
-    .then((result) => {
-      _signInInFlight = false;
-      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-      _dbg('✅ Popup הצליח! משתמש: ' + (result?.user?.email || '?'), '#16a34a');
-      _dbg('⏳ ממתין ל-onAuthStateChanged...', '#d97706');
-    })
-    .catch(e => {
-      console.error('[signIn]', e);
-      _signInInFlight = false;
-      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-      const code = e?.code || '';
-      _dbg('❌ Popup נכשל: ' + code + ' — ' + (e.message||'').slice(0,80), '#dc2626');
-      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-        showLoginError('הכניסה בוטלה', 'לחץ שוב כדי להתחבר.');
-      } else if (code === 'auth/popup-blocked' || code === 'auth/internal-error') {
-        _dbg('🔁 מנסה redirect כגיבוי...', '#d97706');
-        _signInInFlight = true;
-        try { sessionStorage.setItem('_ngc_redirect_pending', '1'); } catch(_) {}
-        auth.signInWithRedirect(provider).catch(e2 => {
+  try {
+    google.accounts.id.initialize({
+      client_id: GIS_CLIENT_ID,
+      callback: (response) => {
+        if (!response || !response.credential) {
           _signInInFlight = false;
-          showLoginError('שגיאה', e2.message||e2.code);
-        });
-      } else if (code === 'auth/unauthorized-domain' || /requested action is invalid/i.test(e?.message||'')) {
-        showLoginError('הדומיין לא מאושר ב-Firebase', 'הוסף את הדומיין ל-Authorized domains ב-Firebase Console.');
-      } else {
-        showLoginError('שגיאת התחברות', e.message || code);
+          if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+          showLoginError('לא התקבל credential מ-Google', 'נסה שוב.');
+          return;
+        }
+        _dbg('2️⃣ Credential מ-Google התקבל — מעביר ל-Firebase Auth...', '#16a34a');
+        // Convert Google ID token to Firebase credential and sign in
+        const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+        auth.signInWithCredential(credential)
+          .then(r => {
+            _signInInFlight = false;
+            if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+            _dbg('✅ נכנסת! ' + (r?.user?.email || '?'), '#16a34a');
+          })
+          .catch(e => {
+            _signInInFlight = false;
+            if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+            console.error('[signInWithCredential]', e);
+            showLoginError('שגיאה בכניסה ל-Firebase — קוד: ' + (e?.code||'unknown'), (e?.message||'').slice(0,200));
+          });
+      },
+      ux_mode: 'popup',
+      auto_select: false,
+      cancel_on_tap_outside: true,
+      use_fedcm_for_prompt: true
+    });
+    // Trigger the One Tap / account picker prompt
+    google.accounts.id.prompt((notification) => {
+      // If prompt cannot be displayed (e.g., user dismissed it before), fall back to button-rendering flow
+      if (notification.isNotDisplayed && notification.isNotDisplayed()) {
+        const reason = notification.getNotDisplayedReason ? notification.getNotDisplayedReason() : 'unknown';
+        _dbg('⚠️ One Tap לא הוצג: ' + reason + ' — נופל ל-OAuth popup', '#d97706');
+        _gisOAuthPopupFallback(btn);
+      } else if (notification.isSkippedMoment && notification.isSkippedMoment()) {
+        const reason = notification.getSkippedReason ? notification.getSkippedReason() : 'unknown';
+        _dbg('⚠️ One Tap דולג: ' + reason, '#d97706');
       }
     });
+  } catch(e) {
+    _signInInFlight = false;
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+    console.error('[gis-init]', e);
+    showLoginError('שגיאת GIS — ' + (e?.message||''), 'אנא נסה שוב או פנה לתמיכה.');
+  }
+}
+
+// Fallback when GIS One Tap doesn't display (e.g., user previously dismissed it).
+// Uses OAuth2 token client to open Google's account picker as a popup.
+function _gisOAuthPopupFallback(btn) {
+  if (!google.accounts || !google.accounts.oauth2) {
+    _signInInFlight = false;
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+    showLoginError('GIS OAuth2 לא זמין', 'אנא רענן ונסה שוב.');
+    return;
+  }
+  // Request an authorization code + ID token. Use 'implicit' flow to get id_token directly.
+  const tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GIS_CLIENT_ID,
+    scope: 'openid email profile',
+    callback: (resp) => {
+      // We only get an access_token here; we need an ID token. Switch to id-token flow:
+      // Re-prompt via google.accounts.id.prompt with notification: forced
+      // For now, just use the access_token to fetch user info and create a credential.
+      if (!resp || !resp.access_token) {
+        _signInInFlight = false;
+        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+        showLoginError('לא התקבל access token', 'נסה שוב.');
+        return;
+      }
+      _dbg('2️⃣ Access token התקבל — יוצר credential...', '#16a34a');
+      // Firebase Auth requires an ID token, not access token, for GoogleAuthProvider.credential
+      // We use signInWithCredential with the access_token as a fallback:
+      const credential = firebase.auth.GoogleAuthProvider.credential(null, resp.access_token);
+      auth.signInWithCredential(credential)
+        .then(r => {
+          _signInInFlight = false;
+          if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+          _dbg('✅ נכנסת! ' + (r?.user?.email || '?'), '#16a34a');
+        })
+        .catch(e => {
+          _signInInFlight = false;
+          if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+          console.error('[signInWithCredential-access]', e);
+          showLoginError('שגיאה בכניסה ל-Firebase — קוד: ' + (e?.code||'unknown'), (e?.message||'').slice(0,200));
+        });
+    }
+  });
+  tokenClient.requestAccessToken({ prompt: 'select_account' });
 }
 
 // Handle redirect result on page load (for mobile / fallback flow)
@@ -3014,7 +3084,9 @@ function _processRedirectResult() {
     sessionStorage.removeItem('_ngc_redirect_pending');
     console.warn('[auth] redirect result error:', e.code, e.message);
     if (typeof showLoginError === 'function') {
-      showLoginError('שגיאת התחברות', 'אנא נסה שוב. אם זה ממשיך — פתח חלון פרטי.');
+      // Show the actual error code in the UI so we can debug without dev tools
+      showLoginError('שגיאת התחברות — קוד: ' + (e.code||'unknown'),
+        (e.message||'').slice(0, 200) + ' · אם זה ממשיך, פתח חלון פרטי או דווח לתמיכה.');
     }
   });
 }
