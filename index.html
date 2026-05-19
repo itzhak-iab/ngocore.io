@@ -852,7 +852,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     <!-- Admin-only management items -->
     <div class="nav-group-label admin-only" id="navGroupAdmin" style="display:none">ניהול</div>
     <div class="nav-item admin-only" onclick="switchSection('finance',this)" id="navFinance" style="display:none"><span class="icon">💰</span> <span data-i18n="nav.finance">שקיפות פיננסית</span></div>
-    <div class="nav-item admin-only" onclick="switchSection('donors',this)" id="navDonors" style="display:none"><span class="icon">❤️</span> תורמים</div>
+    <div class="nav-item admin-only" onclick="switchSection('donors',this)" id="navDonors" style="display:none"><span class="icon">🤝</span> תורמים ושותפים</div>
     <div class="nav-item admin-only" onclick="switchSection('reports',this)" id="navReports" style="display:none"><span class="icon">📊</span> כל הדיווחים</div>
     <div class="nav-item" onclick="switchSection('team',this)" id="navTeam" style="display:none"><span class="icon">👥</span> ניהול צוות</div>
     <div class="nav-item" onclick="switchSection('settings',this)" id="navSettings" style="display:none"><span class="icon">⚙️</span> הגדרות ארגון</div>
@@ -870,7 +870,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <img id="ngoLogoSidebar" src="" alt="" style="height:22px;width:auto">
         <span>Powered by <strong>NGO Core</strong></span>
       </a>
-      <div class="ngocore-version">v2026.05.07-r85</div>
+      <div class="ngocore-version">v2026.05.07-r86</div>
     </div>
   </aside>
 
@@ -911,7 +911,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
           <div class="kpi clickable" onclick="drillDown('finance','income')" title="לחץ לפירוט הכנסות"><div class="icon">💰</div><div class="label">סך הכנסות</div><div class="value" id="dash-income">₪0</div></div>
           <div class="kpi clickable" onclick="drillDown('finance','expense')" title="לחץ לפירוט הוצאות"><div class="icon">📤</div><div class="label">סך הוצאות</div><div class="value" id="dash-expense">₪0</div></div>
           <div class="kpi clickable" onclick="drillDown('finance')" title="לחץ לפירוט פיננסי"><div class="icon">📊</div><div class="label">יתרה</div><div class="value" id="dash-balance">₪0</div></div>
-          <div class="kpi clickable" onclick="drillDown('donors')" title="לחץ לרשימת תורמים"><div class="icon">❤️</div><div class="label">תורמים</div><div class="value" id="dash-donors">0</div></div>
+          <div class="kpi clickable" onclick="drillDown('donors')" title="לחץ לרשימת תורמים ושותפים"><div class="icon">🤝</div><div class="label">תורמים ושותפים</div><div class="value" id="dash-donors">0</div></div>
           <div class="kpi clickable" onclick="drillDown('reports','this-month')" title="לחץ לדיווחי החודש"><div class="icon">📋</div><div class="label">דיווחים החודש</div><div class="value" id="dash-reports">0</div></div>
           <div class="kpi clickable" onclick="drillDown('tasks','overdue')" title="לחץ למשימות באיחור"><div class="icon">⚠️</div><div class="label">משימות באיחור</div><div class="value" id="dash-tasks-overdue" style="color:var(--danger)">0</div></div>
           <div class="kpi" id="dash-projects" style="display:none">0</div>
@@ -1053,12 +1053,22 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         </div>
       </div>
 
-      <!-- Add Income -->
+      <!-- Notice: income now comes via partners -->
+      <div class="card" style="background:linear-gradient(135deg, #f0f9ff 0%, #faf5ff 100%);border-right:4px solid var(--primary);margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <div style="flex:1;min-width:240px">
+            <strong>💡 הכנסות מנוהלות ב"תורמים ושותפים"</strong>
+            <div style="color:var(--muted);font-size:0.9rem;margin-top:4px">כל תרומה או שותפות מנוהלת תחת שותף ספציפי עם סיכום אוטומטי. רשומות הכנסה בעמוד זה מסתנכרנות אוטומטית כשתסמן "הועבר".</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="switchSectionByName('donors')">🤝 לתורמים ושותפים →</button>
+        </div>
+      </div>
+      <!-- Add Expense -->
       <div class="card" id="finAddCard">
-        <h3>הוסף רשומה חדשה</h3>
+        <h3>הוסף הוצאה</h3>
         <div class="form-row">
-          <div class="form-field"><label>סוג</label>
-            <select id="finType" onchange="toggleFinType()"><option value="income">הכנסה</option><option value="expense">הוצאה</option></select>
+          <div class="form-field" style="display:none"><label>סוג</label>
+            <select id="finType" onchange="toggleFinType()"><option value="expense" selected>הוצאה</option></select>
           </div>
           <div class="form-field" style="flex:2">
             <label>סכום</label>
@@ -1082,8 +1092,8 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
           </div>
         </div>
 
-        <!-- ===== INCOME FIELDS ===== -->
-        <div id="finIncomeExtra">
+        <!-- ===== INCOME FIELDS — HIDDEN. Income flows via Partners section. ===== -->
+        <div id="finIncomeExtra" style="display:none">
           <!-- Income status: committed (pledged) vs received (in pocket) -->
           <div class="form-row" style="background:var(--primary-soft);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:10px">
             <div class="form-field" style="grid-column:1/-1">
@@ -1122,6 +1132,21 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
 
         <!-- ===== EXPENSE FIELDS ===== -->
         <div id="finExpenseExtra" style="display:none">
+          <!-- Was money actually moved? -->
+          <div class="form-row" style="background:#ecfdf5;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid #a7f3d0;margin-bottom:10px">
+            <div class="form-field" style="grid-column:1/-1">
+              <label style="margin-bottom:6px;font-weight:600">💸 האם הכסף ירד בפועל מחשבון העמותה?</label>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:#fff;border:1px solid #a7f3d0;border-radius:var(--radius-sm);flex:1">
+                  <input type="radio" name="finActuallyTransferred" value="true" checked> <strong style="color:#065f46">✅ כן — תנועה בנקאית בפועל</strong>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:#fff;border:1px solid #fde68a;border-radius:var(--radius-sm);flex:1">
+                  <input type="radio" name="finActuallyTransferred" value="false"> <strong style="color:#92400e">⏳ עדיין לא — התחייבות בלבד</strong>
+                </label>
+              </div>
+              <small style="display:block;margin-top:6px;color:var(--muted)">חשוב להבחנה בין מה שהובטח/הוצא לבין מה שאכן עבר דרך חשבון הבנק.</small>
+            </div>
+          </div>
           <div class="form-row" style="background:#fef3c7;padding:10px;border-radius:8px;margin-bottom:10px">
             <div class="form-field" style="grid-column:1/-1">
               <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
@@ -1444,29 +1469,46 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     <!-- DONORS -->
     <div class="section" id="sec-donors">
       <div class="page-header">
-        <h1 data-i18n="page.donors.title">ניהול תורמים</h1>
-        <p>מעקב אחרי תורמים ותרומות</p>
+        <h1>🤝 תורמים ושותפים</h1>
+        <p>קרנות, ספונסרים, תורמים-על ושותפים אסטרטגיים — כולל מעקב אחרי התחייבויות, תרומות בפועל וייעוד לתוכניות.</p>
       </div>
+
+      <!-- Summary KPIs -->
+      <div class="kpi-grid" id="partnerKpis">
+        <div class="kpi"><div class="icon">🤝</div><div class="label">סה״כ שותפים פעילים</div><div class="value" id="dash-partners-count">0</div></div>
+        <div class="kpi"><div class="icon">💰</div><div class="label">סה״כ התחייבויות</div><div class="value" id="dash-partners-committed">₪0</div></div>
+        <div class="kpi"><div class="icon">✅</div><div class="label">הועבר בפועל</div><div class="value" id="dash-partners-received" style="color:var(--success)">₪0</div></div>
+        <div class="kpi"><div class="icon">⏳</div><div class="label">צפוי להגיע</div><div class="value" id="dash-partners-pending" style="color:var(--warning)">₪0</div></div>
+      </div>
+
       <div class="card" id="donorAddCard">
-        <h3>הוסף תורם</h3>
-        <div class="form-row">
-          <div class="form-field"><label>שם</label><input type="text" id="donName" placeholder="שם מלא"></div>
-          <div class="form-field"><label>טלפון</label><input type="tel" id="donPhone" placeholder="05X-XXXXXXX" dir="ltr"></div>
-          <div class="form-field"><label>אימייל</label><input type="email" id="donEmail" placeholder="email@example.com" dir="ltr"></div>
-          <div class="form-field"><label>סכום תרומה (₪)</label><input type="number" id="donAmount" placeholder="0"></div>
-          <div class="form-field"><label>מטרה / תוכנית</label>
-            <select id="donPurpose"><option value="general">כללי</option></select>
-          </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+          <h3 style="margin:0">רשימת תורמים ושותפים</h3>
+          <button class="btn btn-primary" onclick="openPartnerEditor(null)">+ שותף/תורם חדש</button>
         </div>
-        <div class="form-row">
-          <div class="form-field" style="grid-column:1/-1"><label>הערות</label><textarea id="donNotes" placeholder="הערות נוספות..."></textarea></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+          <input type="search" id="partnersSearch" placeholder="🔍 חפש לפי שם, איש קשר, פירוט..." oninput="renderPartners()" style="flex:1;min-width:240px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">
+          <select id="partnersFilterType" onchange="renderPartners()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">
+            <option value="">כל סוגי השותפות</option>
+            <option value="monetary">תרומה כספית</option>
+            <option value="program-execution">שותפות במימוש תוכנית</option>
+            <option value="in-kind">תרומת שווה כסף</option>
+            <option value="other">אחר</option>
+          </select>
+          <select id="partnersFilterProgram" onchange="renderPartners()" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)">
+            <option value="">כל התוכניות</option>
+          </select>
         </div>
-        <button class="btn btn-primary" onclick="addDonor()">+ הוסף תורם</button>
-      </div>
-      <div class="card">
-        <h3>רשימת תורמים</h3>
         <table class="data-table">
-          <thead><tr><th>שם</th><th>טלפון</th><th>אימייל</th><th>סה״כ תרומות</th><th>מטרה</th><th>נרשם ע״י</th><th>פעולות</th></tr></thead>
+          <thead><tr>
+            <th>שם השותף/תורם</th>
+            <th>סוג השותפות</th>
+            <th>ייעוד</th>
+            <th style="text-align:left">סה״כ התחייבות</th>
+            <th style="text-align:left">הועבר בפועל</th>
+            <th>גורם מלווה</th>
+            <th></th>
+          </tr></thead>
           <tbody id="donTableBody"><tr><td colspan="7" class="empty-state">טוען...</td></tr></tbody>
         </table>
       </div>
@@ -2107,7 +2149,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r85 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r86 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -3552,87 +3594,111 @@ async function submitNewOrgOnboarding() {
   }
 }
 
+// Resilient post-auth flow. The previous version called auth.signOut() on every
+// transient Firestore error, which caused a login-loop: user authenticates →
+// Firestore read fails → signOut → back to landing → user tries again → loop.
+// Now: errors keep the user signed-in and show a retry banner so they're never
+// bounced back to landing after a successful Google authentication.
+let _authFlowRetryCount = 0;
+async function _runPostAuthFlow(user) {
+  if (typeof _dbg === 'function') _dbg('3️⃣ קורא team doc עבור: ' + user.email, '#0891b2');
+  let teamDoc;
+  try {
+    teamDoc = await db.collection('team').doc(user.email).get();
+    if (typeof _dbg === 'function') _dbg('4️⃣ team doc exists=' + teamDoc.exists, teamDoc.exists ? '#16a34a' : '#d97706');
+  } catch(e) {
+    console.error('Firestore team read error:', e);
+    if (typeof _dbg === 'function') _dbg('❌ team read error: ' + e.message, '#dc2626');
+    // Auto-retry once (transient network issues), then show recoverable banner
+    if (_authFlowRetryCount === 0) {
+      _authFlowRetryCount++;
+      _dbg('🔁 ניסיון אוטומטי שני...', '#d97706');
+      await new Promise(r => setTimeout(r, 1500));
+      return _runPostAuthFlow(user);
+    }
+    // Keep the user signed in. Show recoverable banner with retry button.
+    _showAuthFlowError(user, 'שגיאה בקריאת פרטי הצוות מ-Firestore', e.message || e.code || '');
+    return;
+  }
+
+  if (!teamDoc.exists) {
+    if (typeof _dbg === 'function') _dbg('⚠️ אין team doc — מציג onboarding לארגון חדש', '#d97706');
+    showOnboardingForm(user);
+    return;
+  }
+
+  const td = teamDoc.data();
+  userRole = td.role;
+  window.userRoleTitle = td.roleTitle || ROLES[td.role] || td.role || '';
+  window.userPermission = td.permission || _legacyRoleToPermission(td.role);
+  currentOrgId = td.orgId || DEFAULT_ORG_ID;
+  // Best-effort profile sync — never throw out of this if it fails
+  try {
+    const upd = { name: user.displayName, photo: user.photoURL };
+    if (!td.orgId) upd.orgId = DEFAULT_ORG_ID;
+    await db.collection('team').doc(user.email).update(upd);
+  } catch(e) { console.warn('[team update]', e?.code); }
+
+  if (typeof _dbg === 'function') _dbg('5️⃣ טוען org info...', '#0891b2');
+  try { await loadOrgInfo(); }
+  catch(e) { console.warn('[loadOrgInfo]', e); /* non-fatal — fall through */ }
+
+  if (typeof _dbg === 'function') _dbg('6️⃣ מעלה את האפליקציה...', '#16a34a');
+  try {
+    showApp(user);
+    _authFlowRetryCount = 0;
+  } catch(e) {
+    console.error('[showApp]', e);
+    _showAuthFlowError(user, 'שגיאה בהצגת האפליקציה', e.message || '');
+  }
+}
+
+function _showAuthFlowError(user, title, detail) {
+  // Show a banner over the landing page WITHOUT signing the user out.
+  // User can click retry to try again, or sign out manually.
+  const ls = document.getElementById('loginScreen');
+  if (ls) ls.style.display = '';
+  const app = document.getElementById('app');
+  if (app) app.style.display = 'none';
+  // Inject a recoverable error banner
+  let banner = document.getElementById('authFlowErrorBanner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'authFlowErrorBanner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#fef2f2;border-bottom:2px solid #dc2626;padding:14px 20px;z-index:10000;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:Heebo,sans-serif;direction:rtl';
+    document.body.appendChild(banner);
+  }
+  banner.innerHTML = `
+    <div style="flex:1;min-width:240px">
+      <strong style="color:#dc2626">⚠️ ${escapeHtml(title)}</strong>
+      <div style="color:#7f1d1d;font-size:0.88rem;margin-top:4px">${escapeHtml(detail || 'אנא נסה שוב.')} · מחובר בתור: <code>${escapeHtml(user.email||'')}</code></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="_authFlowRetryCount=0;_runPostAuthFlow(currentUser).then(() => { const b=document.getElementById('authFlowErrorBanner'); if(b) b.remove(); })" style="padding:8px 16px;background:#dc2626;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">🔁 נסה שוב</button>
+      <button onclick="signOutUser()" style="padding:8px 16px;background:#fff;color:#374151;border:1px solid #d1d5db;border-radius:6px;cursor:pointer">התנתק</button>
+    </div>`;
+  banner.style.display = 'flex';
+}
+
 auth.onAuthStateChanged(async user => {
   if (typeof _dbg === 'function') _dbg('2️⃣ onAuthStateChanged: user=' + (user?.email || 'NULL'), user ? '#16a34a' : '#dc2626');
-  // Demo mode — bypass auth flow entirely
   if (isDemoMode()) return;
-  // Public routes (transparency / presentation) — render without login
   try {
     if (typeof checkPublicRoute === 'function' && checkPublicRoute()) return;
   } catch(e) { console.warn('[publicRoute]', e); }
   if (!user) {
     document.getElementById('loginScreen').style.display = '';
     document.getElementById('app').style.display = 'none';
+    // Clear any error banner from a previous session
+    const b = document.getElementById('authFlowErrorBanner'); if (b) b.remove();
     return;
   }
   currentUser = user;
   console.log('Auth: user=', user.email);
-  if (typeof _dbg === 'function') _dbg('3️⃣ קורא team doc עבור: ' + user.email, '#0891b2');
-
-  try {
-    // Check if user has access
-    let teamDoc;
-    try {
-      teamDoc = await db.collection('team').doc(user.email).get();
-      if (typeof _dbg === 'function') _dbg('4️⃣ team doc exists=' + teamDoc.exists, teamDoc.exists ? '#16a34a' : '#d97706');
-    } catch(e) {
-      console.error('Firestore team read error:', e);
-      if (typeof _dbg === 'function') _dbg('❌ team read error: ' + e.message, '#dc2626');
-      // SECURITY: do NOT silently grant admin on read errors. Show the access-denied screen
-      // and force re-auth. The previous behaviour was a critical privilege-escalation vector.
-      document.getElementById('loginScreen').style.display = '';
-      const ad = document.getElementById('accessDenied');
-      if (ad) {
-        ad.style.display = 'block';
-        ad.querySelector('p').textContent = '⛔ שגיאה בטעינת ההרשאה. נסה להתחבר מחדש.';
-      }
-      try { auth.signOut(); } catch(_) {}
-      return;
-    }
-
-    if (!teamDoc.exists) {
-      if (typeof _dbg === 'function') _dbg('⚠️ אין team doc — מציג onboarding לארגון חדש', '#d97706');
-      // SaaS self-service: this user has no org yet → show onboarding form to create one.
-      // (super-admins of the platform are already added via team doc)
-      showOnboardingForm(user);
-      return;
-    } else {
-      const td = teamDoc.data();
-      userRole = td.role;
-      // Capture display title (free-text "תפקיד") and explicit permission, with legacy fallbacks
-      window.userRoleTitle = td.roleTitle || ROLES[td.role] || td.role || '';
-      window.userPermission = td.permission || _legacyRoleToPermission(td.role);
-      // Set the user's org. Legacy users without orgId default to DEFAULT_ORG_ID and get backfilled.
-      currentOrgId = td.orgId || DEFAULT_ORG_ID;
-      // Update photo/name silently + backfill orgId if missing
-      try {
-        const upd = { name: user.displayName, photo: user.photoURL };
-        if (!td.orgId) upd.orgId = DEFAULT_ORG_ID;
-        await db.collection('team').doc(user.email).update(upd);
-      } catch(e) {}
-    }
-
-    // Load the org info doc (name, registration, custom areas, branding...)
-    if (typeof _dbg === 'function') _dbg('5️⃣ טוען org info...', '#0891b2');
-    await loadOrgInfo();
-    if (typeof _dbg === 'function') _dbg('6️⃣ מעלה את האפליקציה...', '#16a34a');
-
-    showApp(user);
-  } catch(e) {
-    console.error('Auth flow error:', e);
-    if (typeof _dbg === 'function') _dbg('❌ Auth flow error: ' + (e.message||''), '#dc2626');
-    // Hard fail: show a clean error UI instead of silently auto-granting admin
-    // (the previous hardcoded i.barkai7@gmail.com override was a security risk —
-    // any Firestore-read failure would have escalated privileges).
-    if (typeof showLoginError === 'function') {
-      showLoginError('שגיאה בטעינת חשבון',
-        'לא הצלחנו לטעון את פרטי המשתמש שלך. נסה לרענן. אם הבעיה נמשכת — פנה למנהל המערכת.');
-    } else {
-      alert('שגיאה בטעינת חשבון: ' + (e.message||'unknown'));
-    }
-    // Force a sign-out so the user sees the login screen again rather than a broken state
-    try { auth.signOut(); } catch(_) {}
-  }
+  // Hide login screen immediately to avoid the user seeing it while we load.
+  // If something fails, the error banner appears over the landing — never bounced.
+  _authFlowRetryCount = 0;
+  await _runPostAuthFlow(user);
 });
 
 function showApp(user) {
@@ -6680,6 +6746,11 @@ function creatorUpdaterCell(r, opts) {
 }
 
 async function loadFinance() {
+  // Ensure the form defaults to expense (income now flows via partners)
+  try {
+    const t = document.getElementById('finType');
+    if (t) { t.value = 'expense'; toggleFinType(); }
+  } catch(e) {}
   const snap = await db.collection('finance').orderBy('createdAt','desc').get();
   let totalInc = 0, totalExp = 0, totalSalary = 0;
   const rows = [];
@@ -6912,6 +6983,9 @@ async function addFinRecord() {
       record.purchaseDate = purchaseDate;
       if (paymentDate) record.paymentDate = paymentDate;
       record.description = document.getElementById('finDescription').value.trim();
+      // NEW: did the money actually move? (true = bank transaction, false = commitment only)
+      const transferredRaw = document.querySelector('input[name="finActuallyTransferred"]:checked')?.value;
+      record.actuallyTransferred = transferredRaw === 'true' || transferredRaw === undefined; // default true
 
       // Salary tracking
       const isSal = document.getElementById('finIsSalary')?.checked;
@@ -9060,40 +9134,389 @@ function printPlugaReport(id) {
   }, 800);
 }
 
-// ===== DONORS =====
+// ===== PARTNERS & DONORS =====
+// New richer model (backward-compatible with legacy donors collection):
+//   { name, partnershipType, allocation (programKey), details,
+//     contactPerson:{name,phone,email}, ngoLiaison (team email),
+//     donations:[{id,date,amount,currency,purpose,transferred,transferDate,notes,addedBy,addedAt}],
+//     createdBy/At, updatedBy/At, orgId }
+// Legacy docs with {amount,phone,email,purpose} are auto-migrated to a single-donation array.
+
+const PARTNERSHIP_TYPES = {
+  'monetary':           'תרומה כספית',
+  'program-execution':  'שותפות במימוש תוכנית',
+  'in-kind':            'תרומת שווה כסף',
+  'other':              'אחר'
+};
+const PARTNERSHIP_TYPE_ICONS = {
+  'monetary':           '💵',
+  'program-execution':  '🤝',
+  'in-kind':            '🎁',
+  'other':              '📝'
+};
+
+let _partnersCache = [];
+
+function _migrateLegacyPartner(d) {
+  // Convert legacy {amount, phone, email, purpose, notes} → new shape with single donation
+  if (Array.isArray(d.donations)) return d; // already migrated
+  const legacyAmount = Number(d.amount) || 0;
+  const out = Object.assign({}, d);
+  out.partnershipType = out.partnershipType || (legacyAmount > 0 ? 'monetary' : 'other');
+  out.allocation = out.allocation || d.purpose || '';
+  out.details = out.details || d.notes || '';
+  out.contactPerson = out.contactPerson || {
+    name: d.contactName || '',
+    phone: d.phone || '',
+    email: d.email || ''
+  };
+  out.ngoLiaison = out.ngoLiaison || '';
+  out.donations = legacyAmount > 0 ? [{
+    id: 'leg_' + Date.now().toString(36),
+    date: '', amount: legacyAmount, currency: 'ILS',
+    purpose: out.allocation, transferred: !!d.transferred,
+    transferDate: '', notes: 'מיובא מרשומה ישנה',
+    addedBy: d.createdBy || '', addedAt: null
+  }] : [];
+  return out;
+}
+
+function _partnerTotals(p) {
+  const donations = Array.isArray(p.donations) ? p.donations : [];
+  const committed = donations.reduce((s, x) => s + (Number(x.amount)||0) * (x.currency === 'USD' ? (window._fxRate || 3.7) : 1), 0);
+  const received  = donations.filter(x => x.transferred).reduce((s, x) => s + (Number(x.amount)||0) * (x.currency === 'USD' ? (window._fxRate || 3.7) : 1), 0);
+  return { committed, received, pending: committed - received, count: donations.length };
+}
+
 async function loadDonors() {
-  const snap = await db.collection('donors').orderBy('createdAt','desc').get();
-  const rows = [];
-  snap.forEach(doc => { const d = doc.data(); if (_orgMatch(d)) rows.push({id: doc.id, ...d}); });
-  document.getElementById('dash-donors').textContent = rows.length;
+  // Load all partners, migrate legacy shape, render
+  try {
+    const snap = await db.collection('donors').orderBy('createdAt','desc').get();
+    _partnersCache = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (!_orgMatch(d)) return;
+      _partnersCache.push(Object.assign(_migrateLegacyPartner(d), { id: doc.id }));
+    });
+  } catch(e) {
+    console.error('[loadDonors]', e);
+    _partnersCache = [];
+  }
+  document.getElementById('dash-donors').textContent = _partnersCache.length;
+  _populatePartnerProgramFilter();
+  renderPartners();
+  _renderPartnerKpis();
+}
+
+function _renderPartnerKpis() {
+  let totalCommitted = 0, totalReceived = 0;
+  _partnersCache.forEach(p => {
+    const t = _partnerTotals(p);
+    totalCommitted += t.committed;
+    totalReceived += t.received;
+  });
+  document.getElementById('dash-partners-count').textContent = _partnersCache.length;
+  document.getElementById('dash-partners-committed').textContent = '₪' + Math.round(totalCommitted).toLocaleString();
+  document.getElementById('dash-partners-received').textContent = '₪' + Math.round(totalReceived).toLocaleString();
+  document.getElementById('dash-partners-pending').textContent = '₪' + Math.round(totalCommitted - totalReceived).toLocaleString();
+}
+
+function _populatePartnerProgramFilter() {
+  const sel = document.getElementById('partnersFilterProgram');
+  if (!sel) return;
+  const current = sel.value;
+  const areas = (currentOrgInfo && currentOrgInfo.areas) || [];
+  sel.innerHTML = '<option value="">כל התוכניות</option>' +
+    areas.map(a => `<option value="${escapeHtml(a.key)}">${escapeHtml(a.label)}</option>`).join('');
+  sel.value = current || '';
+}
+
+function renderPartners() {
+  const q = (document.getElementById('partnersSearch')?.value || '').trim().toLowerCase();
+  const filterType = document.getElementById('partnersFilterType')?.value || '';
+  const filterProgram = document.getElementById('partnersFilterProgram')?.value || '';
+  const filtered = _partnersCache.filter(p => {
+    if (filterType && (p.partnershipType||'') !== filterType) return false;
+    if (filterProgram && (p.allocation||'') !== filterProgram) return false;
+    if (q) {
+      const hay = ((p.name||'') + ' ' + (p.details||'') + ' ' + ((p.contactPerson&&p.contactPerson.name)||'')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
   const tbody = document.getElementById('donTableBody');
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">אין תורמים</td></tr>'; return; }
-  const canDel = userRole === 'admin' || userRole === 'team';
-  tbody.innerHTML = rows.map(r => {
-    const creatorCell = creatorUpdaterCell(r);
-    return `<tr><td>${escapeHtml(r.name||'—')}</td><td dir="ltr">${escapeHtml(r.phone||'—')}</td><td dir="ltr">${escapeHtml(r.email||'—')}</td><td class="amount-positive">₪${(r.amount||0).toLocaleString()}</td><td>${PURPOSES[r.purpose]||'—'}</td><td>${creatorCell}</td><td>${canDel?'<button class="btn btn-danger btn-sm" onclick="delDoc(\'donors\',\''+r.id+'\')">מחק</button>':''}</td></tr>`;
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">אין שותפים שתואמים את הסינון</td></tr>';
+    return;
+  }
+  const canEdit = userRole === 'admin' || userRole === 'team';
+  const areas = (currentOrgInfo && currentOrgInfo.areas) || [];
+  const areaLabel = (k) => (areas.find(a => a.key === k)?.label) || k || '—';
+  const teamCache = window.teamCache || [];
+  const teamLabel = (email) => {
+    const t = teamCache.find(x => x.email === email);
+    return t ? (t.name || email) : (email || '—');
+  };
+  tbody.innerHTML = filtered.map(p => {
+    const t = _partnerTotals(p);
+    const typeLabel = (PARTNERSHIP_TYPE_ICONS[p.partnershipType]||'') + ' ' + (PARTNERSHIP_TYPES[p.partnershipType]||'—');
+    return `<tr onclick="openPartnerEditor('${escapeHtml(p.id)}')" style="cursor:pointer" onmouseover="this.style.background='var(--bg-soft,#f6f7fb)'" onmouseout="this.style.background=''">
+      <td><strong>${escapeHtml(p.name||'—')}</strong>${p.contactPerson && p.contactPerson.name ? `<br><small style="color:var(--muted)">${escapeHtml(p.contactPerson.name)}</small>` : ''}</td>
+      <td>${escapeHtml(typeLabel)}</td>
+      <td>${escapeHtml(areaLabel(p.allocation))}</td>
+      <td class="amount-positive" style="text-align:left">₪${Math.round(t.committed).toLocaleString()}<br><small style="color:var(--muted)">${escapeHtml(String(t.count))} תרומות</small></td>
+      <td style="text-align:left;color:var(--success)">₪${Math.round(t.received).toLocaleString()}${t.pending>0?`<br><small style="color:var(--warning)">₪${Math.round(t.pending).toLocaleString()} ממתינים</small>`:''}</td>
+      <td>${escapeHtml(teamLabel(p.ngoLiaison))}</td>
+      <td style="text-align:left;font-size:1.2rem;color:var(--muted)">›</td>
+    </tr>`;
   }).join('');
 }
 
-async function addDonor() {
-  const name = document.getElementById('donName').value.trim();
-  const phone = document.getElementById('donPhone').value.trim();
-  const email = document.getElementById('donEmail').value.trim();
-  const amount = parseInt(document.getElementById('donAmount').value) || 0;
-  const purpose = document.getElementById('donPurpose').value;
-  const notes = document.getElementById('donNotes').value.trim();
-  if (!name) { toast('יש להזין שם','error'); return; }
-  try {
-    const docRef = await db.collection('donors').add({ orgId: currentOrgId, name, phone, email, amount, purpose, notes, createdBy: currentUser.email, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    console.log('[SAVE OK] donors doc id:', docRef.id);
-    ['donName','donPhone','donEmail','donAmount','donNotes'].forEach(id => document.getElementById(id).value = '');
-    toast('תורם נוסף (ID: ' + docRef.id.substring(0,8) + ')');
-    loadDonors();
-  } catch(e) {
-    console.error('[SAVE FAIL] donors:', e);
-    toast('שגיאה בשמירת תורם: ' + (e.message||e), 'error');
+// === PARTNER EDITOR MODAL ===
+let _partnerEditorId = null;
+let _partnerEditorDonations = [];
+
+async function openPartnerEditor(partnerId) {
+  _partnerEditorId = partnerId;
+  let p = {};
+  if (partnerId) {
+    p = _partnersCache.find(x => x.id === partnerId) || {};
+  }
+  _partnerEditorDonations = Array.isArray(p.donations) ? p.donations.map(d => Object.assign({}, d)) : [];
+
+  // Make sure team cache is loaded (for ngoLiaison dropdown)
+  if (!window.teamCache || !window.teamCache.length) {
+    try {
+      const ts = await db.collection('team').get();
+      window.teamCache = ts.docs.map(d => Object.assign({email: d.id}, d.data())).filter(t => _orgMatch(t));
+    } catch(e) { window.teamCache = []; }
+  }
+  const teamOptions = (window.teamCache || []).map(t =>
+    `<option value="${escapeHtml(t.email)}" ${p.ngoLiaison===t.email?'selected':''}>${escapeHtml(t.name||t.email)} ${t.roleTitle?`(${escapeHtml(t.roleTitle)})`:''}</option>`
+  ).join('');
+  const areas = (currentOrgInfo && currentOrgInfo.areas) || [];
+  const areaOptions = areas.map(a =>
+    `<option value="${escapeHtml(a.key)}" ${p.allocation===a.key?'selected':''}>${escapeHtml(a.label)}</option>`
+  ).join('');
+  const typeOptions = Object.entries(PARTNERSHIP_TYPES).map(([v, l]) =>
+    `<option value="${v}" ${p.partnershipType===v?'selected':''}>${PARTNERSHIP_TYPE_ICONS[v]} ${l}</option>`
+  ).join('');
+
+  const html = `
+    <div class="form-row">
+      <div class="form-field"><label>שם השותף/תורם <span style="color:var(--danger)">*</span></label><input type="text" id="pe_name" value="${escapeHtml(p.name||'')}" required></div>
+      <div class="form-field"><label>סוג השותפות</label><select id="pe_type"><option value="">— בחר —</option>${typeOptions}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>ייעוד (תוכנית)</label><select id="pe_allocation"><option value="">כללי</option>${areaOptions}</select></div>
+      <div class="form-field"><label>גורם מלווה (מהצוות)</label><select id="pe_liaison"><option value="">— בחר —</option>${teamOptions}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1"><label>פירוט השותפות/תרומה</label><textarea id="pe_details" rows="2">${escapeHtml(p.details||'')}</textarea></div>
+    </div>
+
+    <h4 style="margin:18px 0 8px;color:var(--primary);border-bottom:2px solid var(--gold);padding-bottom:6px">👤 איש קשר</h4>
+    <div class="form-row">
+      <div class="form-field"><label>שם</label><input type="text" id="pe_cp_name" value="${escapeHtml((p.contactPerson&&p.contactPerson.name)||'')}"></div>
+      <div class="form-field"><label>טלפון</label><input type="tel" id="pe_cp_phone" value="${escapeHtml((p.contactPerson&&p.contactPerson.phone)||'')}" dir="ltr"></div>
+      <div class="form-field"><label>אימייל</label><input type="email" id="pe_cp_email" value="${escapeHtml((p.contactPerson&&p.contactPerson.email)||'')}" dir="ltr"></div>
+    </div>
+
+    <h4 style="margin:18px 0 8px;color:var(--primary);border-bottom:2px solid var(--gold);padding-bottom:6px">💰 תרומות / העברות</h4>
+    <div id="pe_donations_list"></div>
+    <button class="btn btn-secondary btn-sm" onclick="_addPartnerDonation()" style="margin-top:8px">+ הוסף תרומה</button>
+
+    <div id="pe_totals" style="margin:16px 0 8px;padding:10px 14px;background:#f0f9ff;border-right:4px solid var(--primary);border-radius:var(--radius-sm);font-size:0.95rem"></div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="btn btn-secondary" onclick="closePartnerEditor()">ביטול</button>
+      ${partnerId && (userRole==='admin') ? `<button class="btn btn-danger" onclick="deletePartner('${escapeHtml(partnerId)}')">🗑️ מחק</button>` : ''}
+      <button class="btn btn-primary" onclick="savePartner()">💾 שמור</button>
+    </div>
+  `;
+  let modal = document.getElementById('partnerEditorModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'partnerEditorModal';
+    modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10001;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+    modal.onclick = (e) => { if (e.target === modal) closePartnerEditor(); };
+    modal.innerHTML = `<div style="background:#fff;border-radius:var(--radius);max-width:780px;width:100%;margin-top:20px;padding:24px;border-top:4px solid var(--gold)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 id="peTitle" style="margin:0;color:var(--primary)">🤝 שותף/תורם</h3><button class="btn btn-secondary btn-sm" onclick="closePartnerEditor()" aria-label="סגור">✕</button></div><div id="peBody"></div></div>`;
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'flex';
+  }
+  document.getElementById('peTitle').textContent = partnerId ? '✏️ עריכת ' + (p.name||'שותף') : '🤝 שותף/תורם חדש';
+  document.getElementById('peBody').innerHTML = html;
+  _renderPartnerDonationsEditor();
+}
+
+function closePartnerEditor() {
+  const m = document.getElementById('partnerEditorModal');
+  if (m) m.style.display = 'none';
+  _partnerEditorId = null;
+  _partnerEditorDonations = [];
+}
+
+function _addPartnerDonation() {
+  _partnerEditorDonations.push({
+    id: 'd_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6),
+    date: new Date().toISOString().slice(0,10),
+    amount: 0, currency: 'ILS', purpose: '', transferred: false, transferDate: '', notes: ''
+  });
+  _renderPartnerDonationsEditor();
+}
+
+function _removePartnerDonation(idx) {
+  if (!confirm('להסיר תרומה זו?')) return;
+  _partnerEditorDonations.splice(idx, 1);
+  _renderPartnerDonationsEditor();
+}
+
+function _updatePartnerDonationField(idx, field, value) {
+  if (!_partnerEditorDonations[idx]) return;
+  if (field === 'transferred') _partnerEditorDonations[idx][field] = (value === 'true' || value === true);
+  else _partnerEditorDonations[idx][field] = value;
+  _renderPartnerDonationsTotals();
+}
+
+function _renderPartnerDonationsEditor() {
+  const wrap = document.getElementById('pe_donations_list');
+  if (!wrap) return;
+  if (!_partnerEditorDonations.length) {
+    wrap.innerHTML = '<p style="color:var(--muted);padding:14px;text-align:center;border:1px dashed var(--border);border-radius:var(--radius-sm);margin:0">אין תרומות עדיין. לחץ "הוסף תרומה" למטה.</p>';
+    _renderPartnerDonationsTotals();
+    return;
+  }
+  wrap.innerHTML = _partnerEditorDonations.map((d, i) => `
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;background:#fafbfc">
+      <div style="display:grid;grid-template-columns:120px 100px 80px 1fr 110px auto;gap:8px;align-items:end">
+        <div><label style="font-size:0.78rem;color:var(--muted)">תאריך</label><input type="date" value="${escapeHtml(d.date||'')}" onchange="_updatePartnerDonationField(${i},'date',this.value)" style="width:100%"></div>
+        <div><label style="font-size:0.78rem;color:var(--muted)">סכום</label><input type="number" value="${escapeHtml(String(d.amount||0))}" onchange="_updatePartnerDonationField(${i},'amount',Number(this.value)||0)" style="width:100%"></div>
+        <div><label style="font-size:0.78rem;color:var(--muted)">מטבע</label><select onchange="_updatePartnerDonationField(${i},'currency',this.value)" style="width:100%"><option value="ILS" ${d.currency!=='USD'?'selected':''}>₪</option><option value="USD" ${d.currency==='USD'?'selected':''}>$</option></select></div>
+        <div><label style="font-size:0.78rem;color:var(--muted)">מטרה ספציפית</label><input type="text" value="${escapeHtml(d.purpose||'')}" onchange="_updatePartnerDonationField(${i},'purpose',this.value)" placeholder="לדוגמה: ערב בנות זוג" style="width:100%"></div>
+        <div><label style="font-size:0.78rem;color:var(--muted)">הועבר לעמותה?</label><select onchange="_updatePartnerDonationField(${i},'transferred',this.value)" style="width:100%;background:${d.transferred?'#dcfce7':'#fef9c3'}"><option value="false" ${!d.transferred?'selected':''}>⏳ לא עדיין</option><option value="true" ${d.transferred?'selected':''}>✅ כן</option></select></div>
+        <div><button class="btn btn-secondary btn-sm" onclick="_removePartnerDonation(${i})" style="padding:6px 10px;color:var(--danger)" title="הסר">🗑️</button></div>
+      </div>
+      ${d.transferred ? `<div style="margin-top:6px"><label style="font-size:0.78rem;color:var(--muted)">תאריך העברה</label><input type="date" value="${escapeHtml(d.transferDate||'')}" onchange="_updatePartnerDonationField(${i},'transferDate',this.value)" style="width:140px"></div>` : ''}
+      <div style="margin-top:6px"><input type="text" value="${escapeHtml(d.notes||'')}" onchange="_updatePartnerDonationField(${i},'notes',this.value)" placeholder="הערות" style="width:100%"></div>
+    </div>
+  `).join('');
+  _renderPartnerDonationsTotals();
+}
+
+function _renderPartnerDonationsTotals() {
+  const totals = _partnerTotals({donations: _partnerEditorDonations});
+  const el = document.getElementById('pe_totals');
+  if (el) {
+    el.innerHTML = `📊 <strong>סיכום:</strong>
+      ${_partnerEditorDonations.length} תרומות ·
+      התחייבות: <strong style="color:var(--primary)">₪${Math.round(totals.committed).toLocaleString()}</strong> ·
+      הועבר: <strong style="color:var(--success)">₪${Math.round(totals.received).toLocaleString()}</strong> ·
+      ממתין: <strong style="color:var(--warning)">₪${Math.round(totals.pending).toLocaleString()}</strong>`;
   }
 }
+
+async function savePartner() {
+  const name = document.getElementById('pe_name').value.trim();
+  if (!name) { toast('יש להזין שם', 'error'); return; }
+  const data = {
+    orgId: currentOrgId,
+    name,
+    partnershipType: document.getElementById('pe_type').value || '',
+    allocation: document.getElementById('pe_allocation').value || '',
+    details: document.getElementById('pe_details').value.trim(),
+    contactPerson: {
+      name: document.getElementById('pe_cp_name').value.trim(),
+      phone: document.getElementById('pe_cp_phone').value.trim(),
+      email: document.getElementById('pe_cp_email').value.trim()
+    },
+    ngoLiaison: document.getElementById('pe_liaison').value || '',
+    donations: _partnerEditorDonations.map(d => ({
+      id: d.id || ('d_' + Date.now().toString(36)),
+      date: d.date || '',
+      amount: Number(d.amount) || 0,
+      currency: d.currency || 'ILS',
+      purpose: d.purpose || '',
+      transferred: !!d.transferred,
+      transferDate: d.transferDate || '',
+      notes: d.notes || '',
+      addedBy: d.addedBy || currentUser.email,
+      addedAt: d.addedAt || null
+    })),
+    updatedBy: currentUser.email,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  try {
+    if (_partnerEditorId) {
+      await db.collection('donors').doc(_partnerEditorId).update(data);
+      toast('שותף עודכן ✓');
+    } else {
+      data.createdBy = currentUser.email;
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      const ref = await db.collection('donors').add(data);
+      toast('שותף נוסף ✓');
+      _partnerEditorId = ref.id;
+    }
+    // Sync transferred donations to finance income records (best-effort)
+    try { await _syncPartnerToFinance(_partnerEditorId, data); } catch(e) { console.warn('[finance sync]', e); }
+    closePartnerEditor();
+    loadDonors();
+  } catch(e) {
+    console.error('[savePartner]', e);
+    toast('שגיאה בשמירה: ' + (e.message||e), 'error');
+  }
+}
+
+async function deletePartner(id) {
+  if (!confirm('למחוק את השותף? פעולה זו אינה ניתנת לביטול.')) return;
+  try {
+    await db.collection('donors').doc(id).delete();
+    toast('שותף נמחק');
+    closePartnerEditor();
+    loadDonors();
+  } catch(e) {
+    console.error('[deletePartner]', e);
+    toast('שגיאה במחיקה: ' + (e.message||e), 'error');
+  }
+}
+
+// Sync transferred donations into the finance collection as income records.
+// We tag synced records with sourcePartnerId and sourceDonationId so we don't double-add.
+async function _syncPartnerToFinance(partnerId, data) {
+  if (!partnerId) return;
+  const transferred = (data.donations||[]).filter(d => d.transferred && Number(d.amount) > 0);
+  if (!transferred.length) return;
+  // Fetch existing finance records for this partner
+  const existingSnap = await db.collection('finance').where('orgId','==',currentOrgId).where('sourcePartnerId','==',partnerId).get();
+  const existing = new Map();
+  existingSnap.forEach(d => { const x = d.data(); existing.set(x.sourceDonationId, {id:d.id, ...x}); });
+  for (const d of transferred) {
+    const amountIls = (d.currency === 'USD' ? (Number(d.amount)||0) * (window._fxRate || 3.7) : (Number(d.amount)||0));
+    const rec = {
+      orgId: currentOrgId,
+      type: 'income',
+      amount: Math.round(amountIls),
+      date: d.transferDate || d.date || new Date().toISOString().slice(0,10),
+      purpose: data.allocation || 'general',
+      description: `תרומה מ-${data.name}` + (d.purpose ? ` · ${d.purpose}` : ''),
+      sourcePartnerId: partnerId,
+      sourceDonationId: d.id,
+      actuallyTransferred: true,
+      createdBy: currentUser.email,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (existing.has(d.id)) {
+      // Update existing
+      await db.collection('finance').doc(existing.get(d.id).id).update(rec);
+    } else {
+      await db.collection('finance').add(rec);
+    }
+  }
+  // Note: we DON'T delete finance records for un-transferred donations, since admin may have manual adjustments.
+}
+
+// Legacy stub: keep addDonor for backward-compat references; route to new editor
+function addDonor() { openPartnerEditor(null); }
 
 // ===== PROJECTS =====
 // ===== PROJECTS =====
