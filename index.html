@@ -868,7 +868,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <img id="ngoLogoSidebar" src="" alt="" style="height:22px;width:auto">
         <span>Powered by <strong>NGO Core</strong></span>
       </a>
-      <div class="ngocore-version">v2026.05.07-r87</div>
+      <div class="ngocore-version">v2026.05.07-r88</div>
     </div>
   </aside>
 
@@ -2147,7 +2147,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r87 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r88 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -9151,6 +9151,19 @@ function printPlugaReport(id) {
 //     createdBy/At, updatedBy/At, orgId }
 // Legacy docs with {amount,phone,email,purpose} are auto-migrated to a single-donation array.
 
+// Each donation can be either cash money OR something with monetary value (hall, food, etc.)
+const DONATION_KINDS = {
+  'monetary': '💵 תרומה כספית',
+  'in-kind':  '🎁 שווה כסף (אולם / מזון / שירות וכו׳)'
+};
+// 4-state transfer status — tells us where the value actually sits
+const TRANSFER_STATUSES = {
+  'transferred-to-us':   { label: '✅ הועבר לעמותה',             inOurBank: true,  pending: false, otherNgo: false, partnerManaged: false },
+  'will-transfer-to-us': { label: '⏳ יועבר לעמותה (התחייבות)',   inOurBank: false, pending: true,  otherNgo: false, partnerManaged: false },
+  'via-other-ngo':       { label: '🏛️ בעמותה אחרת לזכותנו',       inOurBank: false, pending: false, otherNgo: true,  partnerManaged: false },
+  'partner-managed':     { label: '🤝 מנוהל ע״י השותף מקצה לקצה', inOurBank: false, pending: false, otherNgo: false, partnerManaged: true }
+};
+
 const PARTNERSHIP_TYPES = {
   'monetary':           'תרומה כספית',
   'program-execution':  'שותפות במימוש תוכנית',
@@ -9183,18 +9196,41 @@ function _migrateLegacyPartner(d) {
   out.donations = legacyAmount > 0 ? [{
     id: 'leg_' + Date.now().toString(36),
     date: '', amount: legacyAmount, currency: 'ILS',
-    purpose: out.allocation, transferred: !!d.transferred,
+    purpose: out.allocation,
+    kind: 'monetary',
+    transferStatus: d.transferred ? 'transferred-to-us' : 'will-transfer-to-us',
+    otherNgoName: '',
     transferDate: '', notes: 'מיובא מרשומה ישנה',
     addedBy: d.createdBy || '', addedAt: null
   }] : [];
   return out;
 }
 
+// Normalize a donation to ensure all the new fields exist (handles older partial migrations)
+function _normalizeDonation(x) {
+  const d = Object.assign({}, x);
+  if (!d.kind) d.kind = 'monetary';
+  if (!d.transferStatus) d.transferStatus = d.transferred ? 'transferred-to-us' : 'will-transfer-to-us';
+  if (!d.otherNgoName) d.otherNgoName = '';
+  return d;
+}
+
 function _partnerTotals(p) {
-  const donations = Array.isArray(p.donations) ? p.donations : [];
-  const committed = donations.reduce((s, x) => s + (Number(x.amount)||0) * (x.currency === 'USD' ? (window._fxRate || 3.7) : 1), 0);
-  const received  = donations.filter(x => x.transferred).reduce((s, x) => s + (Number(x.amount)||0) * (x.currency === 'USD' ? (window._fxRate || 3.7) : 1), 0);
-  return { committed, received, pending: committed - received, count: donations.length };
+  const donations = (Array.isArray(p.donations) ? p.donations : []).map(_normalizeDonation);
+  let committed = 0, inOurBank = 0, willCome = 0, atOtherNgo = 0, inKind = 0, partnerMgmt = 0;
+  for (const x of donations) {
+    const ils = (Number(x.amount)||0) * (x.currency === 'USD' ? (window._fxRate || 3.7) : 1);
+    committed += ils;
+    const status = TRANSFER_STATUSES[x.transferStatus] || TRANSFER_STATUSES['will-transfer-to-us'];
+    if (x.kind === 'in-kind') inKind += ils;
+    if (status.inOurBank && x.kind !== 'in-kind') inOurBank += ils;
+    if (status.pending && x.kind !== 'in-kind') willCome += ils;
+    if (status.otherNgo) atOtherNgo += ils;
+    if (status.partnerManaged) partnerMgmt += ils;
+  }
+  // 'received' = anything realized for our benefit (cash in bank + at-other-NGO + in-kind + partner-managed are all "realized" for our beneficiaries)
+  const received = inOurBank + atOtherNgo + inKind + partnerMgmt;
+  return { committed, inOurBank, willCome, atOtherNgo, inKind, partnerMgmt, received, pending: willCome, count: donations.length };
 }
 
 async function loadDonors() {
@@ -9274,7 +9310,13 @@ function renderPartners() {
       <td>${escapeHtml(typeLabel)}</td>
       <td>${escapeHtml(areaLabel(p.allocation))}</td>
       <td class="amount-positive" style="text-align:left">₪${Math.round(t.committed).toLocaleString()}<br><small style="color:var(--muted)">${escapeHtml(String(t.count))} תרומות</small></td>
-      <td style="text-align:left;color:var(--success)">₪${Math.round(t.received).toLocaleString()}${t.pending>0?`<br><small style="color:var(--warning)">₪${Math.round(t.pending).toLocaleString()} ממתינים</small>`:''}</td>
+      <td style="text-align:left;font-size:0.85rem">
+        ${t.inOurBank>0?`<div style="color:var(--success)">💰 ₪${Math.round(t.inOurBank).toLocaleString()} בבנק</div>`:''}
+        ${t.willCome>0?`<div style="color:var(--warning)">⏳ ₪${Math.round(t.willCome).toLocaleString()} צפוי</div>`:''}
+        ${t.atOtherNgo>0?`<div style="color:#6d28d9">🏛️ ₪${Math.round(t.atOtherNgo).toLocaleString()} בעמותה אחרת</div>`:''}
+        ${t.inKind>0?`<div style="color:#0891b2">🎁 ₪${Math.round(t.inKind).toLocaleString()} שווה כסף</div>`:''}
+        ${t.partnerMgmt>0?`<div style="color:#475569">🤝 ₪${Math.round(t.partnerMgmt).toLocaleString()} בניהול השותף</div>`:''}
+      </td>
       <td>${escapeHtml(teamLabel(p.ngoLiaison))}</td>
       <td style="text-align:left;font-size:1.2rem;color:var(--muted)">›</td>
     </tr>`;
@@ -9396,33 +9438,57 @@ function _renderPartnerDonationsEditor() {
     _renderPartnerDonationsTotals();
     return;
   }
-  wrap.innerHTML = _partnerEditorDonations.map((d, i) => `
-    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px;background:#fafbfc">
-      <div style="display:grid;grid-template-columns:120px 100px 80px 1fr 110px auto;gap:8px;align-items:end">
-        <div><label style="font-size:0.78rem;color:var(--muted)">תאריך</label><input type="date" value="${escapeHtml(d.date||'')}" onchange="_updatePartnerDonationField(${i},'date',this.value)" style="width:100%"></div>
-        <div><label style="font-size:0.78rem;color:var(--muted)">סכום</label><input type="number" value="${escapeHtml(String(d.amount||0))}" onchange="_updatePartnerDonationField(${i},'amount',Number(this.value)||0)" style="width:100%"></div>
+  wrap.innerHTML = _partnerEditorDonations.map((raw, i) => {
+    const d = _normalizeDonation(raw);
+    _partnerEditorDonations[i] = d; // store the normalized copy
+    const status = TRANSFER_STATUSES[d.transferStatus] || TRANSFER_STATUSES['will-transfer-to-us'];
+    // Color the row by status
+    const rowBg = status.inOurBank ? '#ecfdf5' :
+                  status.partnerManaged ? '#f1f5f9' :
+                  status.otherNgo ? '#f5f3ff' : '#fef9c3';
+    const statusOpts = Object.entries(TRANSFER_STATUSES).map(([v, info]) =>
+      `<option value="${v}" ${d.transferStatus===v?'selected':''}>${info.label}</option>`).join('');
+    const kindOpts = Object.entries(DONATION_KINDS).map(([v, l]) =>
+      `<option value="${v}" ${d.kind===v?'selected':''}>${l}</option>`).join('');
+    return `
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;background:${rowBg}">
+      <!-- Row 1: kind + amount + currency -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 80px auto;gap:8px;align-items:end;margin-bottom:8px">
+        <div><label style="font-size:0.78rem;color:var(--muted)">סוג התרומה</label><select onchange="_updatePartnerDonationField(${i},'kind',this.value)" style="width:100%">${kindOpts}</select></div>
+        <div><label style="font-size:0.78rem;color:var(--muted)">${d.kind==='in-kind'?'ערך משוער':'סכום'}</label><input type="number" value="${escapeHtml(String(d.amount||0))}" onchange="_updatePartnerDonationField(${i},'amount',Number(this.value)||0)" style="width:100%"></div>
         <div><label style="font-size:0.78rem;color:var(--muted)">מטבע</label><select onchange="_updatePartnerDonationField(${i},'currency',this.value)" style="width:100%"><option value="ILS" ${d.currency!=='USD'?'selected':''}>₪</option><option value="USD" ${d.currency==='USD'?'selected':''}>$</option></select></div>
-        <div><label style="font-size:0.78rem;color:var(--muted)">מטרה ספציפית</label><input type="text" value="${escapeHtml(d.purpose||'')}" onchange="_updatePartnerDonationField(${i},'purpose',this.value)" placeholder="לדוגמה: ערב בנות זוג" style="width:100%"></div>
-        <div><label style="font-size:0.78rem;color:var(--muted)">הועבר לעמותה?</label><select onchange="_updatePartnerDonationField(${i},'transferred',this.value)" style="width:100%;background:${d.transferred?'#dcfce7':'#fef9c3'}"><option value="false" ${!d.transferred?'selected':''}>⏳ לא עדיין</option><option value="true" ${d.transferred?'selected':''}>✅ כן</option></select></div>
         <div><button class="btn btn-secondary btn-sm" onclick="_removePartnerDonation(${i})" style="padding:6px 10px;color:var(--danger)" title="הסר">🗑️</button></div>
       </div>
-      ${d.transferred ? `<div style="margin-top:6px"><label style="font-size:0.78rem;color:var(--muted)">תאריך העברה</label><input type="date" value="${escapeHtml(d.transferDate||'')}" onchange="_updatePartnerDonationField(${i},'transferDate',this.value)" style="width:140px"></div>` : ''}
-      <div style="margin-top:6px"><input type="text" value="${escapeHtml(d.notes||'')}" onchange="_updatePartnerDonationField(${i},'notes',this.value)" placeholder="הערות" style="width:100%"></div>
-    </div>
-  `).join('');
+      <!-- Row 2: date + purpose -->
+      <div style="display:grid;grid-template-columns:140px 1fr;gap:8px;align-items:end;margin-bottom:8px">
+        <div><label style="font-size:0.78rem;color:var(--muted)">תאריך</label><input type="date" value="${escapeHtml(d.date||'')}" onchange="_updatePartnerDonationField(${i},'date',this.value)" style="width:100%"></div>
+        <div><label style="font-size:0.78rem;color:var(--muted)">מטרה ספציפית</label><input type="text" value="${escapeHtml(d.purpose||'')}" onchange="_updatePartnerDonationField(${i},'purpose',this.value)" placeholder="${d.kind==='in-kind'?'לדוגמה: אולם לערב בנות זוג / מזון ל-50 איש':'לדוגמה: ערב בנות זוג'}" style="width:100%"></div>
+      </div>
+      <!-- Row 3: transfer status -->
+      <div style="margin-bottom:8px"><label style="font-size:0.78rem;color:var(--muted);font-weight:600">סטטוס העברה</label>
+        <select onchange="_updatePartnerDonationField(${i},'transferStatus',this.value)" style="width:100%;font-weight:600">${statusOpts}</select>
+      </div>
+      ${status.otherNgo ? `<div style="margin-bottom:8px;background:#fff;padding:8px;border-radius:6px;border:1px solid #ddd6fe"><label style="font-size:0.78rem;color:#6d28d9;font-weight:600">🏛️ שם העמותה האחרת</label><input type="text" value="${escapeHtml(d.otherNgoName||'')}" onchange="_updatePartnerDonationField(${i},'otherNgoName',this.value)" placeholder="שם העמותה שמחזיקה את היתרה עבורנו" style="width:100%"><small style="color:#6d28d9;display:block;margin-top:4px">הכסף נמצא ביתרת העמותה הזו ועומד לרשותנו. תוכל לתעד הוצאות מולה בעמוד "שקיפות פיננסית".</small></div>` : ''}
+      ${status.inOurBank ? `<div style="margin-bottom:8px"><label style="font-size:0.78rem;color:var(--muted)">תאריך העברה לחשבון</label><input type="date" value="${escapeHtml(d.transferDate||'')}" onchange="_updatePartnerDonationField(${i},'transferDate',this.value)" style="width:140px"></div>` : ''}
+      <!-- Notes -->
+      <div><input type="text" value="${escapeHtml(d.notes||'')}" onchange="_updatePartnerDonationField(${i},'notes',this.value)" placeholder="הערות" style="width:100%"></div>
+    </div>`;
+  }).join('');
   _renderPartnerDonationsTotals();
 }
 
 function _renderPartnerDonationsTotals() {
-  const totals = _partnerTotals({donations: _partnerEditorDonations});
+  const t = _partnerTotals({donations: _partnerEditorDonations});
   const el = document.getElementById('pe_totals');
-  if (el) {
-    el.innerHTML = `📊 <strong>סיכום:</strong>
-      ${_partnerEditorDonations.length} תרומות ·
-      התחייבות: <strong style="color:var(--primary)">₪${Math.round(totals.committed).toLocaleString()}</strong> ·
-      הועבר: <strong style="color:var(--success)">₪${Math.round(totals.received).toLocaleString()}</strong> ·
-      ממתין: <strong style="color:var(--warning)">₪${Math.round(totals.pending).toLocaleString()}</strong>`;
-  }
+  if (!el) return;
+  const parts = [];
+  if (t.inOurBank > 0)  parts.push(`<span style="color:var(--success)">💰 בבנק שלנו: ₪${Math.round(t.inOurBank).toLocaleString()}</span>`);
+  if (t.willCome > 0)   parts.push(`<span style="color:var(--warning)">⏳ צפוי להגיע: ₪${Math.round(t.willCome).toLocaleString()}</span>`);
+  if (t.atOtherNgo > 0) parts.push(`<span style="color:#6d28d9">🏛️ בעמותה אחרת: ₪${Math.round(t.atOtherNgo).toLocaleString()}</span>`);
+  if (t.inKind > 0)     parts.push(`<span style="color:#0891b2">🎁 שווה כסף: ₪${Math.round(t.inKind).toLocaleString()}</span>`);
+  if (t.partnerMgmt > 0)parts.push(`<span style="color:#475569">🤝 בניהול השותף: ₪${Math.round(t.partnerMgmt).toLocaleString()}</span>`);
+  el.innerHTML = `📊 <strong>סיכום:</strong> ${_partnerEditorDonations.length} תרומות · סה"כ ערך: <strong style="color:var(--primary)">₪${Math.round(t.committed).toLocaleString()}</strong>` +
+    (parts.length ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:12px">${parts.join('')}</div>` : '');
 }
 
 async function savePartner() {
@@ -9446,7 +9512,11 @@ async function savePartner() {
       amount: Number(d.amount) || 0,
       currency: d.currency || 'ILS',
       purpose: d.purpose || '',
-      transferred: !!d.transferred,
+      kind: d.kind || 'monetary',
+      transferStatus: d.transferStatus || (d.transferred ? 'transferred-to-us' : 'will-transfer-to-us'),
+      otherNgoName: d.otherNgoName || '',
+      // legacy compat: keep boolean transferred flag in sync for older code paths
+      transferred: (d.transferStatus === 'transferred-to-us') || (!d.transferStatus && !!d.transferred),
       transferDate: d.transferDate || '',
       notes: d.notes || '',
       addedBy: d.addedBy || currentUser.email,
@@ -9489,17 +9559,29 @@ async function deletePartner(id) {
   }
 }
 
-// Sync transferred donations into the finance collection as income records.
-// We tag synced records with sourcePartnerId and sourceDonationId so we don't double-add.
+// Sync MONETARY donations to the finance collection as income records — but only when
+// they actually represent money that is/will-be in OUR bank account. In-kind donations,
+// at-other-NGO balances, and partner-managed donations are tracked in the partner record
+// itself, not in our finance ledger.
 async function _syncPartnerToFinance(partnerId, data) {
   if (!partnerId) return;
-  const transferred = (data.donations||[]).filter(d => d.transferred && Number(d.amount) > 0);
-  if (!transferred.length) return;
-  // Fetch existing finance records for this partner
+  // Eligible: monetary donations with status transferred-to-us or will-transfer-to-us
+  const eligible = (data.donations||[]).filter(d => {
+    if ((d.kind || 'monetary') !== 'monetary') return false;
+    if (!(Number(d.amount) > 0)) return false;
+    const status = d.transferStatus || (d.transferred ? 'transferred-to-us' : 'will-transfer-to-us');
+    return status === 'transferred-to-us' || status === 'will-transfer-to-us';
+  });
+  // Fetch existing finance records for this partner so we can update/insert in place
   const existingSnap = await db.collection('finance').where('orgId','==',currentOrgId).where('sourcePartnerId','==',partnerId).get();
   const existing = new Map();
   existingSnap.forEach(d => { const x = d.data(); existing.set(x.sourceDonationId, {id:d.id, ...x}); });
-  for (const d of transferred) {
+  // Track which donation ids we keep so we can delete stale finance records (donations that became in-kind or partner-managed)
+  const keepIds = new Set();
+  for (const d of eligible) {
+    keepIds.add(d.id);
+    const status = d.transferStatus || (d.transferred ? 'transferred-to-us' : 'will-transfer-to-us');
+    const isTransferred = status === 'transferred-to-us';
     const amountIls = (d.currency === 'USD' ? (Number(d.amount)||0) * (window._fxRate || 3.7) : (Number(d.amount)||0));
     const rec = {
       orgId: currentOrgId,
@@ -9510,18 +9592,24 @@ async function _syncPartnerToFinance(partnerId, data) {
       description: `תרומה מ-${data.name}` + (d.purpose ? ` · ${d.purpose}` : ''),
       sourcePartnerId: partnerId,
       sourceDonationId: d.id,
-      actuallyTransferred: true,
-      createdBy: currentUser.email,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      incomeStatus: isTransferred ? 'received' : 'committed',
+      actuallyTransferred: isTransferred,
+      updatedBy: currentUser.email
     };
     if (existing.has(d.id)) {
-      // Update existing
       await db.collection('finance').doc(existing.get(d.id).id).update(rec);
     } else {
+      rec.createdBy = currentUser.email;
+      rec.createdAt = firebase.firestore.FieldValue.serverTimestamp();
       await db.collection('finance').add(rec);
     }
   }
-  // Note: we DON'T delete finance records for un-transferred donations, since admin may have manual adjustments.
+  // Delete finance records for donations that are no longer eligible (e.g., switched to in-kind / partner-managed)
+  for (const [donationId, fin] of existing) {
+    if (!keepIds.has(donationId)) {
+      try { await db.collection('finance').doc(fin.id).delete(); } catch(_) {}
+    }
+  }
 }
 
 // Legacy stub: keep addDonor for backward-compat references; route to new editor
