@@ -840,20 +840,20 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     <div class="nav-item active" onclick="switchSection('dashboard',this)"><span class="icon">📊</span> <span data-i18n="nav.dashboard">דשבורד</span></div>
     <div class="nav-item" onclick="switchSection('me',this)"><span class="icon">👤</span> <span data-i18n="nav.me">האזור האישי שלי</span></div>
 
-    <!-- Programs nav (filled dynamically by renderProgramNav) -->
-    <div class="nav-group-label" style="display:flex;align-items:center;gap:8px"><img id="navLeafIcon" alt="" style="height:18px;width:auto;flex-shrink:0"> <span>תוכניות העמותה</span></div>
-    <div id="programsNav"></div>
-
-    <!-- Tasks remain quickly accessible from sidebar (not the other quick actions — those live in the personal area) -->
-    <div class="nav-item" onclick="switchSection('tasks',this)"><span class="icon">✅</span> יומן משימות</div>
-
-    <!-- Admin-only management items -->
+    <!-- Admin-only management items — moved ABOVE programs per request -->
     <div class="nav-group-label admin-only" id="navGroupAdmin" style="display:none">ניהול</div>
     <div class="nav-item admin-only" onclick="switchSection('finance',this)" id="navFinance" style="display:none"><span class="icon">💰</span> <span data-i18n="nav.finance">שקיפות פיננסית</span></div>
     <div class="nav-item admin-only" onclick="switchSection('donors',this)" id="navDonors" style="display:none"><span class="icon">🤝</span> תורמים ושותפים</div>
     <div class="nav-item admin-only" onclick="switchSection('reports',this)" id="navReports" style="display:none"><span class="icon">📊</span> כל הדיווחים</div>
     <div class="nav-item" onclick="switchSection('team',this)" id="navTeam" style="display:none"><span class="icon">👥</span> ניהול צוות</div>
     <div class="nav-item" onclick="switchSection('settings',this)" id="navSettings" style="display:none"><span class="icon">⚙️</span> הגדרות ארגון</div>
+
+    <!-- Programs nav (filled dynamically by renderProgramNav) -->
+    <div class="nav-group-label" style="display:flex;align-items:center;gap:8px"><img id="navLeafIcon" alt="" style="height:18px;width:auto;flex-shrink:0"> <span>תוכניות העמותה</span></div>
+    <div id="programsNav"></div>
+
+    <!-- Tasks remain quickly accessible from sidebar -->
+    <div class="nav-item" onclick="switchSection('tasks',this)"><span class="icon">✅</span> יומן משימות</div>
 
     <!-- Legacy (not in nav, accessible via program detail) -->
     <div class="nav-item" onclick="switchSection('workplan',this)" id="navWorkplan" style="display:none"></div>
@@ -868,7 +868,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <img id="ngoLogoSidebar" src="" alt="" style="height:22px;width:auto">
         <span>Powered by <strong>NGO Core</strong></span>
       </a>
-      <div class="ngocore-version">v2026.05.07-r88</div>
+      <div class="ngocore-version">v2026.05.07-r89</div>
     </div>
   </aside>
 
@@ -1020,10 +1020,11 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <p>ניהול הכנסות והוצאות העמותה</p>
       </div>
       <div class="kpi-grid">
-        <div class="kpi clickable" onclick="filterFinance('income')" title="לחץ לפירוט הכנסות"><div class="icon">📥</div><div class="label">סך הכנסות</div><div class="value" id="fin-income">₪0</div></div>
-        <div class="kpi clickable" onclick="filterFinance('expense')" title="לחץ לפירוט הוצאות"><div class="icon">📤</div><div class="label">סך הוצאות</div><div class="value" id="fin-expense">₪0</div></div>
-        <div class="kpi clickable" onclick="filterFinance('all')" title="לחץ לכל הרשומות"><div class="icon">💵</div><div class="label">יתרה</div><div class="value" id="fin-balance">₪0</div></div>
-        <div class="kpi clickable" onclick="filterFinance('salary');scrollToCard('finSalaryCard')" title="לחץ לפירוט שכר"><div class="icon">💼</div><div class="label">סך תשלומי שכר</div><div class="value" id="fin-salary">₪0</div></div>
+        <div class="kpi clickable" onclick="showFinanceBreakdown('income')" title="לחץ לפירוט הכנסות"><div class="icon">📥</div><div class="label">סך הכנסות</div><div class="value" id="fin-income">₪0</div></div>
+        <div class="kpi clickable" onclick="showFinanceBreakdown('expense')" title="לחץ לפירוט הוצאות"><div class="icon">📤</div><div class="label">סך הוצאות</div><div class="value" id="fin-expense">₪0</div></div>
+        <div class="kpi clickable" onclick="showFinanceBreakdown('balance')" title="לחץ לפירוט יתרה"><div class="icon">💵</div><div class="label">יתרה</div><div class="value" id="fin-balance">₪0</div></div>
+        <div class="kpi clickable" onclick="showFinanceBreakdown('salary')" title="לחץ לפירוט שכר"><div class="icon">💼</div><div class="label">סך תשלומי שכר</div><div class="value" id="fin-salary">₪0</div></div>
+        <div class="kpi clickable" onclick="showOtherNgoLedger()" title="לחץ לפירוט יתרות בעמותות אחרות"><div class="icon">🏛️</div><div class="label">יתרות בעמותות אחרות</div><div class="value" id="fin-other-ngo">₪0</div></div>
       </div>
       <p style="color:var(--muted);font-size:0.85rem;margin:-8px 0 16px;background:var(--primary-soft);padding:10px 14px;border-radius:var(--radius-sm);border-right:3px solid var(--primary)">
         💡 לפירוט תקציב לפי תוכנית — לחץ על תוכנית בדשבורד או בסרגל הימני. כל תוכנית מציגה את התקציב, הגיוס, ההוצאה והפער שלה.
@@ -1130,19 +1131,29 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
 
         <!-- ===== EXPENSE FIELDS ===== -->
         <div id="finExpenseExtra" style="display:none">
-          <!-- Was money actually moved? -->
+          <!-- Where does the expense charge against? -->
           <div class="form-row" style="background:#ecfdf5;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid #a7f3d0;margin-bottom:10px">
             <div class="form-field" style="grid-column:1/-1">
-              <label style="margin-bottom:6px;font-weight:600">💸 האם הכסף ירד בפועל מחשבון העמותה?</label>
-              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:#fff;border:1px solid #a7f3d0;border-radius:var(--radius-sm);flex:1">
-                  <input type="radio" name="finActuallyTransferred" value="true" checked> <strong style="color:#065f46">✅ כן — תנועה בנקאית בפועל</strong>
+              <label style="margin-bottom:6px;font-weight:600">💸 מקור התשלום</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;background:#fff;border:1px solid #a7f3d0;border-radius:var(--radius-sm);flex:1;min-width:180px">
+                  <input type="radio" name="finChargeTo" value="own-bank" checked onchange="onFinChargeToChange()"> <strong style="color:#065f46">✅ ירד מחשבון העמותה</strong>
                 </label>
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:#fff;border:1px solid #fde68a;border-radius:var(--radius-sm);flex:1">
-                  <input type="radio" name="finActuallyTransferred" value="false"> <strong style="color:#92400e">⏳ עדיין לא — התחייבות בלבד</strong>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;background:#fff;border:1px solid #fde68a;border-radius:var(--radius-sm);flex:1;min-width:180px">
+                  <input type="radio" name="finChargeTo" value="commitment" onchange="onFinChargeToChange()"> <strong style="color:#92400e">⏳ התחייבות (עוד לא שולם)</strong>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;background:#fff;border:1px solid #ddd6fe;border-radius:var(--radius-sm);flex:1;min-width:180px">
+                  <input type="radio" name="finChargeTo" value="other-ngo" onchange="onFinChargeToChange()"> <strong style="color:#6d28d9">🏛️ מיתרה בעמותה אחרת</strong>
                 </label>
               </div>
-              <small style="display:block;margin-top:6px;color:var(--muted)">חשוב להבחנה בין מה שהובטח/הוצא לבין מה שאכן עבר דרך חשבון הבנק.</small>
+              <div id="finOtherNgoWrap" style="display:none;margin-top:10px;padding:8px 10px;background:#f5f3ff;border-radius:var(--radius-sm);border:1px solid #ddd6fe">
+                <label style="font-size:0.85rem;color:#6d28d9;font-weight:600">בחר עמותה אחרת (יתרות זמינות)</label>
+                <select id="finOtherNgoSelect" style="width:100%;margin-top:4px" onchange="onFinOtherNgoChange()">
+                  <option value="">— בחר —</option>
+                </select>
+                <small id="finOtherNgoBalance" style="display:block;margin-top:6px;color:#6d28d9"></small>
+              </div>
+              <small style="display:block;margin-top:6px;color:var(--muted)">"מיתרה בעמותה אחרת" יוריד מהיתרה הזמינה אצל אותה עמותה (תורמים ושותפים → "בעמותה אחרת לזכותנו").</small>
             </div>
           </div>
           <div class="form-row" style="background:#fef3c7;padding:10px;border-radius:8px;margin-bottom:10px">
@@ -2147,7 +2158,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r88 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r89 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -6566,6 +6577,203 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== FINANCE =====
+// === FINANCE KPI BREAKDOWNS ===
+function showFinanceBreakdown(kind) {
+  const rows = (window._financeCache || []);
+  const partners = (window._partnersCache || []);
+  const areas = (typeof getOrgAreas === 'function') ? getOrgAreas() : _defaultAreas();
+  const areaLabel = (k) => (areas.find(a => a.key === k)?.label) || k || 'כללי';
+
+  let title = '', html = '';
+  if (kind === 'income') {
+    // Income comes from 2 sources: legacy finance income records + partner donations marked transferred
+    let bySource = {}, byProgram = {}, total = 0, totalReceived = 0, totalPending = 0;
+    for (const f of rows.filter(x => x.type === 'income')) {
+      const amt = Number(f.amount) || 0;
+      total += amt;
+      const isReceived = (f.actuallyTransferred !== false) && (f.incomeStatus !== 'committed');
+      if (isReceived) totalReceived += amt; else totalPending += amt;
+      const src = f.sourcePartnerId ? (partners.find(p=>p.id===f.sourcePartnerId)?.name || f.source || 'תורם') : (f.source || 'הכנסה');
+      bySource[src] = (bySource[src]||0) + amt;
+      byProgram[f.purpose] = (byProgram[f.purpose]||0) + amt;
+    }
+    title = '📥 פירוט הכנסות';
+    html = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px">
+      <div class="kpi" style="background:#ecfdf5"><div class="label">סה"כ הכנסות</div><div class="value" style="color:var(--success)">₪${total.toLocaleString()}</div></div>
+      <div class="kpi" style="background:#f0f9ff"><div class="label">התקבל בפועל</div><div class="value">₪${totalReceived.toLocaleString()}</div></div>
+      <div class="kpi" style="background:#fef9c3"><div class="label">צפוי להתקבל</div><div class="value" style="color:var(--warning)">₪${totalPending.toLocaleString()}</div></div>
+    </div>
+    <h4>לפי מקור / תורם</h4><table class="data-table" style="margin-bottom:14px"><thead><tr><th>מקור</th><th style="text-align:left">סכום</th><th style="text-align:left">%</th></tr></thead><tbody>${Object.entries(bySource).sort((a,b)=>b[1]-a[1]).map(([s,a])=>`<tr><td>${escapeHtml(s)}</td><td style="text-align:left">₪${Math.round(a).toLocaleString()}</td><td style="text-align:left;color:var(--muted)">${total?Math.round(a*100/total):0}%</td></tr>`).join('')}</tbody></table>
+    <h4>לפי תוכנית</h4><table class="data-table"><thead><tr><th>תוכנית</th><th style="text-align:left">סכום</th></tr></thead><tbody>${Object.entries(byProgram).sort((a,b)=>b[1]-a[1]).map(([k,a])=>`<tr><td>${escapeHtml(areaLabel(k))}</td><td style="text-align:left">₪${Math.round(a).toLocaleString()}</td></tr>`).join('')}</tbody></table>`;
+  }
+  else if (kind === 'expense') {
+    let byCategory = {}, byProgram = {}, byChargeTo = { 'own-bank':0, 'commitment':0, 'other-ngo':0 };
+    let total = 0;
+    for (const f of rows.filter(x => x.type === 'expense')) {
+      const amt = Number(f.amount) || 0;
+      total += amt;
+      const cat = f.category || (f.isSalary ? 'salary' : 'other');
+      byCategory[cat] = (byCategory[cat]||0) + amt;
+      byProgram[f.purpose] = (byProgram[f.purpose]||0) + amt;
+      const ct = f.chargeTo || (f.actuallyTransferred === false ? 'commitment' : 'own-bank');
+      byChargeTo[ct] = (byChargeTo[ct]||0) + amt;
+    }
+    title = '📤 פירוט הוצאות';
+    const ctLabels = { 'own-bank':'✅ ירד מחשבון העמותה', 'commitment':'⏳ התחייבות (עוד לא שולם)', 'other-ngo':'🏛️ מיתרה בעמותה אחרת' };
+    const catLabels = { 'salary':'💼 שכר', 'personnel':'👥 כוח אדם', 'logistics':'📦 לוגיסטיקה', 'materials':'🧰 חומרים', 'travel':'🚗 נסיעות', 'food':'🍽️ אוכל', 'other':'📝 אחר' };
+    html = `<div class="kpi" style="background:#fef2f2;margin-bottom:14px"><div class="label">סה"כ הוצאות</div><div class="value" style="color:var(--danger)">₪${total.toLocaleString()}</div></div>
+    <h4>לפי מקור התשלום</h4><table class="data-table" style="margin-bottom:14px"><thead><tr><th>מקור</th><th style="text-align:left">סכום</th><th style="text-align:left">%</th></tr></thead><tbody>${Object.entries(byChargeTo).filter(([,v])=>v>0).map(([k,v])=>`<tr><td>${ctLabels[k]||k}</td><td style="text-align:left">₪${Math.round(v).toLocaleString()}</td><td style="text-align:left;color:var(--muted)">${total?Math.round(v*100/total):0}%</td></tr>`).join('')}</tbody></table>
+    <h4>לפי קטגוריה</h4><table class="data-table" style="margin-bottom:14px"><thead><tr><th>קטגוריה</th><th style="text-align:left">סכום</th></tr></thead><tbody>${Object.entries(byCategory).sort((a,b)=>b[1]-a[1]).map(([k,a])=>`<tr><td>${catLabels[k]||k}</td><td style="text-align:left">₪${Math.round(a).toLocaleString()}</td></tr>`).join('')}</tbody></table>
+    <h4>לפי תוכנית</h4><table class="data-table"><thead><tr><th>תוכנית</th><th style="text-align:left">סכום</th></tr></thead><tbody>${Object.entries(byProgram).sort((a,b)=>b[1]-a[1]).map(([k,a])=>`<tr><td>${escapeHtml(areaLabel(k))}</td><td style="text-align:left">₪${Math.round(a).toLocaleString()}</td></tr>`).join('')}</tbody></table>`;
+  }
+  else if (kind === 'balance') {
+    let totalIncReceived = 0, totalIncPending = 0, totalExpFromBank = 0, totalExpCommit = 0, totalExpOtherNgo = 0;
+    for (const f of rows) {
+      const amt = Number(f.amount) || 0;
+      if (f.type === 'income') {
+        const isReceived = (f.actuallyTransferred !== false) && (f.incomeStatus !== 'committed');
+        if (isReceived) totalIncReceived += amt; else totalIncPending += amt;
+      } else if (f.type === 'expense') {
+        const ct = f.chargeTo || (f.actuallyTransferred === false ? 'commitment' : 'own-bank');
+        if (ct === 'own-bank') totalExpFromBank += amt;
+        else if (ct === 'commitment') totalExpCommit += amt;
+        else if (ct === 'other-ngo') totalExpOtherNgo += amt;
+      }
+    }
+    const bankBalance = totalIncReceived - totalExpFromBank;
+    title = '💵 פירוט יתרה';
+    html = `<table class="data-table" style="margin-bottom:14px"><tbody>
+      <tr><td>📥 התקבל בחשבון העמותה</td><td style="text-align:left;color:var(--success)">+₪${totalIncReceived.toLocaleString()}</td></tr>
+      <tr><td>📤 ירד מחשבון העמותה</td><td style="text-align:left;color:var(--danger)">−₪${totalExpFromBank.toLocaleString()}</td></tr>
+      <tr style="font-weight:700;background:#f0f9ff"><td>💵 יתרה בחשבון העמותה</td><td style="text-align:left;color:${bankBalance>=0?'var(--success)':'var(--danger)'}">₪${bankBalance.toLocaleString()}</td></tr>
+    </tbody></table>
+    <h4 style="margin-bottom:6px">לידיעה (לא משפיע על יתרה בבנק):</h4>
+    <table class="data-table"><tbody>
+      <tr><td>⏳ הכנסות שצפויות להגיע</td><td style="text-align:left;color:var(--warning)">₪${totalIncPending.toLocaleString()}</td></tr>
+      <tr><td>⏳ הוצאות שהובטחו (לא שולמו)</td><td style="text-align:left;color:var(--warning)">₪${totalExpCommit.toLocaleString()}</td></tr>
+      <tr><td>🏛️ הוצאות מיתרת עמותה אחרת</td><td style="text-align:left">₪${totalExpOtherNgo.toLocaleString()}</td></tr>
+    </tbody></table>`;
+  }
+  else if (kind === 'salary') {
+    const sal = rows.filter(f => f.type === 'expense' && f.isSalary);
+    const total = sal.reduce((s,f)=>s+(Number(f.amount)||0), 0);
+    // by employee
+    let byEmp = {};
+    for (const f of sal) {
+      const k = f.employeeEmail || f.source || 'לא ידוע';
+      byEmp[k] = (byEmp[k]||0) + (Number(f.amount)||0);
+    }
+    title = '💼 פירוט שכר עובדים';
+    html = `<div class="kpi" style="margin-bottom:14px;background:#fef3c7"><div class="label">סה"כ תשלומי שכר</div><div class="value">₪${total.toLocaleString()}</div></div>
+    <h4>לפי עובד</h4><table class="data-table"><thead><tr><th>עובד</th><th style="text-align:left">סה"כ ששולם</th></tr></thead><tbody>${Object.entries(byEmp).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td style="text-align:left">₪${Math.round(v).toLocaleString()}</td></tr>`).join('')}</tbody></table>`;
+  }
+  _openSimpleModal(title, html);
+}
+
+function showOtherNgoLedger() {
+  const balances = _getOtherNgoBalances();
+  if (!balances.length) {
+    _openSimpleModal('🏛️ יתרות בעמותות אחרות', '<p style="text-align:center;color:var(--muted);padding:20px">אין שותפים שמחזיקים יתרה עבור העמותה בעמותה אחרת. הוסף תרומה לשותף וסמן "בעמותה אחרת לזכותנו" כדי להתחיל.</p>');
+    return;
+  }
+  const total = balances.reduce((s,b)=>s+b.available, 0);
+  const html = `<div class="kpi" style="margin-bottom:14px;background:#f5f3ff"><div class="label">סה"כ יתרה זמינה</div><div class="value" style="color:#6d28d9">₪${Math.round(total).toLocaleString()}</div></div>
+  ${balances.map(b => `
+    <div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+        <h4 style="margin:0">🏛️ ${escapeHtml(b.name)}</h4>
+        <div><strong style="color:${b.available>0?'#6d28d9':'var(--danger)'}">זמין: ₪${Math.round(b.available).toLocaleString()}</strong></div>
+      </div>
+      <div style="font-size:0.85rem;color:var(--muted)">הופקד: ₪${Math.round(b.deposited).toLocaleString()} · הוצא: ₪${Math.round(b.spent).toLocaleString()}</div>
+      ${b.donations.length?`<details style="margin-top:6px"><summary style="cursor:pointer;color:var(--primary)">💵 ${b.donations.length} תרומות</summary><table class="data-table" style="margin-top:6px"><tbody>${b.donations.map(d=>`<tr><td>${escapeHtml(d.partnerName)}</td><td>${escapeHtml(d.purpose||'—')}</td><td style="text-align:left">₪${Math.round(d.amount).toLocaleString()}</td></tr>`).join('')}</tbody></table></details>`:''}
+      ${b.expenses.length?`<details style="margin-top:6px"><summary style="cursor:pointer;color:var(--danger)">📤 ${b.expenses.length} הוצאות מהיתרה</summary><table class="data-table" style="margin-top:6px"><tbody>${b.expenses.map(e=>`<tr><td>${escapeHtml(e.date||'—')}</td><td>${escapeHtml(e.description||e.source||'—')}</td><td style="text-align:left">₪${Math.round(e.amount).toLocaleString()}</td></tr>`).join('')}</tbody></table></details>`:''}
+    </div>
+  `).join('')}`;
+  _openSimpleModal('🏛️ יתרות בעמותות אחרות', html);
+}
+
+function _openSimpleModal(title, innerHtml) {
+  let m = document.getElementById('simpleModal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'simpleModal';
+    m.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10002;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto';
+    m.onclick = (e) => { if (e.target === m) m.style.display='none'; };
+    m.innerHTML = '<div style="background:#fff;border-radius:var(--radius);max-width:800px;width:100%;margin-top:20px;padding:24px;border-top:4px solid var(--primary)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 id="simpleModalTitle" style="margin:0;color:var(--primary)"></h3><button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'simpleModal\').style.display=\'none\'" aria-label="סגור">✕</button></div><div id="simpleModalBody"></div></div>';
+    document.body.appendChild(m);
+  } else { m.style.display = 'flex'; }
+  document.getElementById('simpleModalTitle').textContent = title;
+  document.getElementById('simpleModalBody').innerHTML = innerHtml;
+}
+
+// === OTHER-NGO LEDGER ===
+// Compute available balances per other-NGO name: sum of all via-other-ngo donations
+// across all partners minus sum of expenses charged against that NGO.
+function _getOtherNgoBalances() {
+  const balances = {};
+  for (const p of (window._partnersCache || _partnersCache || [])) {
+    for (const raw of (p.donations || [])) {
+      const d = _normalizeDonation(raw);
+      if (d.transferStatus !== 'via-other-ngo') continue;
+      const name = (d.otherNgoName || '').trim();
+      if (!name) continue;
+      const ils = (Number(d.amount)||0) * (d.currency === 'USD' ? (window._fxRate || 3.7) : 1);
+      if (!balances[name]) balances[name] = { name, deposited: 0, spent: 0, donations: [], expenses: [] };
+      balances[name].deposited += ils;
+      balances[name].donations.push({ partnerName: p.name, partnerId: p.id, amount: ils, purpose: d.purpose, date: d.date });
+    }
+  }
+  for (const f of (window._financeCache || [])) {
+    if (f.type === 'expense' && f.chargeTo === 'other-ngo' && f.chargeToOtherNgo) {
+      const name = f.chargeToOtherNgo;
+      if (!balances[name]) balances[name] = { name, deposited: 0, spent: 0, donations: [], expenses: [] };
+      balances[name].spent += Number(f.amount) || 0;
+      balances[name].expenses.push({ amount: Number(f.amount)||0, description: f.description, date: f.purchaseDate || f.date, source: f.source });
+    }
+  }
+  return Object.values(balances).map(b => Object.assign(b, { available: b.deposited - b.spent }));
+}
+
+function onFinChargeToChange() {
+  const v = document.querySelector('input[name="finChargeTo"]:checked')?.value;
+  const wrap = document.getElementById('finOtherNgoWrap');
+  if (wrap) wrap.style.display = (v === 'other-ngo') ? 'block' : 'none';
+  if (v === 'other-ngo') _populateOtherNgoSelect();
+}
+
+function _populateOtherNgoSelect() {
+  const sel = document.getElementById('finOtherNgoSelect');
+  if (!sel) return;
+  const balances = _getOtherNgoBalances();
+  if (!balances.length) {
+    sel.innerHTML = '<option value="">— אין יתרות זמינות —</option>';
+    return;
+  }
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— בחר —</option>' + balances.map(b =>
+    `<option value="${escapeHtml(b.name)}" data-available="${b.available}">${escapeHtml(b.name)} (זמין: ₪${Math.round(b.available).toLocaleString()})</option>`
+  ).join('');
+  sel.value = current || '';
+  onFinOtherNgoChange();
+}
+
+function onFinOtherNgoChange() {
+  const sel = document.getElementById('finOtherNgoSelect');
+  const lbl = document.getElementById('finOtherNgoBalance');
+  if (!sel || !lbl) return;
+  const opt = sel.options[sel.selectedIndex];
+  const avail = opt ? Number(opt.dataset.available || 0) : 0;
+  const requested = Number(document.getElementById('finAmount')?.value || 0);
+  if (!sel.value) { lbl.textContent = ''; return; }
+  if (requested > avail) {
+    lbl.innerHTML = '⚠️ הסכום (₪' + requested.toLocaleString() + ') חורג מהיתרה הזמינה (₪' + Math.round(avail).toLocaleString() + ')';
+    lbl.style.color = '#dc2626';
+  } else {
+    lbl.innerHTML = 'יתרה אחרי הוצאה זו: ₪' + Math.round(avail - requested).toLocaleString();
+    lbl.style.color = '#6d28d9';
+  }
+}
+
 function toggleFinType() {
   const type = document.getElementById('finType').value;
   document.getElementById('finIncomeExtra').style.display = type === 'income' ? 'block' : 'none';
@@ -6755,17 +6963,18 @@ function creatorUpdaterCell(r, opts) {
 }
 
 async function loadFinance() {
-  // Ensure the form defaults to expense (income now flows via partners)
   try {
     const t = document.getElementById('finType');
     if (t) { t.value = 'expense'; toggleFinType(); }
   } catch(e) {}
   const snap = await db.collection('finance').orderBy('createdAt','desc').get();
+  window._financeCache = [];
   let totalInc = 0, totalExp = 0, totalSalary = 0;
   const rows = [];
   snap.forEach(doc => {
     const d = doc.data();
     if (!_orgMatch(d)) return; // Phase 2: skip records from other orgs
+    window._financeCache.push(Object.assign({id: doc.id}, d));
     if (d.type === 'expense' && d.isSalary) totalSalary += d.amount || 0;
     if (d.type === 'income') totalInc += d.amount || 0;
     else totalExp += d.amount || 0;
@@ -6776,6 +6985,14 @@ async function loadFinance() {
   document.getElementById('fin-balance').textContent = '₪' + (totalInc - totalExp).toLocaleString();
   const salKpi = document.getElementById('fin-salary');
   if (salKpi) salKpi.textContent = '₪' + totalSalary.toLocaleString();
+  try {
+    const otherKpi = document.getElementById('fin-other-ngo');
+    if (otherKpi && typeof _getOtherNgoBalances === 'function') {
+      const otherBalances = _getOtherNgoBalances();
+      const otherTotal = otherBalances.reduce((s,b)=>s+b.available, 0);
+      otherKpi.textContent = '₪' + Math.round(otherTotal).toLocaleString();
+    }
+  } catch(e) {}
   document.getElementById('dash-income').textContent = '₪' + totalInc.toLocaleString();
   document.getElementById('dash-expense').textContent = '₪' + totalExp.toLocaleString();
   document.getElementById('dash-balance').textContent = '₪' + (totalInc - totalExp).toLocaleString();
@@ -6992,9 +7209,15 @@ async function addFinRecord() {
       record.purchaseDate = purchaseDate;
       if (paymentDate) record.paymentDate = paymentDate;
       record.description = document.getElementById('finDescription').value.trim();
-      // NEW: did the money actually move? (true = bank transaction, false = commitment only)
-      const transferredRaw = document.querySelector('input[name="finActuallyTransferred"]:checked')?.value;
-      record.actuallyTransferred = transferredRaw === 'true' || transferredRaw === undefined; // default true
+      // NEW: 3-way charge-to: 'own-bank' (default), 'commitment', 'other-ngo'
+      const chargeTo = document.querySelector('input[name="finChargeTo"]:checked')?.value || 'own-bank';
+      record.chargeTo = chargeTo;
+      record.actuallyTransferred = chargeTo === 'own-bank'; // backward compat
+      if (chargeTo === 'other-ngo') {
+        const otherNgo = document.getElementById('finOtherNgoSelect').value;
+        if (!otherNgo) { toast('יש לבחור עמותה אחרת','error'); btn.disabled=false; btn.textContent='+ הוסף'; return; }
+        record.chargeToOtherNgo = otherNgo;
+      }
 
       // Salary tracking
       const isSal = document.getElementById('finIsSalary')?.checked;
@@ -9237,7 +9460,7 @@ async function loadDonors() {
   // Load all partners, migrate legacy shape, render
   try {
     const snap = await db.collection('donors').orderBy('createdAt','desc').get();
-    _partnersCache = [];
+    _partnersCache = []; window._partnersCache = _partnersCache;
     snap.forEach(doc => {
       const d = doc.data();
       if (!_orgMatch(d)) return;
@@ -9270,7 +9493,7 @@ function _populatePartnerProgramFilter() {
   const sel = document.getElementById('partnersFilterProgram');
   if (!sel) return;
   const current = sel.value;
-  const areas = (currentOrgInfo && currentOrgInfo.areas) || [];
+  const areas = (typeof getOrgAreas === 'function') ? getOrgAreas() : ((currentOrgInfo && currentOrgInfo.areas) || _defaultAreas());
   sel.innerHTML = '<option value="">כל התוכניות</option>' +
     areas.map(a => `<option value="${escapeHtml(a.key)}">${escapeHtml(a.label)}</option>`).join('');
   sel.value = current || '';
@@ -9281,7 +9504,10 @@ function renderPartners() {
   const filterType = document.getElementById('partnersFilterType')?.value || '';
   const filterProgram = document.getElementById('partnersFilterProgram')?.value || '';
   const filtered = _partnersCache.filter(p => {
-    if (filterType && (p.partnershipType||'') !== filterType) return false;
+    if (filterType) {
+      const types = Array.isArray(p.partnershipTypes) ? p.partnershipTypes : (p.partnershipType ? [p.partnershipType] : []);
+      if (!types.includes(filterType)) return false;
+    }
     if (filterProgram && (p.allocation||'') !== filterProgram) return false;
     if (q) {
       const hay = ((p.name||'') + ' ' + (p.details||'') + ' ' + ((p.contactPerson&&p.contactPerson.name)||'')).toLowerCase();
@@ -9295,7 +9521,7 @@ function renderPartners() {
     return;
   }
   const canEdit = userRole === 'admin' || userRole === 'team';
-  const areas = (currentOrgInfo && currentOrgInfo.areas) || [];
+  const areas = (typeof getOrgAreas === 'function') ? getOrgAreas() : ((currentOrgInfo && currentOrgInfo.areas) || _defaultAreas());
   const areaLabel = (k) => (areas.find(a => a.key === k)?.label) || k || '—';
   const teamCache = window.teamCache || [];
   const teamLabel = (email) => {
@@ -9304,10 +9530,11 @@ function renderPartners() {
   };
   tbody.innerHTML = filtered.map(p => {
     const t = _partnerTotals(p);
-    const typeLabel = (PARTNERSHIP_TYPE_ICONS[p.partnershipType]||'') + ' ' + (PARTNERSHIP_TYPES[p.partnershipType]||'—');
+    const types = Array.isArray(p.partnershipTypes) && p.partnershipTypes.length ? p.partnershipTypes : (p.partnershipType ? [p.partnershipType] : []);
+    const typeLabel = types.length ? types.map(t => (PARTNERSHIP_TYPE_ICONS[t]||'') + ' ' + (PARTNERSHIP_TYPES[t]||t)).join('<br>') : '—';
     return `<tr onclick="openPartnerEditor('${escapeHtml(p.id)}')" style="cursor:pointer" onmouseover="this.style.background='var(--bg-soft,#f6f7fb)'" onmouseout="this.style.background=''">
       <td><strong>${escapeHtml(p.name||'—')}</strong>${p.contactPerson && p.contactPerson.name ? `<br><small style="color:var(--muted)">${escapeHtml(p.contactPerson.name)}</small>` : ''}</td>
-      <td>${escapeHtml(typeLabel)}</td>
+      <td style="font-size:0.88rem;line-height:1.5">${typeLabel}</td>
       <td>${escapeHtml(areaLabel(p.allocation))}</td>
       <td class="amount-positive" style="text-align:left">₪${Math.round(t.committed).toLocaleString()}<br><small style="color:var(--muted)">${escapeHtml(String(t.count))} תרומות</small></td>
       <td style="text-align:left;font-size:0.85rem">
@@ -9345,18 +9572,28 @@ async function openPartnerEditor(partnerId) {
   const teamOptions = (window.teamCache || []).map(t =>
     `<option value="${escapeHtml(t.email)}" ${p.ngoLiaison===t.email?'selected':''}>${escapeHtml(t.name||t.email)} ${t.roleTitle?`(${escapeHtml(t.roleTitle)})`:''}</option>`
   ).join('');
-  const areas = (currentOrgInfo && currentOrgInfo.areas) || [];
+  const areas = (typeof getOrgAreas === 'function') ? getOrgAreas() : ((currentOrgInfo && currentOrgInfo.areas) || _defaultAreas());
   const areaOptions = areas.map(a =>
     `<option value="${escapeHtml(a.key)}" ${p.allocation===a.key?'selected':''}>${escapeHtml(a.label)}</option>`
   ).join('');
-  const typeOptions = Object.entries(PARTNERSHIP_TYPES).map(([v, l]) =>
-    `<option value="${v}" ${p.partnershipType===v?'selected':''}>${PARTNERSHIP_TYPE_ICONS[v]} ${l}</option>`
+  // Backward compat: support legacy partnershipType (string) AND new partnershipTypes (array)
+  const selectedTypes = Array.isArray(p.partnershipTypes) ? p.partnershipTypes : (p.partnershipType ? [p.partnershipType] : []);
+  const typeCheckboxes = Object.entries(PARTNERSHIP_TYPES).map(([v, l]) =>
+    `<label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;flex:1;min-width:180px">
+      <input type="checkbox" class="pe_type_chk" value="${v}" ${selectedTypes.includes(v)?'checked':''} style="width:auto;margin:0">
+      <span>${PARTNERSHIP_TYPE_ICONS[v]} ${l}</span>
+    </label>`
   ).join('');
 
   const html = `
     <div class="form-row">
-      <div class="form-field"><label>שם השותף/תורם <span style="color:var(--danger)">*</span></label><input type="text" id="pe_name" value="${escapeHtml(p.name||'')}" required></div>
-      <div class="form-field"><label>סוג השותפות</label><select id="pe_type"><option value="">— בחר —</option>${typeOptions}</select></div>
+      <div class="form-field" style="grid-column:1/-1"><label>שם השותף/תורם <span style="color:var(--danger)">*</span></label><input type="text" id="pe_name" value="${escapeHtml(p.name||'')}" required></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field" style="grid-column:1/-1">
+        <label>סוג השותפות <small style="color:var(--muted);font-weight:400">(ניתן לבחור יותר מאחד)</small></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">${typeCheckboxes}</div>
+      </div>
     </div>
     <div class="form-row">
       <div class="form-field"><label>ייעוד (תוכנית)</label><select id="pe_allocation"><option value="">כללי</option>${areaOptions}</select></div>
@@ -9497,7 +9734,8 @@ async function savePartner() {
   const data = {
     orgId: currentOrgId,
     name,
-    partnershipType: document.getElementById('pe_type').value || '',
+    partnershipTypes: Array.from(document.querySelectorAll('.pe_type_chk:checked')).map(c => c.value),
+    partnershipType: (document.querySelector('.pe_type_chk:checked')?.value) || '', // legacy compat (first selected)
     allocation: document.getElementById('pe_allocation').value || '',
     details: document.getElementById('pe_details').value.trim(),
     contactPerson: {
