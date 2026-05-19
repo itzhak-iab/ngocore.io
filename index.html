@@ -841,13 +841,11 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
     <div class="nav-item" onclick="switchSection('me',this)"><span class="icon">👤</span> <span data-i18n="nav.me">האזור האישי שלי</span></div>
 
     <!-- Programs nav (filled dynamically by renderProgramNav) -->
-    <div class="nav-group-label">תוכניות העמותה</div>
+    <div class="nav-group-label" style="display:flex;align-items:center;gap:8px"><img id="navLeafIcon" alt="" style="height:18px;width:auto;flex-shrink:0"> <span>תוכניות העמותה</span></div>
     <div id="programsNav"></div>
 
-    <div class="nav-group-label">פעולות מהירות</div>
+    <!-- Tasks remain quickly accessible from sidebar (not the other quick actions — those live in the personal area) -->
     <div class="nav-item" onclick="switchSection('tasks',this)"><span class="icon">✅</span> יומן משימות</div>
-    <div class="nav-item" onclick="quickGoSubmitExpense()"><span class="icon">🧾</span> הגשת החזר הוצאות</div>
-    <div class="nav-item" onclick="quickGoSubmitWeekly()"><span class="icon">📋</span> מילוי דוח שבועי</div>
 
     <!-- Admin-only management items -->
     <div class="nav-group-label admin-only" id="navGroupAdmin" style="display:none">ניהול</div>
@@ -870,7 +868,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <img id="ngoLogoSidebar" src="" alt="" style="height:22px;width:auto">
         <span>Powered by <strong>NGO Core</strong></span>
       </a>
-      <div class="ngocore-version">v2026.05.07-r86</div>
+      <div class="ngocore-version">v2026.05.07-r87</div>
     </div>
   </aside>
 
@@ -2149,7 +2147,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r86 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r87 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -2431,6 +2429,17 @@ function getOrgLogoSrc() {
 }
 
 // Apply the org logo to all <img class="org-logo"> elements + the login-screen logo container
+// NGO Core leaf icon — used in sidebar group label and 'Powered by NGO Core' footer.
+const LEAF_ICON_URL = 'data:image/png;base64,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';
+(function _setLeafIcons() {
+  function apply() {
+    const nav = document.getElementById('navLeafIcon'); if (nav) nav.src = LEAF_ICON_URL;
+    const foot = document.getElementById('ngoLogoSidebar'); if (foot) foot.src = LEAF_ICON_URL;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+  else apply();
+})();
+
 function applyOrgLogoToUI() {
   const src = getOrgLogoSrc();
   document.querySelectorAll('img.org-logo').forEach(img => { img.src = src; });
@@ -6533,7 +6542,7 @@ window.addEventListener('popstate', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
   // Inject NGO Core logo into landing page elements
   try {
-    ['ngoLogoNav','heroLogoFallback','ngoLogoFoot','ngoLogoSidebar'].forEach(id => {
+    ['ngoLogoNav','heroLogoFallback','ngoLogoFoot'].forEach /* ngoLogoSidebar = leaf, set elsewhere */(id => {
       const el = document.getElementById(id);
       if (el && typeof NGO_CORE_LOGO_URL !== 'undefined') el.src = NGO_CORE_LOGO_URL;
     });
