@@ -868,7 +868,7 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
         <img id="ngoLogoSidebar" src="" alt="" style="height:22px;width:auto">
         <span>Powered by <strong>NGO Core</strong></span>
       </a>
-      <div class="ngocore-version">v2026.05.07-r89</div>
+      <div class="ngocore-version">v2026.05.07-r90</div>
     </div>
   </aside>
 
@@ -1059,7 +1059,10 @@ h1,h2,h3,h4{font-family:'Frank Ruhl Libre','David',serif;letter-spacing:-0.3px}
             <strong>💡 הכנסות מנוהלות ב"תורמים ושותפים"</strong>
             <div style="color:var(--muted);font-size:0.9rem;margin-top:4px">כל תרומה או שותפות מנוהלת תחת שותף ספציפי עם סיכום אוטומטי. רשומות הכנסה בעמוד זה מסתנכרנות אוטומטית כשתסמן "הועבר".</div>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="switchSectionByName('donors')">🤝 לתורמים ושותפים →</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="migrateLegacyIncomeToPartners()" id="migrateIncomeBtn">📦 ייבא הכנסות ישנות לשותפים</button>
+            <button class="btn btn-primary btn-sm" onclick="switchSectionByName('donors')">🤝 לתורמים ושותפים →</button>
+          </div>
         </div>
       </div>
       <!-- Add Expense -->
@@ -2158,7 +2161,7 @@ try {
 const storage = firebase.storage();
 let currentUser = null;
 let userRole = null;
-console.log('%c[ruach-manage] v2026.05.07-r89 loaded', 'color:#1a8a9a;font-weight:bold');
+console.log('%c[ruach-manage] v2026.05.07-r90 loaded', 'color:#1a8a9a;font-weight:bold');
 
 // ===== PURPOSE / AREA DICTIONARIES =====
 // The 6 canonical "areas" = the operational programs of the association.
@@ -4040,8 +4043,12 @@ function _renderProgramDetailInner() {
   employees.forEach(e => {
     const isLeader = matchedLeader && e.email === matchedLeader.email;
     const titleLabel = e.roleTitle || ROLES[e.role] || e.role || '—';
+    const removeBtn = (userRole === 'admin' && !isLeader)
+      ? `<button onclick="event.stopPropagation();removeEmployeeFromProgram('${escapeHtml(e.email)}','${escapeHtml(k)}','${escapeHtml(e.name||e.email)}')" style="position:absolute;top:6px;left:6px;background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:2px 6px;border-radius:6px" title="הסר מהתוכנית">✕</button>`
+      : '';
     peopleCards.push(`<div style="background:${isLeader?'linear-gradient(135deg,var(--gold-soft) 0%,var(--primary-soft) 100%)':'var(--primary-soft)'};padding:12px 14px;border-radius:var(--radius-sm);border:${isLeader?'2px solid var(--gold)':'1px solid var(--border)'};position:relative">
       ${isLeader?'<span style="position:absolute;top:-9px;right:10px;background:var(--gold);color:#fff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px">👑 מוביל/ת</span>':''}
+      ${removeBtn}
       <div style="font-weight:700;color:${isLeader?'var(--primary)':'var(--dark)'};margin-top:${isLeader?'4px':'0'}">${e.name || e.email}</div>
       <div style="font-size:0.78rem;color:var(--muted)">${titleLabel}</div>
     </div>`);
@@ -5113,6 +5120,23 @@ function showProgramRecords(progKey, type) {
 // ============================================================
 // ===== EMPLOYEE ↔ PROGRAM ASSIGNMENT
 // ============================================================
+async function removeEmployeeFromProgram(email, progKey, displayName) {
+  if (userRole !== 'admin') return;
+  if (!confirm(`להסיר את "${displayName}" מהתוכנית?`)) return;
+  try {
+    const member = (teamCache||[]).find(t => t.email === email);
+    if (!member) { toast('עובד לא נמצא', 'error'); return; }
+    const newPrograms = (member.programs||[]).filter(p => p !== progKey);
+    await db.collection('team').doc(email).update({ programs: newPrograms });
+    member.programs = newPrograms;
+    toast(`הוסר מהתוכנית ✓`);
+    if (typeof renderProgramDetail === 'function') renderProgramDetail();
+  } catch(e) {
+    console.error('[removeEmployeeFromProgram]', e);
+    toast('שגיאה בהסרה: ' + (e.message||e), 'error');
+  }
+}
+
 function openAssignEmployeeToProgram(progKey) {
   if (userRole !== 'admin') return;
   const team = (teamCache||[]);
@@ -6928,7 +6952,17 @@ function filesCell(files, icon) {
 // ---- Name helper: email → name from teamCache ----
 function nameOfEmail(email) {
   if (!email) return '—';
-  return ((teamCache||[]).find(t => t.email === email)?.name) || email;
+  const t = (teamCache||[]).find(t => t.email === email);
+  return (t?.name) || email;
+}
+// Richer: name + role title. Falls back to name-only, then email-only.
+function nameAndRoleOfEmail(email) {
+  if (!email) return '—';
+  const t = (teamCache||[]).find(t => t.email === email);
+  if (!t) return email;
+  const name = t.name || email;
+  const role = t.roleTitle || ROLES[t.role] || '';
+  return role ? `${name} · ${role}` : name;
 }
 
 // ---- Relative time formatter ----
@@ -6951,13 +6985,13 @@ function creatorUpdaterCell(r, opts) {
   opts = opts || {};
   const creatorEmail = r.createdBy || '';
   const updaterEmail = r.updatedBy || '';
-  const creator = nameOfEmail(creatorEmail);
-  const updater = updaterEmail ? nameOfEmail(updaterEmail) : '';
+  const creator = nameAndRoleOfEmail(creatorEmail);
+  const updater = updaterEmail ? nameAndRoleOfEmail(updaterEmail) : '';
   const wasUpdated = updaterEmail && (updaterEmail !== creatorEmail || (r.updatedAt && r.createdAt && r.updatedAt !== r.createdAt));
   const updWhen = relTime(r.updatedAt);
-  let html = `<span style="font-size:0.82rem;color:#374151;font-weight:500" title="${creatorEmail}">👤 ${creator}</span>`;
+  let html = `<span style="font-size:0.82rem;color:#374151;font-weight:500" title="${creatorEmail}">👤 ${escapeHtml(creator)}</span>`;
   if (wasUpdated) {
-    html += `<div style="font-size:0.72rem;color:#9ca3af;margin-top:2px" title="${updaterEmail}${updWhen?' · '+updWhen:''}">✏️ עודכן ע״י ${updater}${updWhen?` · ${updWhen}`:''}</div>`;
+    html += `<div style="font-size:0.72rem;color:#9ca3af;margin-top:2px" title="${updaterEmail}${updWhen?' · '+updWhen:''}">✏️ עודכן ע״י ${escapeHtml(updater)}${updWhen?` · ${updWhen}`:''}</div>`;
   }
   return html;
 }
@@ -8972,28 +9006,71 @@ function renderWeeklyReportUI() {
     if (dailyCard) dailyCard.style.display = 'none';
     if (dailyHistory) dailyHistory.style.display = 'none';
   } else if (userRole === 'admin' || userRole === 'team') {
-    // Admin / team: role picker so they can submit on behalf or preview
+    // Admin / team: employee-first picker. Choose employee → auto-select role → render form.
     card.style.display = '';
-    title.textContent = '📅 דיווח שבועי לעובדי חוזה';
-    const opts = CONTRACT_ROLES.map(r =>
+    title.textContent = '📅 דיווח שבועי — מילוי עבור עובד';
+    const contractEmployees = (teamCache||[]).filter(t => t.role && CONTRACT_ROLES.includes(t.role));
+    const empOpts = contractEmployees.map(t =>
+      `<option value="${escapeHtml(t.email)}" data-role="${escapeHtml(t.role)}">${escapeHtml(t.name||t.email)} · ${escapeHtml(t.roleTitle || ROLES[t.role] || t.role)}</option>`
+    ).join('');
+    const roleOpts = CONTRACT_ROLES.map(r =>
       `<option value="${r}">${CONTRACT_CONFIG[r].icon} ${CONTRACT_CONFIG[r].roleLabel}</option>`
     ).join('');
     body.innerHTML = `
-      <div class="form-row" style="margin-bottom:10px">
-        <div class="form-field" style="grid-column:1/-1"><label>בחר/י תפקיד למילוי הדיווח</label>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:10px">
+        <strong>💡 מצב מילוי עבור עובד</strong> — בחר/י עובד מהרשימה, ויטען הטופס המתאים לתפקידו.
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>🧑 העובד עליו ממלאים</label>
+          <select id="wk_adminEmployeeSelect" onchange="onAdminEmployeePick()">
+            <option value="">— בחר/י עובד —</option>
+            ${empOpts}
+          </select>
+        </div>
+        <div class="form-field"><label>תפקיד (נקבע אוטומטית)</label>
           <select id="wk_roleSelect" onchange="onAdminRolePick()">
-            <option value="">— בחר/י תפקיד —</option>
-            ${opts}
+            <option value="">— ייקבע לפי העובד —</option>
+            ${roleOpts}
           </select>
         </div>
       </div>
-      <div id="wk_formContainer"><div class="empty-state">לצפהיה / מילוי דיווח — בחר/י תפקיד למעלה.</div></div>
+      <div id="wk_formContainer"><div class="empty-state">לצפהיה / מילוי דיווח — בחר/י עובד למעלה.</div></div>
     `;
     if (historyCard) historyCard.style.display = '';
     if (filterRow) filterRow.style.display = '';
   } else {
     card.style.display = 'none';
     if (historyCard) historyCard.style.display = 'none';
+  }
+}
+
+function onAdminEmployeePick() {
+  const empSel = document.getElementById('wk_adminEmployeeSelect');
+  const roleSel = document.getElementById('wk_roleSelect');
+  const container = document.getElementById('wk_formContainer');
+  if (!empSel || !roleSel || !container) return;
+  if (!empSel.value) {
+    container.innerHTML = '<div class="empty-state">לצפהיה / מילוי דיווח — בחר/י עובד למעלה.</div>';
+    return;
+  }
+  // Auto-pick role from selected employee's data-role
+  const opt = empSel.options[empSel.selectedIndex];
+  const empRole = opt?.dataset?.role || '';
+  if (empRole) {
+    roleSel.value = empRole;
+    container.innerHTML = buildWeeklyFormHTML(empRole);
+    wireWeeklyDaysRow();
+    // Pre-fill the on-behalf section with the picked employee
+    setTimeout(() => {
+      const cb = document.getElementById('wk_onBehalf');
+      if (cb && !cb.checked) { cb.checked = true; toggleOnBehalf(); }
+      const empEmailSel = document.getElementById('wk_employeeEmail');
+      if (empEmailSel) {
+        populateWkEmployeeSelect();
+        empEmailSel.value = empSel.value;
+        onWkEmployeePick();
+      }
+    }, 50);
   }
 }
 
@@ -9523,11 +9600,7 @@ function renderPartners() {
   const canEdit = userRole === 'admin' || userRole === 'team';
   const areas = (typeof getOrgAreas === 'function') ? getOrgAreas() : ((currentOrgInfo && currentOrgInfo.areas) || _defaultAreas());
   const areaLabel = (k) => (areas.find(a => a.key === k)?.label) || k || '—';
-  const teamCache = window.teamCache || [];
-  const teamLabel = (email) => {
-    const t = teamCache.find(x => x.email === email);
-    return t ? (t.name || email) : (email || '—');
-  };
+  const teamLabel = (email) => email ? nameAndRoleOfEmail(email) : '—';
   tbody.innerHTML = filtered.map(p => {
     const t = _partnerTotals(p);
     const types = Array.isArray(p.partnershipTypes) && p.partnershipTypes.length ? p.partnershipTypes : (p.partnershipType ? [p.partnershipType] : []);
@@ -9852,6 +9925,109 @@ async function _syncPartnerToFinance(partnerId, data) {
 
 // Legacy stub: keep addDonor for backward-compat references; route to new editor
 function addDonor() { openPartnerEditor(null); }
+
+// === MIGRATE LEGACY INCOME RECORDS TO PARTNERS ===
+// Takes all finance income records that aren't already linked to a partner (no sourcePartnerId)
+// and groups them by source name. Creates a new partner per source (or appends to an existing
+// partner with the same name). After migration, the legacy finance income records are deleted.
+async function migrateLegacyIncomeToPartners() {
+  if (!confirm('פעולה זו תייבא את כל רשומות ההכנסה הישנות מ-"שקיפות פיננסית" לתוך "תורמים ושותפים", ותמחק אותן מ-"שקיפות פיננסית" (כי תרומות נכנסות מסתנכרנות אוטומטית מעכשיו דרך השותפים). להמשיך?')) return;
+  const btn = document.getElementById('migrateIncomeBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'מייבא...'; }
+  try {
+    const finSnap = await db.collection('finance').where('orgId','==',currentOrgId).get();
+    const legacyIncomes = [];
+    finSnap.forEach(d => {
+      const x = d.data();
+      if (x.type !== 'income') return;
+      if (x.sourcePartnerId) return; // already linked
+      legacyIncomes.push(Object.assign({id: d.id}, x));
+    });
+    if (!legacyIncomes.length) {
+      alert('אין רשומות הכנסה ישנות לייבא ✓');
+      if (btn) { btn.disabled = false; btn.textContent = '📦 ייבא הכנסות ישנות לשותפים'; }
+      return;
+    }
+    // Group by source name
+    const groups = {};
+    for (const f of legacyIncomes) {
+      const name = (f.source || 'תורם לא ידוע').trim();
+      if (!groups[name]) groups[name] = [];
+      groups[name].push(f);
+    }
+    // Refresh partners cache
+    const partnerSnap = await db.collection('donors').where('orgId','==',currentOrgId).get();
+    const existingPartners = new Map();
+    partnerSnap.forEach(d => {
+      const x = d.data();
+      existingPartners.set((x.name||'').trim().toLowerCase(), Object.assign({id: d.id}, _migrateLegacyPartner(x)));
+    });
+    let createdCount = 0, appendedCount = 0, donationCount = 0;
+    for (const [name, finances] of Object.entries(groups)) {
+      const existing = existingPartners.get(name.toLowerCase());
+      const newDonations = finances.map(f => {
+        const isReceived = (f.actuallyTransferred !== false) && (f.incomeStatus !== 'committed');
+        return {
+          id: 'mig_' + f.id.slice(0,8),
+          date: f.date || f.purchaseDate || '',
+          amount: Number(f.amount) || 0,
+          currency: 'ILS',
+          purpose: f.description || f.purpose || '',
+          kind: 'monetary',
+          transferStatus: isReceived ? 'transferred-to-us' : 'will-transfer-to-us',
+          transferred: isReceived,
+          otherNgoName: '',
+          transferDate: f.date || '',
+          notes: 'ייבוא מרשומת הכנסה היסטורית · ' + (f.description || ''),
+          addedBy: f.createdBy || currentUser.email,
+          addedAt: f.createdAt || null,
+          _legacyFinanceId: f.id
+        };
+      });
+      donationCount += newDonations.length;
+      if (existing) {
+        const merged = (existing.donations || []).concat(newDonations);
+        await db.collection('donors').doc(existing.id).update({
+          donations: merged,
+          partnershipTypes: existing.partnershipTypes && existing.partnershipTypes.length ? existing.partnershipTypes : ['monetary'],
+          updatedBy: currentUser.email,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        appendedCount++;
+      } else {
+        await db.collection('donors').add({
+          orgId: currentOrgId,
+          name,
+          partnershipTypes: ['monetary'],
+          partnershipType: 'monetary',
+          allocation: finances[0].purpose || '',
+          details: 'נוצר אוטומטית מרשומות הכנסה ישנות',
+          contactPerson: { name: '', phone: '', email: '' },
+          ngoLiaison: '',
+          donations: newDonations,
+          createdBy: currentUser.email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedBy: currentUser.email,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        createdCount++;
+      }
+    }
+    // Delete migrated finance records (to avoid duplicate income)
+    for (const f of legacyIncomes) {
+      try { await db.collection('finance').doc(f.id).delete(); } catch(e) {}
+    }
+    alert(`ייבוא הסתיים בהצלחה ✓\n\n• ${createdCount} שותפים חדשים נוצרו\n• ${appendedCount} שותפים קיימים עודכנו עם תרומות נוספות\n• ${donationCount} תרומות הועברו\n• ${legacyIncomes.length} רשומות הכנסה ישנות נמחקו מ-"שקיפות פיננסית"`);
+    if (btn) { btn.disabled = false; btn.textContent = '📦 ייבא הכנסות ישנות לשותפים'; }
+    // Refresh everything
+    if (typeof loadDonors === 'function') await loadDonors();
+    if (typeof loadFinance === 'function') await loadFinance();
+  } catch(e) {
+    console.error('[migrate]', e);
+    alert('שגיאה בייבוא: ' + (e.message||e));
+    if (btn) { btn.disabled = false; btn.textContent = '📦 ייבא הכנסות ישנות לשותפים'; }
+  }
+}
 
 // ===== PROJECTS =====
 // ===== PROJECTS =====
